@@ -72,6 +72,22 @@ def decode_video_to_tempfile(payload_base64: str) -> str:
     return tmp.name
 
 
+def safe_int(value: Any, default: int, min_value: int, max_value: int) -> int:
+    try:
+        parsed = int(value)
+    except Exception:
+        parsed = default
+    return max(min_value, min(max_value, parsed))
+
+
+def safe_float(value: Any, default: float, min_value: float, max_value: float) -> float:
+    try:
+        parsed = float(value)
+    except Exception:
+        parsed = default
+    return max(min_value, min(max_value, parsed))
+
+
 def read_video_frames(video_path: str, max_frames: int = 60, stride: int = 1) -> Tuple[List[np.ndarray], float]:
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -270,13 +286,16 @@ def run_video_action(payload_base64: str, model_id: str, options: Dict[str, Any]
 
 
 def run_velocity_estimation(payload_base64: str, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
-    max_frames = int(options.get("max_frames", 48))
-    stride = int(options.get("stride", 1))
-    threshold = float(options.get("threshold", 0.35))
+    max_frames = safe_int(options.get("max_frames", 48), default=48, min_value=4, max_value=240)
+    stride = safe_int(options.get("stride", 1), default=1, min_value=1, max_value=8)
+    threshold = safe_float(options.get("threshold", 0.35), default=0.35, min_value=0.01, max_value=0.95)
 
     in_path = decode_video_to_tempfile(payload_base64)
-    frames, fps = read_video_frames(in_path, max_frames=max_frames, stride=stride)
-    os.remove(in_path)
+    try:
+        frames, fps = read_video_frames(in_path, max_frames=max_frames, stride=stride)
+    finally:
+        if os.path.exists(in_path):
+            os.remove(in_path)
 
     tracker = get_tracker()
     last_centers: Dict[int, Tuple[float, float]] = {}
@@ -338,15 +357,18 @@ def run_velocity_estimation(payload_base64: str, model_id: str, options: Dict[st
 
 
 def run_perception_pipeline(payload_base64: str, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
-    max_frames = int(options.get("max_frames", 28))
-    stride = int(options.get("stride", 1))
-    threshold = float(options.get("threshold", 0.35))
+    max_frames = safe_int(options.get("max_frames", 28), default=28, min_value=4, max_value=180)
+    stride = safe_int(options.get("stride", 1), default=1, min_value=1, max_value=8)
+    threshold = safe_float(options.get("threshold", 0.35), default=0.35, min_value=0.01, max_value=0.95)
     depth_model_id = options.get("depth_model", DEFAULT_MODELS["depth-estimation"])
     seg_model_id = options.get("seg_model", DEFAULT_MODELS["image-segmentation"])
 
     in_path = decode_video_to_tempfile(payload_base64)
-    frames, fps = read_video_frames(in_path, max_frames=max_frames, stride=stride)
-    os.remove(in_path)
+    try:
+        frames, fps = read_video_frames(in_path, max_frames=max_frames, stride=stride)
+    finally:
+        if os.path.exists(in_path):
+            os.remove(in_path)
 
     tracker = get_tracker()
     last_centers: Dict[int, Tuple[float, float]] = {}
@@ -363,8 +385,9 @@ def run_perception_pipeline(payload_base64: str, model_id: str, options: Dict[st
         segments = run_segmentation(pil, seg_model_id, {"threshold": 0.3})
         depth = run_depth_estimation(pil, depth_model_id)
 
-        depth_img = decode_image(depth["depth_image"])
-        depth_arr = np.array(depth_img).astype(np.float32)
+        # Depth PNG may decode as grayscale or RGB depending on PIL path; handle both safely.
+        depth_raw = Image.open(io.BytesIO(base64.b64decode(depth["depth_image"])))
+        depth_arr = np.array(depth_raw).astype(np.float32)
         depth_values.append(float(depth_arr.mean()))
 
         ds_inputs = []
@@ -413,7 +436,13 @@ def run_perception_pipeline(payload_base64: str, model_id: str, options: Dict[st
             )
 
         # Show depth thumbnail for intuitive visualization.
-        depth_bgr = cv2.cvtColor(np.array(depth_img), cv2.COLOR_GRAY2BGR)
+        depth_np = np.array(depth_raw)
+        if depth_np.ndim == 2:
+            depth_bgr = cv2.cvtColor(depth_np, cv2.COLOR_GRAY2BGR)
+        elif depth_np.ndim == 3 and depth_np.shape[2] == 3:
+            depth_bgr = cv2.cvtColor(depth_np, cv2.COLOR_RGB2BGR)
+        else:
+            depth_bgr = np.zeros((90, 160, 3), dtype=np.uint8)
         depth_bgr = cv2.resize(depth_bgr, (160, 90))
         overlay[10:100, overlay.shape[1] - 170:overlay.shape[1] - 10] = depth_bgr
         cv2.rectangle(overlay, (overlay.shape[1] - 170, 10), (overlay.shape[1] - 10, 100), (255, 255, 255), 1)
