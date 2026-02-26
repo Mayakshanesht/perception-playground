@@ -120,17 +120,27 @@ def encode_video_base64(frames: List[np.ndarray], fps: float = 24.0) -> str:
     if not frames:
         raise RuntimeError("No frames to encode.")
     h, w = frames[0].shape[:2]
+    # Browser decoders are more reliable with even dimensions.
+    w = w if w % 2 == 0 else w - 1
+    h = h if h % 2 == 0 else h - 1
+    if w < 2 or h < 2:
+        raise RuntimeError("Invalid frame shape for encoding.")
     out_tmp = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False)
     out_path = out_tmp.name
     out_tmp.close()
 
-    writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
+    # Prefer MP4-compatible codecs for browser playback.
+    writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"avc1"), fps, (w, h))
     if not writer.isOpened():
-        writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"XVID"), fps, (w, h))
+        writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
     if not writer.isOpened():
-        raise RuntimeError("Failed to initialize video writer (mp4v/XVID).")
+        raise RuntimeError("Failed to initialize MP4 video writer (avc1/mp4v).")
     for frame in frames:
-        writer.write(frame)
+        # Ensure consistent shape/type for encoder stability.
+        frame = frame[:h, :w]
+        if frame.dtype != np.uint8:
+            frame = frame.astype(np.uint8)
+        writer.write(np.ascontiguousarray(frame))
     writer.release()
 
     with open(out_path, "rb") as f:

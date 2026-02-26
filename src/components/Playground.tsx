@@ -362,10 +362,9 @@ function ResultDisplay({ result, taskType, threshold }: { result: any; taskType:
   if ((taskType === "velocity-estimation" || taskType === "perception-pipeline") && result?.annotated_video) {
     return (
       <div className="space-y-3">
-        <video
-          controls
-          className="rounded w-full max-h-56 bg-black"
-          src={`data:${result.content_type || "video/mp4"};base64,${result.annotated_video}`}
+        <VideoResult
+          base64={result.annotated_video}
+          contentType={result.content_type || "video/mp4"}
         />
         {result.metrics && (
           <div className="grid grid-cols-2 gap-2">
@@ -387,4 +386,28 @@ function ResultDisplay({ result, taskType, threshold }: { result: any; taskType:
       {JSON.stringify(result, null, 2)}
     </pre>
   );
+}
+
+function VideoResult({ base64, contentType }: { base64: string; contentType: string }) {
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const blob = new Blob([bytes], { type: contentType });
+      const url = URL.createObjectURL(blob);
+      setVideoUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } catch {
+      setVideoUrl(null);
+    }
+  }, [base64, contentType]);
+
+  if (!videoUrl) {
+    return <p className="text-xs text-muted-foreground">Could not decode annotated video output.</p>;
+  }
+
+  return <video controls className="rounded w-full max-h-56 bg-black" src={videoUrl} />;
 }
