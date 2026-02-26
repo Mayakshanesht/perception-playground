@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ZoomIn, ZoomOut } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -19,37 +19,53 @@ interface GraphEdge {
 const nodes: GraphNode[] = [
   // Tasks
   { id: "t1", label: "Classification", type: "task", x: 100, y: 80 },
-  { id: "t2", label: "Detection", type: "task", x: 400, y: 60 },
-  { id: "t3", label: "Segmentation", type: "task", x: 700, y: 80 },
+  { id: "t2", label: "Detection", type: "task", x: 300, y: 60 },
+  { id: "t3", label: "Segmentation", type: "task", x: 500, y: 70 },
+  { id: "t4", label: "Depth", type: "task", x: 700, y: 80 },
+  { id: "t5", label: "Pose", type: "task", x: 840, y: 140 },
+  { id: "t6", label: "Action", type: "task", x: 850, y: 300 },
   // Architectures
   { id: "a1", label: "ResNet", type: "architecture", x: 150, y: 220 },
   { id: "a2", label: "VGG", type: "architecture", x: 50, y: 200 },
-  { id: "a3", label: "YOLO", type: "architecture", x: 350, y: 200 },
-  { id: "a4", label: "Faster R-CNN", type: "architecture", x: 500, y: 220 },
-  { id: "a5", label: "U-Net", type: "architecture", x: 650, y: 200 },
-  { id: "a6", label: "Mask R-CNN", type: "architecture", x: 780, y: 220 },
+  { id: "a3", label: "YOLO", type: "architecture", x: 310, y: 190 },
+  { id: "a4", label: "Faster R-CNN", type: "architecture", x: 420, y: 220 },
+  { id: "a5", label: "U-Net", type: "architecture", x: 540, y: 200 },
+  { id: "a6", label: "Mask R-CNN", type: "architecture", x: 660, y: 220 },
+  { id: "a7", label: "DPT", type: "architecture", x: 760, y: 210 },
+  { id: "a8", label: "ViTPose", type: "architecture", x: 840, y: 210 },
+  { id: "a9", label: "VideoMAE", type: "architecture", x: 840, y: 370 },
+  { id: "a10", label: "SAM", type: "architecture", x: 620, y: 290 },
   // Datasets
   { id: "d1", label: "ImageNet", type: "dataset", x: 100, y: 380 },
-  { id: "d2", label: "COCO", type: "dataset", x: 450, y: 380 },
-  { id: "d3", label: "Pascal VOC", type: "dataset", x: 300, y: 400 },
+  { id: "d2", label: "COCO", type: "dataset", x: 360, y: 380 },
+  { id: "d3", label: "Pascal VOC", type: "dataset", x: 220, y: 410 },
+  { id: "d4", label: "NYU Depth v2", type: "dataset", x: 640, y: 390 },
+  { id: "d5", label: "Kinetics-400", type: "dataset", x: 840, y: 440 },
   // Papers
   { id: "p1", label: "He 2016", type: "paper", x: 200, y: 320 },
-  { id: "p2", label: "Redmon 2016", type: "paper", x: 380, y: 310 },
-  { id: "p3", label: "Ren 2015", type: "paper", x: 550, y: 330 },
-  { id: "p4", label: "Ronneberger 2015", type: "paper", x: 680, y: 330 },
+  { id: "p2", label: "Redmon 2016", type: "paper", x: 320, y: 310 },
+  { id: "p3", label: "Ren 2015", type: "paper", x: 430, y: 330 },
+  { id: "p4", label: "Ronneberger 2015", type: "paper", x: 540, y: 330 },
+  { id: "p5", label: "Ranftl 2021", type: "paper", x: 740, y: 320 },
+  { id: "p6", label: "Xu 2022", type: "paper", x: 840, y: 270 },
+  { id: "p7", label: "Tong 2022", type: "paper", x: 840, y: 520 },
+  { id: "p8", label: "Kirillov 2023", type: "paper", x: 620, y: 370 },
 ];
 
 const edges: GraphEdge[] = [
   { from: "t1", to: "a1" }, { from: "t1", to: "a2" },
   { from: "t2", to: "a3" }, { from: "t2", to: "a4" },
-  { from: "t3", to: "a5" }, { from: "t3", to: "a6" },
+  { from: "t3", to: "a5" }, { from: "t3", to: "a6" }, { from: "t3", to: "a10" },
+  { from: "t4", to: "a7" }, { from: "t5", to: "a8" }, { from: "t6", to: "a9" },
   { from: "a1", to: "p1" }, { from: "a3", to: "p2" },
   { from: "a4", to: "p3" }, { from: "a5", to: "p4" },
+  { from: "a7", to: "p5" }, { from: "a8", to: "p6" }, { from: "a9", to: "p7" }, { from: "a10", to: "p8" },
   { from: "a1", to: "d1" }, { from: "a2", to: "d1" },
   { from: "a3", to: "d2" }, { from: "a4", to: "d2" },
   { from: "a3", to: "d3" }, { from: "a4", to: "d3" },
-  { from: "a5", to: "d2" }, { from: "a6", to: "d2" },
-  { from: "t2", to: "t3" },
+  { from: "a5", to: "d2" }, { from: "a6", to: "d2" }, { from: "a10", to: "d2" },
+  { from: "a7", to: "d4" }, { from: "a8", to: "d2" }, { from: "a9", to: "d5" },
+  { from: "t2", to: "t3" }, { from: "t3", to: "t5" }, { from: "t5", to: "t6" }, { from: "t3", to: "t4" },
 ];
 
 const typeConfig: Record<string, { color: string; label: string }> = {
@@ -80,7 +96,7 @@ export default function KnowledgeGraph() {
       </Link>
 
       <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">Knowledge Graph</h1>
-      <p className="text-sm text-muted-foreground mb-6">Explore connections between tasks, architectures, papers, and datasets.</p>
+      <p className="text-sm text-muted-foreground mb-6">Explore links between tasks, architectures, papers, and datasets. Hover a node to highlight its local neighborhood.</p>
 
       {/* Legend */}
       <div className="flex gap-4 mb-4">
@@ -104,9 +120,9 @@ export default function KnowledgeGraph() {
 
       {/* Graph */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="grid-pattern relative" style={{ height: 500 }}>
+        <div className="grid-pattern relative" style={{ height: 620 }}>
           <svg
-            viewBox="0 0 900 460"
+            viewBox="0 0 920 600"
             className="w-full h-full"
             style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}
           >

@@ -1,7 +1,6 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Upload, Play, Loader2, ImageIcon, AlertCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 interface PlaygroundProps {
   title: string;
@@ -9,28 +8,66 @@ interface PlaygroundProps {
   taskType: string;
   acceptVideo?: boolean;
   acceptImage?: boolean;
+  modelName?: string;
+  learningFocus?: string;
 }
 
-export default function Playground({ title, description, taskType, acceptVideo = false, acceptImage = true }: PlaygroundProps) {
+export default function Playground({
+  title,
+  description,
+  taskType,
+  acceptVideo = false,
+  acceptImage = true,
+  modelName,
+  learningFocus,
+}: PlaygroundProps) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [threshold, setThreshold] = useState(0.3);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const accept = [
     ...(acceptImage ? ["image/jpeg", "image/png", "image/webp"] : []),
     ...(acceptVideo ? ["video/mp4", "video/webm"] : []),
   ].join(",");
+  const uploadLabel = acceptImage && acceptVideo ? "image or video" : acceptVideo ? "a video" : "an image";
+
+  useEffect(() => {
+    return () => {
+      if (preview?.startsWith("blob:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
+    const isImage = f.type.startsWith("image/");
+    const isVideo = f.type.startsWith("video/");
+
+    if ((isImage && !acceptImage) || (isVideo && !acceptVideo) || (!isImage && !isVideo)) {
+      setError("Unsupported file type for this playground.");
+      return;
+    }
+
+    const maxSizeBytes = isVideo ? 40 * 1024 * 1024 : 8 * 1024 * 1024;
+    if (f.size > maxSizeBytes) {
+      setError(`File too large. Max allowed is ${isVideo ? "40MB" : "8MB"}.`);
+      return;
+    }
+
+    if (preview?.startsWith("blob:")) {
+      URL.revokeObjectURL(preview);
+    }
+
     setFile(f);
     setResult(null);
     setError(null);
-    if (f.type.startsWith("image/")) {
+    if (isImage) {
       const reader = new FileReader();
       reader.onload = () => setPreview(reader.result as string);
       reader.readAsDataURL(f);
@@ -47,19 +84,33 @@ export default function Playground({ title, description, taskType, acceptVideo =
 
     try {
       const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve) => {
+      const base64 = await new Promise<string>((resolve, reject) => {
         reader.onload = () => {
           const result = reader.result as string;
           resolve(result.split(",")[1]);
         };
+        reader.onerror = () => reject(new Error("Could not read the uploaded file."));
         reader.readAsDataURL(file);
       });
 
-      const { data, error: fnError } = await supabase.functions.invoke("hf-inference", {
-        body: { image: base64, task: taskType, mimeType: file.type },
+      const response = await fetch("/api/hf-inference", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image: file.type.startsWith("image/") ? base64 : undefined,
+          video: file.type.startsWith("video/") ? base64 : undefined,
+          task: taskType,
+          mimeType: file.type,
+        }),
       });
 
-      if (fnError) throw fnError;
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "Inference request failed.");
+      }
+      if (data?.error) throw new Error(data.error);
       setResult(data);
     } catch (err: any) {
       setError(err.message || "Inference failed. Please try again.");
@@ -75,6 +126,12 @@ export default function Playground({ title, description, taskType, acceptVideo =
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       </div>
       <p className="text-xs text-muted-foreground mb-4">{description}</p>
+      {(modelName || learningFocus) && (
+        <div className="mb-4 rounded-lg border border-border bg-muted/40 p-3">
+          {modelName && <p className="text-[11px] text-foreground font-mono mb-1">Model: {modelName}</p>}
+          {learningFocus && <p className="text-xs text-muted-foreground">{learningFocus}</p>}
+        </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-4">
         {/* Input */}
@@ -92,7 +149,7 @@ export default function Playground({ title, description, taskType, acceptVideo =
             ) : (
               <div className="flex flex-col items-center gap-2 text-muted-foreground">
                 <Upload className="h-8 w-8" />
-                <p className="text-xs">Click to upload {acceptVideo ? "image or video" : "an image"}</p>
+                <p className="text-xs">Click to upload {uploadLabel}</p>
               </div>
             )}
           </div>
@@ -106,6 +163,24 @@ export default function Playground({ title, description, taskType, acceptVideo =
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
             {loading ? "Running inference..." : "Run Model"}
           </button>
+
+          {["image-classification", "object-detection", "image-segmentation", "video-action-recognition", "pose-estimation"].includes(taskType) && (
+            <div className="mt-3 rounded-lg border border-border bg-muted/40 p-3">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[11px] text-muted-foreground">Confidence threshold</p>
+                <p className="text-[11px] text-foreground font-mono">{(threshold * 100).toFixed(0)}%</p>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={0.95}
+                step={0.05}
+                value={threshold}
+                onChange={(e) => setThreshold(Number(e.target.value))}
+                className="w-full accent-primary"
+              />
+            </div>
+          )}
         </div>
 
         {/* Output */}
@@ -117,9 +192,7 @@ export default function Playground({ title, description, taskType, acceptVideo =
               <p>{error}</p>
             </div>
           )}
-          {result && !error && (
-            <ResultDisplay result={result} taskType={taskType} previewSrc={preview} />
-          )}
+          {result && !error && <ResultDisplay result={result} taskType={taskType} threshold={threshold} />}
           {!result && !error && !loading && (
             <p className="text-xs text-muted-foreground/60 text-center mt-8">
               Upload an input and click "Run Model" to see results
@@ -131,11 +204,16 @@ export default function Playground({ title, description, taskType, acceptVideo =
   );
 }
 
-function ResultDisplay({ result, taskType, previewSrc }: { result: any; taskType: string; previewSrc: string | null }) {
+function ResultDisplay({ result, taskType, threshold }: { result: any; taskType: string; threshold: number }) {
   if (taskType === "image-classification" && Array.isArray(result)) {
+    const ranked = [...result].sort((a: any, b: any) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 5);
+    const filtered = ranked.filter((item: any) => (item.score ?? 0) >= threshold);
+    if (filtered.length === 0) {
+      return <p className="text-xs text-muted-foreground">No classes above threshold.</p>;
+    }
     return (
       <div className="space-y-2">
-        {result.map((item: any, i: number) => (
+        {filtered.map((item: any, i: number) => (
           <div key={i} className="flex items-center gap-2">
             <div className="flex-1">
               <div className="flex justify-between text-xs mb-1">
@@ -157,10 +235,14 @@ function ResultDisplay({ result, taskType, previewSrc }: { result: any; taskType
   }
 
   if (taskType === "object-detection" && Array.isArray(result)) {
+    const filtered = result.filter((item: any) => (item.score ?? 0) >= threshold);
+    if (filtered.length === 0) {
+      return <p className="text-xs text-muted-foreground">No objects above threshold.</p>;
+    }
     return (
       <div className="space-y-2">
-        <p className="text-xs text-foreground font-medium mb-2">{result.length} object(s) detected</p>
-        {result.map((item: any, i: number) => (
+        <p className="text-xs text-foreground font-medium mb-2">{filtered.length} object(s) detected</p>
+        {filtered.map((item: any, i: number) => (
           <div key={i} className="rounded bg-card border border-border p-2 text-xs">
             <span className="text-primary font-medium">{item.label}</span>
             <span className="text-muted-foreground ml-2">{(item.score * 100).toFixed(1)}%</span>
@@ -176,10 +258,14 @@ function ResultDisplay({ result, taskType, previewSrc }: { result: any; taskType
   }
 
   if (taskType === "image-segmentation" && Array.isArray(result)) {
+    const filtered = result.filter((item: any) => (item.score ?? 0) >= threshold);
+    if (filtered.length === 0) {
+      return <p className="text-xs text-muted-foreground">No segments above threshold.</p>;
+    }
     return (
       <div className="space-y-2">
-        <p className="text-xs text-foreground font-medium mb-2">{result.length} segment(s)</p>
-        {result.map((item: any, i: number) => (
+        <p className="text-xs text-foreground font-medium mb-2">{filtered.length} segment(s)</p>
+        {filtered.map((item: any, i: number) => (
           <div key={i} className="rounded bg-card border border-border p-2 text-xs flex items-center gap-2">
             <div className="h-3 w-3 rounded-sm" style={{ backgroundColor: `hsl(${(i * 40) % 360} 70% 50%)` }} />
             <span className="text-foreground">{item.label}</span>
@@ -190,8 +276,106 @@ function ResultDisplay({ result, taskType, previewSrc }: { result: any; taskType
     );
   }
 
+  if (taskType === "sam-segmentation") {
+    const masks = Array.isArray(result) ? result : Array.isArray(result?.masks) ? result.masks : [];
+    if (masks.length > 0) {
+      return (
+        <div className="space-y-2">
+          <p className="text-xs text-foreground font-medium mb-2">{masks.length} mask proposal(s)</p>
+          {masks.slice(0, 5).map((item: any, i: number) => (
+            <div key={i} className="rounded bg-card border border-border p-2 text-xs">
+              <span className="text-primary font-medium">Mask {i + 1}</span>
+              {typeof item.score === "number" && (
+                <span className="text-muted-foreground ml-2">{(item.score * 100).toFixed(1)}%</span>
+              )}
+              {typeof item.label === "string" && <span className="text-muted-foreground ml-2">{item.label}</span>}
+            </div>
+          ))}
+        </div>
+      );
+    }
+  }
+
+  if (taskType === "pose-estimation" && Array.isArray(result)) {
+    const filtered = result.filter((person: any) => (person.score ?? 0) >= threshold);
+    if (filtered.length === 0) {
+      return <p className="text-xs text-muted-foreground">No pose instances above threshold.</p>;
+    }
+    return (
+      <div className="space-y-2">
+        <p className="text-xs text-foreground font-medium mb-2">{filtered.length} keypoint set(s)</p>
+        {filtered.slice(0, 3).map((person: any, i: number) => (
+          <div key={i} className="rounded bg-card border border-border p-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-primary font-medium">Person {i + 1}</span>
+              {typeof person.score === "number" && (
+                <span className="text-muted-foreground">{(person.score * 100).toFixed(1)}%</span>
+              )}
+            </div>
+            {Array.isArray(person.keypoints) && (
+              <p className="text-muted-foreground mt-1">{person.keypoints.length} keypoints predicted</p>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (taskType === "video-action-recognition" && Array.isArray(result)) {
+    const filtered = result
+      .filter((item: any) => (item.score ?? 0) >= threshold)
+      .sort((a: any, b: any) => (b.score ?? 0) - (a.score ?? 0))
+      .slice(0, 5);
+    if (filtered.length === 0) {
+      return <p className="text-xs text-muted-foreground">No actions above threshold.</p>;
+    }
+    return (
+      <div className="space-y-2">
+        {filtered.map((item: any, i: number) => (
+          <div key={i} className="flex items-center gap-2">
+            <div className="flex-1">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-foreground font-medium">{item.label}</span>
+                <span className="text-muted-foreground font-mono">{(item.score * 100).toFixed(1)}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-border overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${item.score * 100}%` }}
+                  className="h-full rounded-full bg-primary"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (taskType === "depth-estimation" && result?.depth_image) {
     return <img src={`data:image/png;base64,${result.depth_image}`} alt="Depth map" className="rounded max-h-48" />;
+  }
+
+  if ((taskType === "velocity-estimation" || taskType === "perception-pipeline") && result?.annotated_video) {
+    return (
+      <div className="space-y-3">
+        <video
+          controls
+          className="rounded w-full max-h-56 bg-black"
+          src={`data:${result.content_type || "video/mp4"};base64,${result.annotated_video}`}
+        />
+        {result.metrics && (
+          <div className="grid grid-cols-2 gap-2">
+            {Object.entries(result.metrics).map(([key, value]) => (
+              <div key={key} className="rounded bg-card border border-border p-2">
+                <p className="text-[10px] text-muted-foreground font-mono">{key}</p>
+                <p className="text-xs text-foreground">{String(value)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   }
 
   // Generic JSON fallback

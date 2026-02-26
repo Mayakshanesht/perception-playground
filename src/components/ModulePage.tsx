@@ -10,6 +10,14 @@ interface ModulePageProps {
 }
 
 export default function ModulePage({ content }: ModulePageProps) {
+  const playgrounds = content.playgrounds ?? (content.playground ? [content.playground] : []);
+  const flowItems = [
+    { id: "theory", label: "Theory", detail: `${content.theory.length} concepts` },
+    { id: "algorithms", label: "Algorithms", detail: `${content.algorithms.length} pipeline(s)` },
+    { id: "papers", label: "Papers", detail: `${content.papers.length} references` },
+    { id: "playground", label: "Playground", detail: `${playgrounds.length} lab(s)` },
+  ];
+
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6">
@@ -31,8 +39,25 @@ export default function ModulePage({ content }: ModulePageProps) {
       </div>
 
       <div className="space-y-10">
+        <section className="rounded-xl border border-border bg-muted/40 p-4">
+          <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">Structured Learning Flow</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            {flowItems.map((item, idx) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className="rounded-lg border border-border bg-card p-3 hover:border-primary/40 transition-colors"
+              >
+                <p className="text-[10px] text-muted-foreground font-mono mb-1">Step {idx + 1}</p>
+                <p className="text-sm text-foreground font-medium">{item.label}</p>
+                <p className="text-xs text-muted-foreground">{item.detail}</p>
+              </a>
+            ))}
+          </div>
+        </section>
+
         {/* Theory Section */}
-        <section>
+        <section id="theory">
           <SectionHeader icon={BookOpen} title="Theory & Foundations" />
           <div className="space-y-6">
             {content.theory.map((section, i) => (
@@ -66,7 +91,7 @@ export default function ModulePage({ content }: ModulePageProps) {
 
         {/* Algorithms Section */}
         {content.algorithms.length > 0 && (
-          <section>
+          <section id="algorithms">
             <SectionHeader icon={Cpu} title="Algorithms & Pipelines" />
             <div className="space-y-6">
               {content.algorithms.map((algo) => (
@@ -104,7 +129,7 @@ export default function ModulePage({ content }: ModulePageProps) {
         )}
 
         {/* Key Papers */}
-        <section>
+        <section id="papers">
           <SectionHeader icon={FileText} title="Key Papers" />
           <div className="relative">
             <div className="absolute left-[72px] top-0 bottom-0 w-px bg-border" />
@@ -141,16 +166,29 @@ export default function ModulePage({ content }: ModulePageProps) {
         </section>
 
         {/* Playground */}
-        {content.playground && (
-          <section>
+        {playgrounds.length > 0 && (
+          <section id="playground">
             <SectionHeader icon={FlaskConical} title="Inference Playground" />
-            <Playground
-              title={content.playground.title}
-              description={content.playground.description}
-              taskType={content.playground.taskType}
-              acceptVideo={content.playground.acceptVideo}
-              acceptImage={content.playground.acceptImage}
-            />
+            <div className="mb-4 rounded-xl border border-border bg-muted/40 p-4">
+              <p className="text-xs font-semibold text-foreground mb-1">Student Workflow</p>
+              <p className="text-xs text-muted-foreground">
+                Run each model with at least two contrasting inputs, compare confidence outputs, and note one failure mode.
+              </p>
+            </div>
+            <div className="space-y-4">
+              {playgrounds.map((pg) => (
+                <Playground
+                  key={`${content.id}-${pg.taskType}-${pg.title}`}
+                  title={pg.title}
+                  description={pg.description}
+                  taskType={pg.taskType}
+                  acceptVideo={pg.acceptVideo}
+                  acceptImage={pg.acceptImage}
+                  modelName={pg.modelName}
+                  learningFocus={pg.learningFocus}
+                />
+              ))}
+            </div>
           </section>
         )}
       </div>

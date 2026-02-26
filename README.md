@@ -71,3 +71,69 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Run With Vercel Backend
+
+This project now includes a Vercel Serverless backend route at `api/hf-inference.ts` used by all playgrounds.
+
+### Local development
+
+1. Install deps:
+
+```sh
+npm i
+```
+
+2. Install Vercel CLI (one-time):
+
+```sh
+npm i -g vercel
+```
+
+3. Run frontend + API together:
+
+```sh
+vercel dev
+```
+
+### Required environment variables
+
+Set in Vercel Project Settings -> Environment Variables:
+
+- `HUGGINGFACE_API_KEY` (required for HF Inference API mode)
+- `INFERENCE_BACKEND_URL` (recommended; if set, API proxies to your RunPod backend)
+
+### Deployment (frontend + backend)
+
+1. Push this repo to GitHub.
+2. Import it in Vercel.
+3. Framework preset: `Vite`.
+4. Build command: `npm run build`
+5. Output directory: `dist`
+6. Deploy.
+
+## Recommended Production Architecture
+
+For a student-facing CV lab with heavier models/video:
+
+- Frontend on Vercel (React app)
+- API proxy on Vercel (`/api/hf-inference`)
+- GPU backend on RunPod (`backend/` folder)
+
+Flow:
+
+1. Browser uploads image/video to Vercel API.
+2. Vercel API forwards to RunPod `/infer`.
+3. RunPod executes Hugging Face models on GPU and returns predictions.
+4. Frontend renders outputs + educational explanations/checklists.
+
+RunPod backend setup instructions are in:
+
+- `backend/README.md`
+- includes both Docker and non-Docker (direct Python) options
+
+### GPU baseline for RunPod
+
+- CUDA: **12.1**
+- Minimum: **16 GB VRAM**
+- Recommended for chained perception playground: **24 GB VRAM**

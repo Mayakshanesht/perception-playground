@@ -17,6 +17,16 @@ export interface AlgorithmStep {
   detail: string;
 }
 
+export interface PlaygroundConfig {
+  title: string;
+  description: string;
+  taskType: string;
+  acceptVideo?: boolean;
+  acceptImage?: boolean;
+  modelName?: string;
+  learningFocus?: string;
+}
+
 export interface ModuleContent {
   id: string;
   title: string;
@@ -25,13 +35,8 @@ export interface ModuleContent {
   theory: TheorySection[];
   algorithms: { name: string; steps: AlgorithmStep[] }[];
   papers: PaperEntry[];
-  playground?: {
-    title: string;
-    description: string;
-    taskType: string;
-    acceptVideo?: boolean;
-    acceptImage?: boolean;
-  };
+  playground?: PlaygroundConfig;
+  playgrounds?: PlaygroundConfig[];
 }
 
 export const moduleContents: Record<string, ModuleContent> = {
@@ -112,6 +117,8 @@ export const moduleContents: Record<string, ModuleContent> = {
       description: "Upload an image to classify it using Google's ViT (Vision Transformer) model pre-trained on ImageNet-1K. The model outputs top-5 predicted labels with confidence scores.",
       taskType: "image-classification",
       acceptImage: true,
+      modelName: "google/vit-base-patch16-224",
+      learningFocus: "Observe confidence calibration across similar classes and test robustness to viewpoint/background changes.",
     },
   },
 
@@ -203,6 +210,8 @@ export const moduleContents: Record<string, ModuleContent> = {
       description: "Upload an image to detect objects using Facebook's DETR (Detection Transformer) model with ResNet-50 backbone, trained on COCO.",
       taskType: "object-detection",
       acceptImage: true,
+      modelName: "facebook/detr-resnet-50",
+      learningFocus: "Compare detections across cluttered scenes and inspect how confidence and bounding boxes change with scale.",
     },
   },
 
@@ -270,12 +279,24 @@ export const moduleContents: Record<string, ModuleContent> = {
       { year: 2019, title: "Panoptic FPN", authors: "Kirillov et al.", venue: "CVPR", summary: "Unified panoptic segmentation merging stuff and things predictions." },
       { year: 2021, title: "SegFormer", authors: "Xie et al.", venue: "NeurIPS", summary: "Transformer-based segmentation with hierarchical features and lightweight decoder." },
     ],
-    playground: {
-      title: "Image Segmentation Playground",
-      description: "Upload an image to run panoptic segmentation using Facebook's DETR model. Outputs both stuff (sky, road) and thing (car, person) segments.",
-      taskType: "image-segmentation",
-      acceptImage: true,
-    },
+    playgrounds: [
+      {
+        title: "Panoptic Segmentation Playground",
+        description: "Upload an image to run panoptic segmentation using Facebook's DETR model. Outputs both stuff (sky, road) and thing (car, person) segments.",
+        taskType: "image-segmentation",
+        acceptImage: true,
+        modelName: "facebook/detr-resnet-50-panoptic",
+        learningFocus: "Contrast panoptic labels with object detection results and inspect how small objects are grouped.",
+      },
+      {
+        title: "SAM Playground (Mask Proposals)",
+        description: "Upload an image to generate prompt-free mask proposals using Segment Anything.",
+        taskType: "sam-segmentation",
+        acceptImage: true,
+        modelName: "facebook/sam-vit-base",
+        learningFocus: "Compare how a foundation segmentation model proposes object masks without explicit class labels.",
+      },
+    ],
   },
 
   depth: {
@@ -342,6 +363,8 @@ export const moduleContents: Record<string, ModuleContent> = {
       description: "Upload an image to estimate depth using Intel's DPT-Large model. The output is a relative depth map visualized as a heatmap.",
       taskType: "depth-estimation",
       acceptImage: true,
+      modelName: "Intel/dpt-large",
+      learningFocus: "Test indoor vs outdoor scenes and inspect where monocular depth is uncertain (transparent/reflective regions).",
     },
   },
 
@@ -523,6 +546,14 @@ export const moduleContents: Record<string, ModuleContent> = {
       { year: 2020, title: "MediaPipe Pose", authors: "Google", venue: "arXiv", summary: "Real-time on-device pose estimation using BlazePose architecture." },
       { year: 2022, title: "ViTPose", authors: "Xu et al.", venue: "NeurIPS", summary: "Plain Vision Transformer for pose estimation. Simple and scalable." },
     ],
+    playground: {
+      title: "Pose Estimation Playground",
+      description: "Upload an image to estimate human keypoints using a ViTPose model.",
+      taskType: "pose-estimation",
+      acceptImage: true,
+      modelName: "usyd-community/vitpose-base-simple",
+      learningFocus: "Try crowd scenes, occlusions, and unusual poses to study keypoint confidence and failure cases.",
+    },
   },
 
   tracking: {
@@ -584,6 +615,26 @@ export const moduleContents: Record<string, ModuleContent> = {
       { year: 2022, title: "ByteTrack", authors: "Zhang et al.", venue: "ECCV", summary: "Associates every detection box including low-confidence ones for improved tracking." },
       { year: 2023, title: "BoTrack", authors: "Aharon et al.", venue: "arXiv", summary: "BoT-SORT with camera motion compensation and improved association." },
     ],
+    playgrounds: [
+      {
+        title: "Velocity Estimation Playground",
+        description: "Upload a short video. The backend runs detection + DeepSORT tracking and estimates per-track velocity in pixels/second with annotated output.",
+        taskType: "velocity-estimation",
+        acceptVideo: true,
+        acceptImage: false,
+        modelName: "DETR + DeepSORT",
+        learningFocus: "Inspect how FPS, object scale, and camera motion affect apparent velocity estimates.",
+      },
+      {
+        title: "Integrated Perception Pipeline Playground",
+        description: "End-to-end chain: object detection, DeepSORT tracking, instance-style segmentation, depth estimation, and velocity estimation with annotated video output.",
+        taskType: "perception-pipeline",
+        acceptVideo: true,
+        acceptImage: false,
+        modelName: "DETR + DeepSORT + Segmentation + DPT",
+        learningFocus: "Study how errors propagate across tasks in a full perception stack and compare trade-offs between speed and richness.",
+      },
+    ],
   },
 
   action: {
@@ -641,6 +692,15 @@ export const moduleContents: Record<string, ModuleContent> = {
       { year: 2021, title: "TimeSformer", authors: "Bertasius et al.", venue: "ICML", summary: "Divided space-time attention in transformers for efficient video understanding." },
       { year: 2021, title: "Video Swin Transformer", authors: "Liu et al.", venue: "CVPR", summary: "3D shifted windows for efficient video recognition with hierarchical features." },
     ],
+    playground: {
+      title: "Video Action Recognition Playground",
+      description: "Upload a short MP4/WebM clip to classify the dominant action with a VideoMAE model.",
+      taskType: "video-action-recognition",
+      acceptVideo: true,
+      acceptImage: false,
+      modelName: "MCG-NJU/videomae-base-finetuned-kinetics",
+      learningFocus: "Test short clips with distinct motions and compare predictions when trimming the same video to different durations.",
+    },
   },
 
   opticalflow: {
