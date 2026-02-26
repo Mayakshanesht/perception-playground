@@ -93,7 +93,8 @@ export default function Playground({
         reader.readAsDataURL(file);
       });
 
-      const response = await fetch("/api/hf-inference", {
+      const endpoint = import.meta.env.VITE_INFERENCE_API_URL || "/api/hf-inference";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -101,8 +102,10 @@ export default function Playground({
         body: JSON.stringify({
           image: file.type.startsWith("image/") ? base64 : undefined,
           video: file.type.startsWith("video/") ? base64 : undefined,
+          payloadBase64: base64,
           task: taskType,
           mimeType: file.type,
+          options: {},
         }),
       });
 

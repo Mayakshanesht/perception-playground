@@ -1,5 +1,6 @@
 import base64
 import io
+import logging
 import os
 import tempfile
 from functools import lru_cache
@@ -22,6 +23,8 @@ from transformers import (
     pipeline,
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("perception-backend")
 
 DEFAULT_MODELS: Dict[str, str] = {
     "image-classification": "google/vit-base-patch16-224",
@@ -89,6 +92,14 @@ def read_video_frames(video_path: str, max_frames: int = 60, stride: int = 1) ->
     return frames, float(fps)
 
 
+def resize_frame(frame: np.ndarray, max_width: int = 960) -> np.ndarray:
+    h, w = frame.shape[:2]
+    if w <= max_width:
+        return frame
+    scale = max_width / float(w)
+    return cv2.resize(frame, (int(w * scale), int(h * scale)))
+
+
 def encode_video_base64(frames: List[np.ndarray], fps: float = 24.0) -> str:
     if not frames:
         raise RuntimeError("No frames to encode.")
@@ -97,12 +108,11 @@ def encode_video_base64(frames: List[np.ndarray], fps: float = 24.0) -> str:
     out_path = out_tmp.name
     out_tmp.close()
 
-    writer = cv2.VideoWriter(
-        out_path,
-        cv2.VideoWriter_fourcc(*"mp4v"),
-        fps,
-        (w, h),
-    )
+    writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
+    if not writer.isOpened():
+        writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"XVID"), fps, (w, h))
+    if not writer.isOpened():
+        raise RuntimeError("Failed to initialize video writer (mp4v/XVID).")
     for frame in frames:
         writer.write(frame)
     writer.release()
@@ -260,7 +270,7 @@ def run_video_action(payload_base64: str, model_id: str, options: Dict[str, Any]
 
 
 def run_velocity_estimation(payload_base64: str, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
-    max_frames = int(options.get("max_frames", 80))
+    max_frames = int(options.get("max_frames", 48))
     stride = int(options.get("stride", 1))
     threshold = float(options.get("threshold", 0.35))
 
@@ -274,6 +284,7 @@ def run_velocity_estimation(payload_base64: str, model_id: str, options: Dict[st
     annotated: List[np.ndarray] = []
 
     for frame in frames:
+        frame = resize_frame(frame, max_width=int(options.get("max_width", 960)))
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         pil = Image.fromarray(rgb)
         detections = run_object_detection(pil, model_id, {"threshold": threshold})
@@ -327,7 +338,7 @@ def run_velocity_estimation(payload_base64: str, model_id: str, options: Dict[st
 
 
 def run_perception_pipeline(payload_base64: str, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
-    max_frames = int(options.get("max_frames", 48))
+    max_frames = int(options.get("max_frames", 28))
     stride = int(options.get("stride", 1))
     threshold = float(options.get("threshold", 0.35))
     depth_model_id = options.get("depth_model", DEFAULT_MODELS["depth-estimation"])
@@ -344,6 +355,7 @@ def run_perception_pipeline(payload_base64: str, model_id: str, options: Dict[st
     annotated: List[np.ndarray] = []
 
     for idx, frame in enumerate(frames):
+        frame = resize_frame(frame, max_width=int(options.get("max_width", 960)))
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         pil = Image.fromarray(rgb)
 
@@ -539,4 +551,5 @@ def infer(request: InferenceRequest):
     except HTTPException:
         raise
     except Exception as exc:
+        logger.exception("Inference failed for task=%s model=%s", task, model_id)
         raise HTTPException(status_code=500, detail=str(exc))
