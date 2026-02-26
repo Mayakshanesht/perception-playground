@@ -129,12 +129,12 @@ def encode_video_base64(frames: List[np.ndarray], fps: float = 24.0) -> str:
     out_path = out_tmp.name
     out_tmp.close()
 
-    # Prefer MP4-compatible codecs for browser playback.
-    writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"avc1"), fps, (w, h))
+    # Prefer software-friendly MP4 codec first to avoid missing HW h264 encoders in cloud pods.
+    writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
     if not writer.isOpened():
-        writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
+        writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"avc1"), fps, (w, h))
     if not writer.isOpened():
-        raise RuntimeError("Failed to initialize MP4 video writer (avc1/mp4v).")
+        raise RuntimeError("Failed to initialize MP4 video writer (mp4v/avc1).")
     for frame in frames:
         # Ensure consistent shape/type for encoder stability.
         frame = frame[:h, :w]
