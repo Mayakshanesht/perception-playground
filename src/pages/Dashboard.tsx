@@ -69,12 +69,19 @@ const modules = [
     path: "/module/action",
     color: "15 85% 55%",
   },
+  {
+    name: "Optical Flow",
+    desc: "Lucas-Kanade, Horn-Schunck, RAFT, motion estimation",
+    icon: GitBranch,
+    path: "/module/opticalflow",
+    color: "170 80% 45%",
+  },
 ];
 
 const stats = [
-  { label: "Modules", value: "9" },
-  { label: "Architectures", value: "25+" },
-  { label: "Key Papers", value: "60+" },
+  { label: "Modules", value: "10" },
+  { label: "Architectures", value: "30+" },
+  { label: "Key Papers", value: "70+" },
   { label: "Interactive Demos", value: "15+" },
 ];
 

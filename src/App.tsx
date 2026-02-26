@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "@/pages/Dashboard";
-import DetectionModule from "@/pages/DetectionModule";
 import GenericModule from "@/pages/GenericModule";
 import KnowledgeGraph from "@/pages/KnowledgeGraph";
 import NotFound from "@/pages/NotFound";
@@ -21,7 +20,6 @@ const App = () => (
         <AppLayout>
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/module/detection" element={<DetectionModule />} />
             <Route path="/module/:moduleId" element={<GenericModule />} />
             <Route path="/knowledge-graph" element={<KnowledgeGraph />} />
             <Route path="*" element={<NotFound />} />
