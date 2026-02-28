@@ -1,6 +1,6 @@
-# Perception Playground
+# Perception Concept Studio
 
-Perception Playground is a React + Vercel frontend with a GPU backend for notebook-aligned computer vision inference.
+Perception Concept Studio is a React + Vercel frontend with a GPU backend for notebook-aligned and promptable computer vision inference.
 
 ## Implemented Playground Tasks
 
@@ -11,6 +11,7 @@ The backend and frontend are aligned to the validated `project_sdk/perception_pr
 3. `03_monocular_depth_ai.ipynb` -> `depth-estimation`
 4. `04_motion_velocity_estimation.ipynb` -> `velocity-estimation`
 5. YOLO Pose (`yolo26n-pose.pt`) -> `pose-estimation`
+6. SAM 3 (`sam3.pt`) -> `sam3-concept-segmentation` (text-prompt concept segmentation)
 
 Any playground not backed by these implementations has been removed from the UI.
 
@@ -57,3 +58,6 @@ Set frontend env:
 - Velocity estimates are derived from RAFT optical flow magnitude and an approximate `meter_per_pixel` scale.
 - Default model fallbacks mirror notebook behavior (`yolo26*` -> `yolo11*` fallback when unavailable).
 - Pose estimation uses the default 17 COCO keypoints (nose, eyes, ears, shoulders, elbows, wrists, hips, knees, ankles).
+- SAM 3 requires `sam3.pt` weights available on the backend host and Ultralytics `>=8.3.237`.
+- If you see `SimpleTokenizer` errors with SAM 3, run:
+  `pip uninstall clip -y && pip install git+https://github.com/ultralytics/CLIP.git`

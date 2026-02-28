@@ -27,6 +27,7 @@ export default function Playground({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [threshold, setThreshold] = useState(0.3);
+  const [textPrompt, setTextPrompt] = useState("person");
   const [inferencePreview, setInferencePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -112,12 +113,15 @@ export default function Playground({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          image: file.type.startsWith("image/") ? base64 : undefined,
+          image: isImageTask ? base64 : (file.type.startsWith("image/") ? base64 : undefined),
           video: isImageTask ? undefined : (file.type.startsWith("video/") ? base64 : undefined),
           payloadBase64: base64,
           task: taskType,
           mimeType: requestMimeType,
-          options: { threshold },
+          options: {
+            threshold,
+            ...(taskType === "sam3-concept-segmentation" ? { text_prompt: textPrompt } : {}),
+          },
         }),
       });
 
@@ -179,7 +183,7 @@ export default function Playground({
             {loading ? "Running inference..." : "Run Model"}
           </button>
 
-          {["object-detection", "image-segmentation", "pose-estimation", "velocity-estimation"].includes(taskType) && (
+          {["object-detection", "image-segmentation", "pose-estimation", "velocity-estimation", "sam3-concept-segmentation"].includes(taskType) && (
             <div className="mt-3 rounded-lg border border-border bg-muted/40 p-3">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-[11px] text-muted-foreground">Confidence threshold</p>
@@ -194,6 +198,20 @@ export default function Playground({
                 onChange={(e) => setThreshold(Number(e.target.value))}
                 className="w-full accent-primary"
               />
+            </div>
+          )}
+
+          {taskType === "sam3-concept-segmentation" && (
+            <div className="mt-3 rounded-lg border border-border bg-muted/40 p-3">
+              <p className="text-[11px] text-muted-foreground mb-1">Concept prompt(s)</p>
+              <input
+                type="text"
+                value={textPrompt}
+                onChange={(e) => setTextPrompt(e.target.value)}
+                placeholder="person, bicycle, red car"
+                className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">Use comma-separated concepts.</p>
             </div>
           )}
         </div>
@@ -304,11 +322,24 @@ function ResultDisplay({
       </div>
     );
   }
+
+  if (taskType === "sam3-concept-segmentation" && Array.isArray(result?.instances)) {
+    const filtered = result.instances.filter((item: any) => (item.score ?? 0) >= threshold);
+    return (
+      <div className="space-y-2">
+        {inferencePreview && <ImageOverlayResult src={inferencePreview} taskType="image-segmentation" data={filtered} />}
+        <p className="text-xs text-foreground font-medium mb-2">{filtered.length} concept mask(s)</p>
+        {Array.isArray(result.concepts) && (
+          <p className="text-[11px] text-muted-foreground">Concepts: {result.concepts.join(", ")}</p>
+        )}
+      </div>
+    );
+  }
   if (taskType === "depth-estimation" && result?.depth_image) {
     return <img src={`data:image/png;base64,${result.depth_image}`} alt="Depth map" className="rounded max-h-48" />;
   }
 
-  if (taskType === "velocity-estimation" && result?.annotated_video) {
+  if ((taskType === "velocity-estimation" || taskType === "sam3-concept-segmentation") && result?.annotated_video) {
     return (
       <div className="space-y-3">
         <VideoResult
@@ -420,6 +451,20 @@ function ImageOverlayResult({
             ? { xmin: item.bbox[0], ymin: item.bbox[1], xmax: item.bbox[2], ymax: item.bbox[3] }
             : null
         );
+
+        if (taskType === "image-segmentation" && Array.isArray(item.mask_polygon) && item.mask_polygon.length > 2) {
+          const poly = item.mask_polygon as number[][];
+          ctx.beginPath();
+          ctx.moveTo(Number(poly[0][0]), Number(poly[0][1]));
+          for (let p = 1; p < poly.length; p++) {
+            ctx.lineTo(Number(poly[p][0]), Number(poly[p][1]));
+          }
+          ctx.closePath();
+          ctx.fillStyle = `hsl(${hue} 95% 55% / 0.25)`;
+          ctx.fill();
+          ctx.strokeStyle = color;
+          ctx.stroke();
+        }
 
         if (box) {
           const x = Number(box.xmin);

@@ -24,6 +24,7 @@ DEFAULT_MODELS: Dict[str, str] = {
     "object-detection": "yolo26n.pt",
     "image-segmentation": "yolo26n-seg.pt",
     "pose-estimation": "yolo26n-pose.pt",
+    "sam3-concept-segmentation": "sam3.pt",
     "depth-estimation": "LiheYoung/depth-anything-small-hf",
     "velocity-estimation": "raft-large",
 }
@@ -151,6 +152,48 @@ def get_raft_bundle():
     return model, transforms, device
 
 
+def extract_instances_from_result(r: Any) -> List[Dict[str, Any]]:
+    output: List[Dict[str, Any]] = []
+    if r is None or r.boxes is None:
+        return output
+
+    boxes = r.boxes.xyxy.cpu().numpy()
+    classes = r.boxes.cls.cpu().numpy().astype(int) if hasattr(r.boxes, "cls") else np.zeros((len(boxes),), dtype=int)
+    scores = r.boxes.conf.cpu().numpy() if hasattr(r.boxes, "conf") else np.ones((len(boxes),), dtype=float)
+    masks = r.masks.data.cpu().numpy() if r.masks is not None else None
+    mask_polys = r.masks.xy if r.masks is not None and hasattr(r.masks, "xy") else None
+    names = getattr(r, "names", {})
+
+    for i, b in enumerate(boxes):
+        c = int(classes[i]) if i < len(classes) else 0
+        s = float(scores[i]) if i < len(scores) else 1.0
+        label = names.get(c, str(c)) if isinstance(names, dict) else str(c)
+        item: Dict[str, Any] = {
+            "instance_id": i,
+            "bbox": [float(x) for x in b.tolist()],
+            "class_id": c,
+            "class_name": label,
+            "confidence": s,
+            "label": label,
+            "score": s,
+            "box": {
+                "xmin": float(b[0]),
+                "ymin": float(b[1]),
+                "xmax": float(b[2]),
+                "ymax": float(b[3]),
+            },
+        }
+        if masks is not None and i < len(masks):
+            item["mask_area_px"] = int((masks[i] > 0.5).sum())
+        if mask_polys is not None and i < len(mask_polys):
+            poly = mask_polys[i]
+            if poly is not None and len(poly) > 2:
+                item["mask_polygon"] = [[float(pt[0]), float(pt[1])] for pt in poly.tolist()]
+        output.append(item)
+
+    return output
+
+
 def run_object_detection(image: Image.Image, options: Dict[str, Any]) -> List[Dict[str, Any]]:
     conf = safe_float(options.get("threshold", 0.25), 0.25, 0.01, 0.95)
     imgsz = safe_int(options.get("imgsz", 640), 640, 320, 1280)
@@ -163,31 +206,7 @@ def run_object_detection(image: Image.Image, options: Dict[str, Any]) -> List[Di
     if not results:
         return []
 
-    r = results[0]
-    output: List[Dict[str, Any]] = []
-    if r.boxes is not None:
-        boxes = r.boxes.xyxy.cpu().numpy()
-        classes = r.boxes.cls.cpu().numpy().astype(int)
-        scores = r.boxes.conf.cpu().numpy()
-
-        for b, c, s in zip(boxes, classes, scores):
-            output.append(
-                {
-                    "label": r.names[int(c)],
-                    "score": float(s),
-                    "box": {
-                        "xmin": float(b[0]),
-                        "ymin": float(b[1]),
-                        "xmax": float(b[2]),
-                        "ymax": float(b[3]),
-                    },
-                    "class_id": int(c),
-                    "class_name": r.names[int(c)],
-                    "confidence": float(s),
-                    "bbox": [float(x) for x in b.tolist()],
-                }
-            )
-    return output
+    return extract_instances_from_result(results[0])
 
 
 def run_segmentation(image: Image.Image, options: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -202,34 +221,7 @@ def run_segmentation(image: Image.Image, options: Dict[str, Any]) -> List[Dict[s
     if not results:
         return []
 
-    r = results[0]
-    output: List[Dict[str, Any]] = []
-    if r.boxes is not None:
-        boxes = r.boxes.xyxy.cpu().numpy()
-        classes = r.boxes.cls.cpu().numpy().astype(int)
-        scores = r.boxes.conf.cpu().numpy()
-        masks = r.masks.data.cpu().numpy() if r.masks is not None else None
-
-        for i, (b, c, s) in enumerate(zip(boxes, classes, scores)):
-            item: Dict[str, Any] = {
-                "instance_id": i,
-                "bbox": [float(x) for x in b.tolist()],
-                "class_id": int(c),
-                "class_name": r.names[int(c)],
-                "confidence": float(s),
-                "label": r.names[int(c)],
-                "score": float(s),
-                "box": {
-                    "xmin": float(b[0]),
-                    "ymin": float(b[1]),
-                    "xmax": float(b[2]),
-                    "ymax": float(b[3]),
-                },
-            }
-            if masks is not None and i < len(masks):
-                item["mask_area_px"] = int((masks[i] > 0.5).sum())
-            output.append(item)
-    return output
+    return extract_instances_from_result(results[0])
 
 
 def run_depth_estimation(image: Image.Image, model_id: str) -> Dict[str, str]:
@@ -239,6 +231,95 @@ def run_depth_estimation(image: Image.Image, model_id: str) -> Dict[str, str]:
     depth = (depth - depth.min()) / (depth.max() - depth.min() + 1e-8)
     depth_image = Image.fromarray((depth * 255).astype(np.uint8))
     return {"depth_image": image_to_base64_png(depth_image)}
+
+
+def parse_text_prompts(options: Dict[str, Any]) -> List[str]:
+    raw = str(options.get("text_prompt", "")).strip() or str(options.get("text", "")).strip()
+    if not raw:
+        raw = "person"
+    prompts = [x.strip() for x in raw.split(",") if x.strip()]
+    return prompts or ["person"]
+
+
+def run_sam3_concept_image(image: Image.Image, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
+    threshold = safe_float(options.get("threshold", 0.25), 0.25, 0.01, 0.95)
+    prompts = parse_text_prompts(options)
+
+    img_tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
+    img_path = img_tmp.name
+    img_tmp.close()
+    try:
+        image.save(img_path, format="JPEG")
+        try:
+            from ultralytics.models.sam import SAM3SemanticPredictor  # type: ignore
+        except Exception as exc:
+            raise RuntimeError("SAM3SemanticPredictor unavailable. Install ultralytics>=8.3.237.") from exc
+
+        predictor = SAM3SemanticPredictor(
+            overrides={
+                "conf": threshold,
+                "task": "segment",
+                "mode": "predict",
+                "model": model_id,
+                "verbose": False,
+            }
+        )
+        predictor.set_image(img_path)
+        results = predictor(text=prompts)
+        if not results:
+            return {"concepts": prompts, "instances": []}
+        return {"concepts": prompts, "instances": extract_instances_from_result(results[0])}
+    finally:
+        if os.path.exists(img_path):
+            os.remove(img_path)
+
+
+def run_sam3_concept_video(payload_base64: str, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
+    threshold = safe_float(options.get("threshold", 0.25), 0.25, 0.01, 0.95)
+    prompts = parse_text_prompts(options)
+    max_frames = safe_int(options.get("max_frames", 90), 90, 4, 300)
+
+    in_path = decode_video_to_tempfile(payload_base64)
+    try:
+        try:
+            from ultralytics.models.sam import SAM3VideoSemanticPredictor  # type: ignore
+        except Exception as exc:
+            raise RuntimeError("SAM3VideoSemanticPredictor unavailable. Install ultralytics>=8.3.237.") from exc
+
+        predictor = SAM3VideoSemanticPredictor(
+            overrides={
+                "conf": threshold,
+                "task": "segment",
+                "mode": "predict",
+                "model": model_id,
+                "verbose": False,
+            }
+        )
+        stream = predictor(source=in_path, text=prompts, stream=True)
+
+        frames: List[np.ndarray] = []
+        total_instances = 0
+        for idx, r in enumerate(stream):
+            frames.append(r.plot())
+            total_instances += int(len(r.boxes)) if getattr(r, "boxes", None) is not None else 0
+            if idx + 1 >= max_frames:
+                break
+
+        if not frames:
+            raise RuntimeError("SAM3 video segmentation returned no frames.")
+
+        return {
+            "concepts": prompts,
+            "annotated_video": encode_video_base64(frames, fps=10.0),
+            "content_type": "video/mp4",
+            "metrics": {
+                "frames_processed": len(frames),
+                "instances_detected_total": total_instances,
+            },
+        }
+    finally:
+        if os.path.exists(in_path):
+            os.remove(in_path)
 
 
 def run_pose_estimation(image: Image.Image, options: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -495,7 +576,7 @@ def run_velocity_estimation(payload_base64: str, options: Dict[str, Any]) -> Dic
     }
 
 
-app = FastAPI(title="Perception Playground Backend", version="2.0.0")
+app = FastAPI(title="Perception Playground Backend", version="2.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -523,6 +604,11 @@ def infer(request: InferenceRequest):
     try:
         if task == "velocity-estimation":
             return run_velocity_estimation(request.payloadBase64, request.options)
+        if task == "sam3-concept-segmentation":
+            if (request.mimeType or "").lower().startswith("video/"):
+                return run_sam3_concept_video(request.payloadBase64, model_id, request.options)
+            image = decode_image(request.payloadBase64)
+            return run_sam3_concept_image(image, model_id, request.options)
 
         image = decode_image(request.payloadBase64)
 

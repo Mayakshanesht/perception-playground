@@ -4,6 +4,7 @@ const TASK_MODELS: Record<string, string> = {
   "object-detection": "yolo26n.pt",
   "image-segmentation": "yolo26n-seg.pt",
   "pose-estimation": "yolo26n-pose.pt",
+  "sam3-concept-segmentation": "sam3.pt",
   "depth-estimation": "LiheYoung/depth-anything-small-hf",
   "velocity-estimation": "raft-large",
 };
@@ -24,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { image, video, task, mimeType, options } = req.body ?? {};
+    const { image, video, payloadBase64: rawPayloadBase64, task, mimeType, options } = req.body ?? {};
     const backendUrl = process.env.INFERENCE_BACKEND_URL;
 
     if (!task) {
@@ -38,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    const payloadBase64 = video || image;
+    const payloadBase64 = rawPayloadBase64 || video || image;
     if (!payloadBase64) {
       json(res, 400, { error: "Missing payload. Provide image (base64) or video (base64)." });
       return;

@@ -33,8 +33,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <Eye className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-foreground tracking-tight">Perception Lab</h1>
-            <p className="text-[10px] font-mono text-muted-foreground tracking-wider uppercase">Vision Studio</p>
+            <h1 className="text-sm font-bold text-foreground tracking-tight">Perception Concept Studio</h1>
+            <p className="text-[10px] font-mono text-muted-foreground tracking-wider uppercase">Promptable Vision</p>
           </div>
         </Link>
 
@@ -62,7 +62,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
         <div className="p-4 border-t border-border">
           <div className="rounded-lg bg-muted p-3">
-            <p className="text-xs text-muted-foreground font-mono">v1.0 — Educational Platform</p>
+            <p className="text-xs text-muted-foreground font-mono">v1.1 - Concept Segmentation Lab</p>
           </div>
         </div>
       </aside>

@@ -13,6 +13,7 @@ import {
   GitBranch,
   ArrowRight,
   Sparkles,
+  WandSparkles,
 } from "lucide-react";
 import Playground from "@/components/Playground";
 
@@ -35,15 +36,31 @@ export default function Dashboard() {
       <div className="mb-10">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-xs font-mono text-primary uppercase tracking-widest">Perception Playground</span>
+          <span className="text-xs font-mono text-primary uppercase tracking-widest">Perception Concept Studio</span>
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight mb-3">
-          End-to-End Vision Lab
+          Promptable Vision Lab
         </h1>
         <p className="text-base md:text-lg text-muted-foreground max-w-3xl leading-relaxed">
-          Build intuition from single-frame recognition to full multi-object perception pipelines with live inference, tracking, depth, and velocity estimation.
+          Explore modern perception pipelines with interactive detection, segmentation, pose, depth, and SAM 3 concept segmentation.
         </p>
       </div>
+
+      <section className="mb-10">
+        <div className="flex items-center gap-2 mb-4">
+          <WandSparkles className="h-4 w-4 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">SAM 3 Concept Playground</h2>
+        </div>
+        <Playground
+          title="SAM 3 Promptable Concept Segmentation"
+          description="Segment all instances of concepts using text prompts. Supports both image and video input with SAM 3 semantic predictors."
+          taskType="sam3-concept-segmentation"
+          acceptVideo
+          acceptImage
+          modelName="sam3.pt"
+          learningFocus="Try prompts like 'person', 'bicycle', or 'red car' and compare concept-level mask coverage."
+        />
+      </section>
 
       <h2 className="text-lg font-semibold text-foreground mb-4">All Learning Modules</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
