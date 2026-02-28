@@ -27,6 +27,7 @@ export default function Playground({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [threshold, setThreshold] = useState(0.3);
+  const [inferencePreview, setInferencePreview] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const accept = [
@@ -83,15 +84,26 @@ export default function Playground({
     setResult(null);
 
     try {
-      const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result.split(",")[1]);
-        };
-        reader.onerror = () => reject(new Error("Could not read the uploaded file."));
-        reader.readAsDataURL(file);
-      });
+      const isImageTask = ["object-detection", "image-segmentation", "pose-estimation", "depth-estimation"].includes(taskType);
+      const isVideoInput = file.type.startsWith("video/");
+
+      let payloadDataUrl: string;
+      let requestMimeType = file.type;
+
+      if (isImageTask && isVideoInput) {
+        payloadDataUrl = await extractFirstFrameDataUrl(file);
+        requestMimeType = "image/jpeg";
+      } else {
+        const reader = new FileReader();
+        payloadDataUrl = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error("Could not read the uploaded file."));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const base64 = payloadDataUrl.split(",")[1];
+      setInferencePreview(payloadDataUrl);
 
       const endpoint = import.meta.env.VITE_INFERENCE_API_URL || "/api/hf-inference";
       const response = await fetch(endpoint, {
@@ -101,10 +113,10 @@ export default function Playground({
         },
         body: JSON.stringify({
           image: file.type.startsWith("image/") ? base64 : undefined,
-          video: file.type.startsWith("video/") ? base64 : undefined,
+          video: isImageTask ? undefined : (file.type.startsWith("video/") ? base64 : undefined),
           payloadBase64: base64,
           task: taskType,
-          mimeType: file.type,
+          mimeType: requestMimeType,
           options: { threshold },
         }),
       });
@@ -195,7 +207,14 @@ export default function Playground({
               <p>{error}</p>
             </div>
           )}
-          {result && !error && <ResultDisplay result={result} taskType={taskType} threshold={threshold} />}
+          {result && !error && (
+            <ResultDisplay
+              result={result}
+              taskType={taskType}
+              threshold={threshold}
+              inferencePreview={inferencePreview}
+            />
+          )}
           {!result && !error && !loading && (
             <p className="text-xs text-muted-foreground/60 text-center mt-8">
               Upload an input and click "Run Model" to see results
@@ -207,7 +226,17 @@ export default function Playground({
   );
 }
 
-function ResultDisplay({ result, taskType, threshold }: { result: any; taskType: string; threshold: number }) {
+function ResultDisplay({
+  result,
+  taskType,
+  threshold,
+  inferencePreview,
+}: {
+  result: any;
+  taskType: string;
+  threshold: number;
+  inferencePreview: string | null;
+}) {
   if (taskType === "object-detection" && Array.isArray(result)) {
     const filtered = result.filter((item: any) => (item.score ?? 0) >= threshold);
     if (filtered.length === 0) {
@@ -215,6 +244,7 @@ function ResultDisplay({ result, taskType, threshold }: { result: any; taskType:
     }
     return (
       <div className="space-y-2">
+        {inferencePreview && <ImageOverlayResult src={inferencePreview} taskType={taskType} data={filtered} />}
         <p className="text-xs text-foreground font-medium mb-2">{filtered.length} object(s) detected</p>
         {filtered.map((item: any, i: number) => (
           <div key={i} className="rounded bg-card border border-border p-2 text-xs">
@@ -238,6 +268,7 @@ function ResultDisplay({ result, taskType, threshold }: { result: any; taskType:
     }
     return (
       <div className="space-y-2">
+        {inferencePreview && <ImageOverlayResult src={inferencePreview} taskType={taskType} data={filtered} />}
         <p className="text-xs text-foreground font-medium mb-2">{filtered.length} segment(s)</p>
         {filtered.map((item: any, i: number) => (
           <div key={i} className="rounded bg-card border border-border p-2 text-xs flex items-center gap-2">
@@ -257,6 +288,7 @@ function ResultDisplay({ result, taskType, threshold }: { result: any; taskType:
     }
     return (
       <div className="space-y-2">
+        {inferencePreview && <ImageOverlayResult src={inferencePreview} taskType={taskType} data={filtered} />}
         <p className="text-xs text-foreground font-medium mb-2">{filtered.length} person pose(s) detected</p>
         {filtered.slice(0, 6).map((item: any, i: number) => (
           <div key={i} className="rounded bg-card border border-border p-2 text-xs">
@@ -327,4 +359,100 @@ function VideoResult({ base64, contentType }: { base64: string; contentType: str
   }
 
   return <video controls className="rounded w-full max-h-56 bg-black" src={videoUrl} />;
+}
+
+async function extractFirstFrameDataUrl(file: File): Promise<string> {
+  const url = URL.createObjectURL(file);
+  try {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.muted = true;
+    video.src = url;
+
+    await new Promise<void>((resolve, reject) => {
+      video.onloadeddata = () => resolve();
+      video.onerror = () => reject(new Error("Could not decode video for frame extraction."));
+    });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not create canvas context.");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/jpeg", 0.92);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function ImageOverlayResult({
+  src,
+  taskType,
+  data,
+}: {
+  src: string;
+  taskType: string;
+  data: any[];
+}) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0, img.width, img.height);
+
+      ctx.lineWidth = Math.max(2, Math.round(img.width / 420));
+      ctx.font = `${Math.max(12, Math.round(img.width / 50))}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
+
+      data.forEach((item, idx) => {
+        const hue = (idx * 47) % 360;
+        const color = `hsl(${hue} 95% 55%)`;
+        const box = item.box ?? (
+          Array.isArray(item.bbox) && item.bbox.length === 4
+            ? { xmin: item.bbox[0], ymin: item.bbox[1], xmax: item.bbox[2], ymax: item.bbox[3] }
+            : null
+        );
+
+        if (box) {
+          const x = Number(box.xmin);
+          const y = Number(box.ymin);
+          const w = Number(box.xmax) - x;
+          const h = Number(box.ymax) - y;
+          if (w > 0 && h > 0) {
+            ctx.strokeStyle = color;
+            ctx.strokeRect(x, y, w, h);
+            const label = `${item.label || item.class_name || "obj"} ${(Number(item.score ?? item.confidence ?? 0) * 100).toFixed(1)}%`;
+            const textW = ctx.measureText(label).width + 8;
+            const textH = 18;
+            ctx.fillStyle = color;
+            ctx.fillRect(x, Math.max(0, y - textH), textW, textH);
+            ctx.fillStyle = "#111";
+            ctx.fillText(label, x + 4, Math.max(12, y - 4));
+          }
+        }
+
+        if (taskType === "pose-estimation" && Array.isArray(item.keypoints)) {
+          ctx.fillStyle = color;
+          for (const kp of item.keypoints) {
+            const [kx, ky, kv] = kp;
+            if (Number(kv ?? 1) <= 0) continue;
+            ctx.beginPath();
+            ctx.arc(Number(kx), Number(ky), Math.max(2, Math.round(img.width / 220)), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      });
+    };
+    img.src = src;
+  }, [src, taskType, data]);
+
+  return <canvas ref={canvasRef} className="rounded w-full border border-border bg-black/20" />;
 }
