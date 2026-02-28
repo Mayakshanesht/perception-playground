@@ -119,7 +119,6 @@ export default function Playground({
           mimeType: requestMimeType,
           options: {
             threshold,
-
           },
         }),
       });
@@ -202,8 +201,8 @@ export default function Playground({
 
           {taskType === "sam2-segmentation" && (
             <div className="mt-3 rounded-lg border border-border bg-muted/40 p-3">
-              <p className="text-[11px] text-muted-foreground">SAM 2 runs in segment-everything mode by default.</p>
-              <p className="text-[10px] text-muted-foreground mt-1">Optional point/box prompts can be sent from backend options.</p>
+              <p className="text-[11px] text-muted-foreground">SAM 2 uses visual prompts (points/boxes/masks) or segment-everything mode.</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Upload input and click Run Model to predict.</p>
             </div>
           )}
         </div>
@@ -331,11 +330,11 @@ function ResultDisplay({
     return <img src={`data:image/png;base64,${result.depth_image}`} alt="Depth map" className="rounded max-h-48" />;
   }
 
-  if ((taskType === "velocity-estimation" || taskType === "sam2-segmentation") && result?.annotated_video) {
+  if ((taskType === "velocity-estimation" || taskType === "sam2-segmentation") && (result?.annotated_video || result?.output_base64)) {
     return (
       <div className="space-y-3">
         <VideoResult
-          base64={result.annotated_video}
+          base64={result.annotated_video || result.output_base64}
           contentType={result.content_type || "video/mp4"}
         />
         {result.metrics && (
@@ -362,10 +361,24 @@ function ResultDisplay({
 
 function VideoResult({ base64, contentType }: { base64: string; contentType: string }) {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [fallbackUrl, setFallbackUrl] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
+    if (!base64) {
+      setVideoUrl(null);
+      setFallbackUrl(null);
+      return;
+    }
+
+    const cleaned = base64.replace(/\s+/g, "").replace(/-/g, "+").replace(/_/g, "/");
+    const padded = cleaned + "=".repeat((4 - (cleaned.length % 4)) % 4);
+    const dataUrl = `data:${contentType};base64,${padded}`;
+    setFallbackUrl(dataUrl);
+    setLoadError(false);
+
     try {
-      const binary = atob(base64);
+      const binary = atob(padded);
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
       const blob = new Blob([bytes], { type: contentType });
@@ -373,7 +386,7 @@ function VideoResult({ base64, contentType }: { base64: string; contentType: str
       setVideoUrl(url);
       return () => URL.revokeObjectURL(url);
     } catch {
-      setVideoUrl(null);
+      setVideoUrl(dataUrl);
     }
   }, [base64, contentType]);
 
@@ -381,7 +394,26 @@ function VideoResult({ base64, contentType }: { base64: string; contentType: str
     return <p className="text-xs text-muted-foreground">Could not decode annotated video output.</p>;
   }
 
-  return <video controls className="rounded w-full max-h-56 bg-black" src={videoUrl} />;
+  return (
+    <div className="space-y-2">
+      <video
+        controls
+        playsInline
+        preload="metadata"
+        className="rounded w-full max-h-56 bg-black"
+        src={videoUrl}
+        onError={() => {
+          setLoadError(true);
+          if (fallbackUrl) setVideoUrl(fallbackUrl);
+        }}
+      />
+      {loadError && fallbackUrl && (
+        <a href={fallbackUrl} download="annotated-output.mp4" className="text-xs text-primary underline">
+          Download annotated video
+        </a>
+      )}
+    </div>
+  );
 }
 
 async function extractFirstFrameDataUrl(file: File): Promise<string> {

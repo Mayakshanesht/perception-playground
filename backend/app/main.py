@@ -73,9 +73,15 @@ def encode_video_base64(frames: List[np.ndarray], fps: float) -> str:
     out_path = out_tmp.name
     out_tmp.close()
 
-    writer = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
-    if not writer.isOpened():
-        raise RuntimeError("Failed to open mp4 encoder.")
+    writer = None
+    for codec in ("avc1", "H264", "mp4v"):
+        candidate = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*codec), fps, (w, h))
+        if candidate.isOpened():
+            writer = candidate
+            break
+        candidate.release()
+    if writer is None:
+        raise RuntimeError("Failed to open video encoder (avc1/H264/mp4v).")
 
     for frame in frames:
         writer.write(np.ascontiguousarray(frame[:h, :w].astype(np.uint8)))
@@ -259,14 +265,61 @@ def run_depth_estimation(image: Image.Image, model_id: str) -> Dict[str, str]:
     return {"depth_image": image_to_base64_png(depth_image)}
 
 
+def parse_text_prompt(options: Dict[str, Any]) -> List[str]:
+    raw = str(options.get("text_prompt", "")).strip()
+    if not raw:
+        return []
+    return [x.strip().lower() for x in raw.split(",") if x.strip()]
+
+
+def derive_prompt_bboxes_from_text(image: Image.Image, prompts: List[str], conf: float, imgsz: int) -> List[List[float]]:
+    if not prompts:
+        return []
+
+    model = get_detection_model()
+    rgb = np.array(image)
+    bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+    results = model.predict(source=bgr, imgsz=imgsz, conf=conf, verbose=False)
+    if not results:
+        return []
+
+    r = results[0]
+    if r.boxes is None:
+        return []
+
+    names = getattr(r, "names", {}) if isinstance(getattr(r, "names", {}), dict) else {}
+    selected_cls: set[int] = set()
+    for class_id, class_name in names.items():
+        n = str(class_name).lower().strip()
+        if any((p in n) or (n in p) for p in prompts):
+            selected_cls.add(int(class_id))
+
+    boxes_xyxy = r.boxes.xyxy.cpu().numpy()
+    cls_ids = r.boxes.cls.cpu().numpy().astype(int)
+    out: List[List[float]] = []
+    for i in range(min(len(boxes_xyxy), len(cls_ids))):
+        if cls_ids[i] in selected_cls:
+            b = boxes_xyxy[i].tolist()
+            out.append([float(b[0]), float(b[1]), float(b[2]), float(b[3])])
+            if len(out) >= 24:
+                break
+    return out
+
+
 def run_sam2_image(image: Image.Image, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
     threshold = safe_float(options.get("threshold", 0.25), 0.25, 0.01, 0.95)
     imgsz = safe_int(options.get("imgsz", 1024), 1024, 320, 2048)
+    text_prompts = parse_text_prompt(options)
 
     kwargs: Dict[str, Any] = {}
     for key in ("bboxes", "points", "labels", "masks"):
         if key in options and options[key] is not None:
             kwargs[key] = options[key]
+
+    if "bboxes" not in kwargs and "points" not in kwargs and text_prompts:
+        auto_bboxes = derive_prompt_bboxes_from_text(image, text_prompts, conf=threshold, imgsz=min(1280, imgsz))
+        if auto_bboxes:
+            kwargs["bboxes"] = auto_bboxes
 
     img_tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
     img_path = img_tmp.name
@@ -277,8 +330,8 @@ def run_sam2_image(image: Image.Image, model_id: str, options: Dict[str, Any]) -
         model = get_sam2_model(model_id)
         results = model.predict(source=img_path, conf=threshold, imgsz=imgsz, verbose=False, **kwargs)
         if not results:
-            return {"instances": []}
-        return {"instances": extract_instances_from_result(results[0])}
+            return {"instances": [], "concepts": text_prompts}
+        return {"instances": extract_instances_from_result(results[0]), "concepts": text_prompts}
     finally:
         if os.path.exists(img_path):
             os.remove(img_path)
@@ -288,10 +341,12 @@ def run_sam2_video(payload_base64: str, model_id: str, options: Dict[str, Any]) 
     threshold = safe_float(options.get("threshold", 0.25), 0.25, 0.01, 0.95)
     max_frames = safe_int(options.get("max_frames", 90), 90, 4, 300)
     imgsz = safe_int(options.get("imgsz", 1024), 1024, 320, 2048)
+    text_prompts = parse_text_prompt(options)
 
     in_path = decode_video_to_tempfile(payload_base64)
     cap = cv2.VideoCapture(in_path)
     source_fps = cap.get(cv2.CAP_PROP_FPS) or 10.0
+    first_frame_ok, first_frame = cap.read()
     cap.release()
 
     try:
@@ -316,6 +371,12 @@ def run_sam2_video(payload_base64: str, model_id: str, options: Dict[str, Any]) 
             if key in options and options[key] is not None:
                 kwargs[key] = options[key]
 
+        if "bboxes" not in kwargs and "points" not in kwargs and text_prompts and first_frame_ok:
+            first_img = Image.fromarray(cv2.cvtColor(first_frame, cv2.COLOR_BGR2RGB))
+            auto_bboxes = derive_prompt_bboxes_from_text(first_img, text_prompts, conf=threshold, imgsz=min(1280, imgsz))
+            if auto_bboxes:
+                kwargs["bboxes"] = auto_bboxes
+
         stream = predictor(source=in_path, stream=True, **kwargs)
 
         frames: List[np.ndarray] = []
@@ -332,6 +393,7 @@ def run_sam2_video(payload_base64: str, model_id: str, options: Dict[str, Any]) 
         return {
             "annotated_video": encode_video_base64(frames, fps=float(source_fps or 10.0)),
             "content_type": "video/mp4",
+            "concepts": text_prompts,
             "metrics": {
                 "frames_processed": len(frames),
                 "instances_detected_total": int(total_instances),
