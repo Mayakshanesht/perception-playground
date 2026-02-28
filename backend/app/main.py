@@ -13,9 +13,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from PIL import Image
-from torchvision.models.optical_flow import Raft_Large_Weights, raft_large
 from transformers import pipeline
-from ultralytics import YOLO
+from ultralytics import SAM, YOLO, solutions
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("perception-backend")
@@ -24,9 +23,9 @@ DEFAULT_MODELS: Dict[str, str] = {
     "object-detection": "yolo26n.pt",
     "image-segmentation": "yolo26n-seg.pt",
     "pose-estimation": "yolo26n-pose.pt",
-    "sam3-concept-segmentation": "sam3.pt",
+    "sam2-segmentation": "sam2.1_b.pt",
     "depth-estimation": "LiheYoung/depth-anything-small-hf",
-    "velocity-estimation": "raft-large",
+    "velocity-estimation": "yolo26n.pt",
 }
 
 
@@ -104,6 +103,18 @@ def safe_float(value: Any, default: float, min_value: float, max_value: float) -
     return max(min_value, min(max_value, parsed))
 
 
+def safe_list_of_ints(value: Any) -> list[int] | None:
+    if not isinstance(value, list):
+        return None
+    out: list[int] = []
+    for item in value:
+        try:
+            out.append(int(item))
+        except Exception:
+            continue
+    return out or None
+
+
 @lru_cache(maxsize=2)
 def get_detection_model() -> YOLO:
     try:
@@ -135,6 +146,12 @@ def get_pose_model() -> YOLO:
 
 
 @lru_cache(maxsize=4)
+def get_sam2_model(model_id: str) -> SAM:
+    logger.info("Loading SAM2 model %s", model_id)
+    return SAM(model_id)
+
+
+@lru_cache(maxsize=4)
 def get_depth_pipeline(model_id: str):
     return pipeline(
         "depth-estimation",
@@ -143,31 +160,40 @@ def get_depth_pipeline(model_id: str):
     )
 
 
-@lru_cache(maxsize=1)
-def get_raft_bundle():
-    device = get_device()
-    weights = Raft_Large_Weights.DEFAULT
-    transforms = weights.transforms()
-    model = raft_large(weights=weights, progress=False).to(device).eval()
-    return model, transforms, device
-
-
 def extract_instances_from_result(r: Any) -> List[Dict[str, Any]]:
     output: List[Dict[str, Any]] = []
-    if r is None or r.boxes is None:
+    if r is None:
         return output
 
-    boxes = r.boxes.xyxy.cpu().numpy()
-    classes = r.boxes.cls.cpu().numpy().astype(int) if hasattr(r.boxes, "cls") else np.zeros((len(boxes),), dtype=int)
-    scores = r.boxes.conf.cpu().numpy() if hasattr(r.boxes, "conf") else np.ones((len(boxes),), dtype=float)
-    masks = r.masks.data.cpu().numpy() if r.masks is not None else None
-    mask_polys = r.masks.xy if r.masks is not None and hasattr(r.masks, "xy") else None
-    names = getattr(r, "names", {})
+    names = getattr(r, "names", {}) if hasattr(r, "names") else {}
 
-    for i, b in enumerate(boxes):
-        c = int(classes[i]) if i < len(classes) else 0
-        s = float(scores[i]) if i < len(scores) else 1.0
-        label = names.get(c, str(c)) if isinstance(names, dict) else str(c)
+    boxes = r.boxes.xyxy.cpu().numpy() if getattr(r, "boxes", None) is not None else None
+    classes = r.boxes.cls.cpu().numpy().astype(int) if getattr(r, "boxes", None) is not None and hasattr(r.boxes, "cls") else None
+    scores = r.boxes.conf.cpu().numpy() if getattr(r, "boxes", None) is not None and hasattr(r.boxes, "conf") else None
+
+    masks = r.masks.data.cpu().numpy() if getattr(r, "masks", None) is not None else None
+    mask_polys = r.masks.xy if getattr(r, "masks", None) is not None and hasattr(r.masks, "xy") else None
+
+    n_boxes = len(boxes) if boxes is not None else 0
+    n_masks = len(masks) if masks is not None else 0
+    count = max(n_boxes, n_masks)
+
+    for i in range(count):
+        b = None
+        if boxes is not None and i < len(boxes):
+            b = boxes[i]
+        elif masks is not None and i < len(masks):
+            yy, xx = np.where(masks[i] > 0.5)
+            if len(xx) > 0 and len(yy) > 0:
+                b = np.array([xx.min(), yy.min(), xx.max(), yy.max()], dtype=np.float32)
+
+        if b is None:
+            continue
+
+        c = int(classes[i]) if classes is not None and i < len(classes) else -1
+        s = float(scores[i]) if scores is not None and i < len(scores) else 1.0
+        label = names.get(c, "segment") if isinstance(names, dict) else "segment"
+
         item: Dict[str, Any] = {
             "instance_id": i,
             "bbox": [float(x) for x in b.tolist()],
@@ -233,88 +259,83 @@ def run_depth_estimation(image: Image.Image, model_id: str) -> Dict[str, str]:
     return {"depth_image": image_to_base64_png(depth_image)}
 
 
-def parse_text_prompts(options: Dict[str, Any]) -> List[str]:
-    raw = str(options.get("text_prompt", "")).strip() or str(options.get("text", "")).strip()
-    if not raw:
-        raw = "person"
-    prompts = [x.strip() for x in raw.split(",") if x.strip()]
-    return prompts or ["person"]
-
-
-def run_sam3_concept_image(image: Image.Image, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
+def run_sam2_image(image: Image.Image, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
     threshold = safe_float(options.get("threshold", 0.25), 0.25, 0.01, 0.95)
-    prompts = parse_text_prompts(options)
+    imgsz = safe_int(options.get("imgsz", 1024), 1024, 320, 2048)
+
+    kwargs: Dict[str, Any] = {}
+    for key in ("bboxes", "points", "labels", "masks"):
+        if key in options and options[key] is not None:
+            kwargs[key] = options[key]
 
     img_tmp = tempfile.NamedTemporaryFile(suffix=".jpg", delete=False)
     img_path = img_tmp.name
     img_tmp.close()
+
     try:
         image.save(img_path, format="JPEG")
-        try:
-            from ultralytics.models.sam import SAM3SemanticPredictor  # type: ignore
-        except Exception as exc:
-            raise RuntimeError("SAM3SemanticPredictor unavailable. Install ultralytics>=8.3.237.") from exc
-
-        predictor = SAM3SemanticPredictor(
-            overrides={
-                "conf": threshold,
-                "task": "segment",
-                "mode": "predict",
-                "model": model_id,
-                "verbose": False,
-            }
-        )
-        predictor.set_image(img_path)
-        results = predictor(text=prompts)
+        model = get_sam2_model(model_id)
+        results = model.predict(source=img_path, conf=threshold, imgsz=imgsz, verbose=False, **kwargs)
         if not results:
-            return {"concepts": prompts, "instances": []}
-        return {"concepts": prompts, "instances": extract_instances_from_result(results[0])}
+            return {"instances": []}
+        return {"instances": extract_instances_from_result(results[0])}
     finally:
         if os.path.exists(img_path):
             os.remove(img_path)
 
 
-def run_sam3_concept_video(payload_base64: str, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
+def run_sam2_video(payload_base64: str, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
     threshold = safe_float(options.get("threshold", 0.25), 0.25, 0.01, 0.95)
-    prompts = parse_text_prompts(options)
     max_frames = safe_int(options.get("max_frames", 90), 90, 4, 300)
+    imgsz = safe_int(options.get("imgsz", 1024), 1024, 320, 2048)
 
     in_path = decode_video_to_tempfile(payload_base64)
+    cap = cv2.VideoCapture(in_path)
+    source_fps = cap.get(cv2.CAP_PROP_FPS) or 10.0
+    cap.release()
+
     try:
         try:
-            from ultralytics.models.sam import SAM3VideoSemanticPredictor  # type: ignore
+            from ultralytics.models.sam import SAM2VideoPredictor  # type: ignore
         except Exception as exc:
-            raise RuntimeError("SAM3VideoSemanticPredictor unavailable. Install ultralytics>=8.3.237.") from exc
+            raise RuntimeError("SAM2VideoPredictor unavailable. Install ultralytics with SAM2 support.") from exc
 
-        predictor = SAM3VideoSemanticPredictor(
+        predictor = SAM2VideoPredictor(
             overrides={
                 "conf": threshold,
                 "task": "segment",
                 "mode": "predict",
+                "imgsz": imgsz,
                 "model": model_id,
                 "verbose": False,
             }
         )
-        stream = predictor(source=in_path, text=prompts, stream=True)
+
+        kwargs: Dict[str, Any] = {}
+        for key in ("points", "labels", "bboxes", "masks", "obj_ids"):
+            if key in options and options[key] is not None:
+                kwargs[key] = options[key]
+
+        stream = predictor(source=in_path, stream=True, **kwargs)
 
         frames: List[np.ndarray] = []
         total_instances = 0
         for idx, r in enumerate(stream):
             frames.append(r.plot())
-            total_instances += int(len(r.boxes)) if getattr(r, "boxes", None) is not None else 0
+            total_instances += len(extract_instances_from_result(r))
             if idx + 1 >= max_frames:
                 break
 
         if not frames:
-            raise RuntimeError("SAM3 video segmentation returned no frames.")
+            raise RuntimeError("SAM2 video segmentation returned no frames.")
 
         return {
-            "concepts": prompts,
-            "annotated_video": encode_video_base64(frames, fps=10.0),
+            "annotated_video": encode_video_base64(frames, fps=float(source_fps or 10.0)),
             "content_type": "video/mp4",
             "metrics": {
                 "frames_processed": len(frames),
-                "instances_detected_total": total_instances,
+                "instances_detected_total": int(total_instances),
+                "fps_source": float(source_fps or 10.0),
             },
         }
     finally:
@@ -371,212 +392,109 @@ def run_pose_estimation(image: Image.Image, options: Dict[str, Any]) -> List[Dic
     return output
 
 
-def flow_to_color(flow: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    fx = flow[..., 0]
-    fy = flow[..., 1]
-    mag, ang = cv2.cartToPolar(fx, fy)
-    hsv = np.zeros((flow.shape[0], flow.shape[1], 3), dtype=np.uint8)
-    hsv[..., 0] = (ang * 180 / np.pi / 2).astype(np.uint8)
-    hsv[..., 1] = 255
-    hsv[..., 2] = np.clip(mag * 8, 0, 255).astype(np.uint8)
-    return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR), mag
+def run_velocity_estimation(payload_base64: str, model_id: str, options: Dict[str, Any]) -> Dict[str, Any]:
+    in_path = decode_video_to_tempfile(payload_base64)
 
+    max_frames = safe_int(options.get("max_frames", 180), 180, 4, 600)
+    meter_per_pixel = safe_float(options.get("meter_per_pixel", 0.05), 0.05, 0.0001, 10.0)
+    max_hist = safe_int(options.get("max_hist", 5), 5, 2, 30)
+    max_speed = safe_int(options.get("max_speed", 120), 120, 10, 500)
+    conf = safe_float(options.get("threshold", 0.1), 0.1, 0.01, 0.95)
+    iou = safe_float(options.get("iou", 0.7), 0.7, 0.05, 0.95)
+    imgsz = safe_int(options.get("imgsz", 640), 640, 320, 1280)
+    tracker = str(options.get("tracker", "botsort.yaml"))
+    classes = safe_list_of_ints(options.get("classes"))
 
-def read_video_frames(video_path: str, max_frames: int) -> tuple[list[np.ndarray], float]:
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(in_path)
     if not cap.isOpened():
         raise RuntimeError("Unable to open uploaded video.")
 
-    fps = cap.get(cv2.CAP_PROP_FPS) or 10.0
+    source_fps = float(cap.get(cv2.CAP_PROP_FPS) or 30.0)
+    fps_for_calc = safe_float(options.get("fps", source_fps), source_fps, 1.0, 240.0)
+
+    speed_estimator_args: Dict[str, Any] = {
+        "model": model_id,
+        "fps": fps_for_calc,
+        "max_hist": max_hist,
+        "meter_per_pixel": meter_per_pixel,
+        "max_speed": max_speed,
+        "tracker": tracker,
+        "conf": conf,
+        "iou": iou,
+        "imgsz": imgsz,
+        "show": False,
+        "verbose": False,
+        "device": options.get("device") or get_device(),
+    }
+    if classes is not None:
+        speed_estimator_args["classes"] = classes
+
+    estimator = solutions.SpeedEstimator(**speed_estimator_args)
+
     frames: list[np.ndarray] = []
-    while len(frames) < max_frames:
+    speed_values: list[float] = []
+    last_track_speeds: Dict[str, float] = {}
+
+    frame_count = 0
+    while frame_count < max_frames:
         ok, frame = cap.read()
         if not ok:
             break
-        frames.append(frame)
+
+        processed = estimator(frame)
+        annotated = getattr(processed, "plot_im", None)
+        if annotated is None:
+            annotated = getattr(estimator, "plot_im", None)
+        if annotated is None:
+            annotated = frame
+        frames.append(annotated)
+
+        track_speeds: Dict[str, float] = {}
+        for attr in ("spds", "speeds", "speed", "track_speeds"):
+            value = getattr(estimator, attr, None)
+            if isinstance(value, dict):
+                for k, v in value.items():
+                    try:
+                        track_speeds[str(k)] = float(v)
+                    except Exception:
+                        continue
+                break
+
+        last_track_speeds = track_speeds
+        speed_values.extend(track_speeds.values())
+
+        frame_count += 1
+
     cap.release()
 
-    if len(frames) < 2:
-        raise RuntimeError("Video must contain at least two frames.")
+    if not frames:
+        raise RuntimeError("Speed estimation produced no output frames.")
 
-    return frames, float(fps)
-
-
-def run_yolo_tracking(video_path: str, conf: float, imgsz: int) -> tuple[list[np.ndarray], list[Dict[str, Any]]]:
-    model = get_detection_model()
-    try:
-        stream = model.track(
-            source=video_path,
-            tracker="botsort.yaml",
-            persist=True,
-            conf=conf,
-            iou=0.4,
-            imgsz=imgsz,
-            stream=True,
-            verbose=False,
-        )
-    except Exception:
-        logger.warning("BoT-SORT tracking failed, retrying with default tracker config")
-        stream = model.track(
-            source=video_path,
-            persist=True,
-            conf=conf,
-            iou=0.4,
-            imgsz=imgsz,
-            stream=True,
-            verbose=False,
-        )
-
-    annotated_frames: list[np.ndarray] = []
-    all_tracks: list[Dict[str, Any]] = []
-
-    for frame_id, r in enumerate(stream):
-        annotated_frames.append(r.plot())
-        frame_tracks: Dict[str, Any] = {"frame_id": frame_id, "tracks": []}
-
-        if r.boxes is not None and r.boxes.id is not None:
-            ids = r.boxes.id
-            boxes = r.boxes.xyxy
-            classes = r.boxes.cls
-            scores = r.boxes.conf
-
-            for i in range(len(ids)):
-                cid = int(classes[i].item())
-                frame_tracks["tracks"].append(
-                    {
-                        "track_id": int(ids[i].item()),
-                        "bbox": boxes[i].cpu().numpy().tolist(),
-                        "class_id": cid,
-                        "class_name": r.names[cid],
-                        "confidence": float(scores[i].item()),
-                    }
-                )
-
-        all_tracks.append(frame_tracks)
-
-    return annotated_frames, all_tracks
-
-
-def run_raft_velocity(
-    frames_bgr: list[np.ndarray],
-    tracks: list[Dict[str, Any]],
-    fps: float,
-    meter_per_pixel: float,
-    max_pairs: int,
-) -> tuple[list[np.ndarray], Dict[str, Any]]:
-    model, transforms, device = get_raft_bundle()
-
-    pair_count = min(len(frames_bgr) - 1, max_pairs)
-    flow_vis_frames: list[np.ndarray] = []
-    velocity_data: list[Dict[str, Any]] = []
-    global_mags: list[float] = []
-
-    for i in range(pair_count):
-        im1_bgr = frames_bgr[i]
-        im2_bgr = frames_bgr[i + 1]
-        im1 = cv2.cvtColor(im1_bgr, cv2.COLOR_BGR2RGB)
-        im2 = cv2.cvtColor(im2_bgr, cv2.COLOR_BGR2RGB)
-
-        t1 = torch.from_numpy(im1).permute(2, 0, 1).float()[None] / 255.0
-        t2 = torch.from_numpy(im2).permute(2, 0, 1).float()[None] / 255.0
-        t1, t2 = transforms(t1, t2)
-        t1 = t1.to(device)
-        t2 = t2.to(device)
-
-        with torch.no_grad():
-            flow_list = model(t1, t2)
-        flow = flow_list[-1][0].permute(1, 2, 0).cpu().numpy()
-
-        flow_bgr, mag = flow_to_color(flow)
-        global_mean_flow = float(mag.mean())
-        global_mags.append(global_mean_flow)
-
-        rec: Dict[str, Any] = {"frame_id": i, "tracks": []}
-        frame_tracks = tracks[i].get("tracks", []) if i < len(tracks) else []
-
-        for tr in frame_tracks:
-            x1, y1, x2, y2 = tr["bbox"]
-            x1 = int(max(0, min(flow.shape[1] - 1, x1)))
-            x2 = int(max(0, min(flow.shape[1] - 1, x2)))
-            y1 = int(max(0, min(flow.shape[0] - 1, y1)))
-            y2 = int(max(0, min(flow.shape[0] - 1, y2)))
-            if x2 <= x1 or y2 <= y1:
-                continue
-
-            roi = flow[y1:y2, x1:x2, :]
-            mag_roi = np.sqrt((roi[..., 0] ** 2) + (roi[..., 1] ** 2))
-            px_per_frame = float(np.median(mag_roi))
-            speed_mps = float(px_per_frame * fps * meter_per_pixel)
-            rec["tracks"].append(
-                {
-                    "track_id": tr.get("track_id", -1),
-                    "class_name": tr.get("class_name", ""),
-                    "median_flow_px_per_frame": px_per_frame,
-                    "speed_mps_est": speed_mps,
-                }
-            )
-
-        velocity_data.append(rec)
-
-        panel = cv2.hconcat([im1_bgr, flow_bgr])
-        cv2.putText(
-            panel,
-            f"pair {i:04d}  mean_flow_px={global_mean_flow:.3f}",
-            (20, 35),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            1.0,
-            (0, 255, 0),
-            2,
-            cv2.LINE_AA,
-        )
-        flow_vis_frames.append(panel)
-
-    mean_global = float(np.mean(global_mags)) if global_mags else 0.0
-    metrics = {
-        "frames_processed": len(flow_vis_frames),
-        "mean_flow_px_per_frame": mean_global,
-        "mean_speed_mps_est": float(mean_global * fps * meter_per_pixel),
-    }
-
-    return flow_vis_frames, {"mode": "per_track", "data": velocity_data, "metrics": metrics}
-
-
-def run_velocity_estimation(payload_base64: str, options: Dict[str, Any]) -> Dict[str, Any]:
-    max_frames = safe_int(options.get("max_frames", 121), 121, 4, 360)
-    max_pairs = safe_int(options.get("max_pairs", 120), 120, 1, 300)
-    conf = safe_float(options.get("threshold", 0.5), 0.5, 0.01, 0.95)
-    meter_per_pixel = safe_float(options.get("meter_per_pixel", 0.05), 0.05, 0.0001, 10.0)
-    imgsz = safe_int(options.get("imgsz", 640), 640, 320, 1280)
-
-    in_path = decode_video_to_tempfile(payload_base64)
-    try:
-        frames_bgr, fps = read_video_frames(in_path, max_frames=max_frames)
-        _, tracks = run_yolo_tracking(in_path, conf=conf, imgsz=imgsz)
-        flow_vis_frames, velocity_info = run_raft_velocity(
-            frames_bgr=frames_bgr,
-            tracks=tracks,
-            fps=fps,
-            meter_per_pixel=meter_per_pixel,
-            max_pairs=max_pairs,
-        )
-    finally:
-        if os.path.exists(in_path):
-            os.remove(in_path)
+    mean_speed = float(np.mean(speed_values)) if speed_values else 0.0
+    max_observed_speed = float(np.max(speed_values)) if speed_values else 0.0
 
     return {
-        "annotated_video": encode_video_base64(flow_vis_frames, fps=fps),
+        "annotated_video": encode_video_base64(frames, fps=source_fps),
         "content_type": "video/mp4",
-        "velocity": {
-            "fps": fps,
+        "speed": {
+            "fps": fps_for_calc,
             "meter_per_pixel": meter_per_pixel,
-            "mode": velocity_info["mode"],
-            "data": velocity_info["data"],
+            "track_speeds": [{"track_id": k, "speed": v} for k, v in last_track_speeds.items()],
         },
-        "metrics": velocity_info["metrics"],
+        "metrics": {
+            "frames_processed": len(frames),
+            "fps_source": source_fps,
+            "fps_used": fps_for_calc,
+            "meter_per_pixel": meter_per_pixel,
+            "tracked_objects_last_frame": len(last_track_speeds),
+            "mean_speed": mean_speed,
+            "max_speed_observed": max_observed_speed,
+            "max_speed_config": max_speed,
+        },
     }
 
 
-app = FastAPI(title="Perception Playground Backend", version="2.1.0")
+app = FastAPI(title="Perception Concept Studio Backend", version="2.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -603,12 +521,12 @@ def infer(request: InferenceRequest):
 
     try:
         if task == "velocity-estimation":
-            return run_velocity_estimation(request.payloadBase64, request.options)
-        if task == "sam3-concept-segmentation":
+            return run_velocity_estimation(request.payloadBase64, model_id, request.options)
+        if task == "sam2-segmentation":
             if (request.mimeType or "").lower().startswith("video/"):
-                return run_sam3_concept_video(request.payloadBase64, model_id, request.options)
+                return run_sam2_video(request.payloadBase64, model_id, request.options)
             image = decode_image(request.payloadBase64)
-            return run_sam3_concept_image(image, model_id, request.options)
+            return run_sam2_image(image, model_id, request.options)
 
         image = decode_image(request.payloadBase64)
 

@@ -12,9 +12,9 @@ Supported tasks (and only these tasks):
 - `object-detection` (Ultralytics YOLO detection)
 - `image-segmentation` (Ultralytics YOLO instance segmentation)
 - `pose-estimation` (Ultralytics YOLO human keypoints, 17 COCO joints)
-- `sam3-concept-segmentation` (SAM 3 text-prompt concept segmentation for image/video)
+- `sam2-segmentation` (SAM 2 promptable segmentation for image/video)
 - `depth-estimation` (Depth Anything small)
-- `velocity-estimation` (RAFT optical flow + YOLO tracking)
+- `velocity-estimation` (Ultralytics SpeedEstimator)
 
 ## Request contract
 
@@ -32,25 +32,22 @@ Supported tasks (and only these tasks):
 
 For `velocity-estimation`, upload video and optional options:
 
-- `threshold` (YOLO tracking confidence, default `0.5`)
-- `max_frames` (default `121`)
-- `max_pairs` (default `120`)
+- `threshold` (YOLO tracking confidence, default `0.1`)
+- `max_frames` (default `180`)
 - `meter_per_pixel` (default `0.05`)
 - `imgsz` (default `640`)
 
-For `sam3-concept-segmentation`, send:
+For `sam2-segmentation`, send:
 
-- `options.text_prompt` (example: `person, bicycle`)
+- Optional prompts: `options.points`, `options.labels`, `options.bboxes`, `options.masks`
 - `options.threshold` (default `0.25`)
 - image or video `payloadBase64`
 
-SAM 3 setup prerequisites:
+SAM 2 setup notes:
 
-1. Install Ultralytics with SAM 3 support (already pinned in `requirements.txt`).
-2. Download `sam3.pt` manually and place it in backend working directory (or provide model path).
-3. If tokenizer error appears:
-   - `pip uninstall clip -y`
-   - `pip install git+https://github.com/ultralytics/CLIP.git`
+1. Install Ultralytics (already pinned in `requirements.txt`).
+2. Use a SAM 2 model id such as `sam2.1_b.pt` (auto-downloads on first use).
+3. No manual CLIP/tokenizer setup is needed for SAM 2.
 
 ## Run locally
 
@@ -77,3 +74,6 @@ Set:
 - `INFERENCE_BACKEND_URL=https://<your-host>/infer`
 
 The Vercel API route forwards all supported playground requests to this backend.
+
+
+

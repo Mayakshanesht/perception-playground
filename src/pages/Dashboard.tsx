@@ -42,23 +42,23 @@ export default function Dashboard() {
           Promptable Vision Lab
         </h1>
         <p className="text-base md:text-lg text-muted-foreground max-w-3xl leading-relaxed">
-          Explore modern perception pipelines with interactive detection, segmentation, pose, depth, and SAM 3 concept segmentation.
+          Explore modern perception pipelines with interactive detection, segmentation, pose, depth, and SAM 2 segmentation.
         </p>
       </div>
 
       <section className="mb-10">
         <div className="flex items-center gap-2 mb-4">
           <WandSparkles className="h-4 w-4 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">SAM 3 Concept Playground</h2>
+          <h2 className="text-lg font-semibold text-foreground">SAM 2 Segmentation Playground</h2>
         </div>
         <Playground
-          title="SAM 3 Promptable Concept Segmentation"
-          description="Segment all instances of concepts using text prompts. Supports both image and video input with SAM 3 semantic predictors."
-          taskType="sam3-concept-segmentation"
+          title="SAM 2 Promptable Segmentation"
+          description="Segment objects with SAM 2 prompts (points/boxes/masks) or run segment-everything on image/video input."
+          taskType="sam2-segmentation"
           acceptVideo
           acceptImage
-          modelName="sam3.pt"
-          learningFocus="Try prompts like 'person', 'bicycle', or 'red car' and compare concept-level mask coverage."
+          modelName="sam2.1_b.pt"
+          learningFocus="Try point/box prompts and compare mask stability across frames."
         />
       </section>
 
@@ -111,3 +111,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

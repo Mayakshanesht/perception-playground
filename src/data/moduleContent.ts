@@ -282,15 +282,7 @@ export const moduleContents: Record<string, ModuleContent> = {
         modelName: "yolo26n-seg.pt (fallback yolo11n-seg.pt)",
         learningFocus: "Contrast segmentation outputs with detection results and inspect mask-area variation per instance.",
       },
-      {
-        title: "SAM 3 Concept Segmentation Playground",
-        description: "Segment all instances of a text concept (for example: person, bicycle, red car). Supports image and video input.",
-        taskType: "sam3-concept-segmentation",
-        acceptImage: true,
-        acceptVideo: true,
-        modelName: "sam3.pt",
-        learningFocus: "Test open-vocabulary concept prompts and compare coverage quality across different noun phrases.",
-      },
+
     ],
   },
 
@@ -756,12 +748,14 @@ export const moduleContents: Record<string, ModuleContent> = {
     ],
     playground: {
       title: "Speed Estimation Playground",
-      description: "Estimate object speed from video using YOLO tracking + RAFT optical flow. Speeds are approximate and depend on camera setup and meter-per-pixel scaling.",
+      description: "Estimate object speed from video using Ultralytics SpeedEstimator (YOLO tracking + distance-time scaling).",
       taskType: "velocity-estimation",
       acceptVideo: true,
       acceptImage: false,
-      modelName: "RAFT Large + YOLO Speed Estimation",
+      modelName: "Ultralytics SpeedEstimator (YOLO)",
       learningFocus: "Experiment with different scenes and compare speed stability under camera motion, frame rate changes, and scale assumptions.",
     },
   },
 };
+
+

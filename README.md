@@ -11,7 +11,7 @@ The backend and frontend are aligned to the validated `project_sdk/perception_pr
 3. `03_monocular_depth_ai.ipynb` -> `depth-estimation`
 4. `04_motion_velocity_estimation.ipynb` -> `velocity-estimation`
 5. YOLO Pose (`yolo26n-pose.pt`) -> `pose-estimation`
-6. SAM 3 (`sam3.pt`) -> `sam3-concept-segmentation` (text-prompt concept segmentation)
+6. SAM 2 (`sam2.1_b.pt`) -> `sam2-segmentation` (promptable image/video segmentation)
 
 Any playground not backed by these implementations has been removed from the UI.
 
@@ -55,9 +55,10 @@ Set frontend env:
 
 ## Notes
 
-- Velocity estimates are derived from RAFT optical flow magnitude and an approximate `meter_per_pixel` scale.
+- Velocity estimates use Ultralytics `solutions.SpeedEstimator` with YOLO tracking and `meter_per_pixel` scaling.
 - Default model fallbacks mirror notebook behavior (`yolo26*` -> `yolo11*` fallback when unavailable).
 - Pose estimation uses the default 17 COCO keypoints (nose, eyes, ears, shoulders, elbows, wrists, hips, knees, ankles).
-- SAM 3 requires `sam3.pt` weights available on the backend host and Ultralytics `>=8.3.237`.
-- If you see `SimpleTokenizer` errors with SAM 3, run:
-  `pip uninstall clip -y && pip install git+https://github.com/ultralytics/CLIP.git`
+- SAM 2 models auto-download on first use (for example `sam2.1_b.pt`) with a compatible Ultralytics install.
+- SAM 3-specific CLIP/tokenizer setup is no longer required for this app.
+
+

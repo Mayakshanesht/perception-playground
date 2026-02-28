@@ -4,9 +4,9 @@ const TASK_MODELS: Record<string, string> = {
   "object-detection": "yolo26n.pt",
   "image-segmentation": "yolo26n-seg.pt",
   "pose-estimation": "yolo26n-pose.pt",
-  "sam3-concept-segmentation": "sam3.pt",
+  "sam2-segmentation": "sam2.1_b.pt",
   "depth-estimation": "LiheYoung/depth-anything-small-hf",
-  "velocity-estimation": "raft-large",
+  "velocity-estimation": "yolo26n.pt",
 };
 
 function json(res: VercelResponse, status: number, payload: unknown) {
@@ -80,3 +80,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     json(res, 500, { error: error?.message || "Inference request failed" });
   }
 }
+
