@@ -105,7 +105,7 @@ export default function Playground({
           payloadBase64: base64,
           task: taskType,
           mimeType: file.type,
-          options: {},
+          options: { threshold },
         }),
       });
 
@@ -167,7 +167,7 @@ export default function Playground({
             {loading ? "Running inference..." : "Run Model"}
           </button>
 
-          {["image-classification", "object-detection", "image-segmentation", "video-action-recognition", "pose-estimation"].includes(taskType) && (
+          {["object-detection", "image-segmentation", "pose-estimation", "velocity-estimation"].includes(taskType) && (
             <div className="mt-3 rounded-lg border border-border bg-muted/40 p-3">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-[11px] text-muted-foreground">Confidence threshold</p>
@@ -208,35 +208,6 @@ export default function Playground({
 }
 
 function ResultDisplay({ result, taskType, threshold }: { result: any; taskType: string; threshold: number }) {
-  if (taskType === "image-classification" && Array.isArray(result)) {
-    const ranked = [...result].sort((a: any, b: any) => (b.score ?? 0) - (a.score ?? 0)).slice(0, 5);
-    const filtered = ranked.filter((item: any) => (item.score ?? 0) >= threshold);
-    if (filtered.length === 0) {
-      return <p className="text-xs text-muted-foreground">No classes above threshold.</p>;
-    }
-    return (
-      <div className="space-y-2">
-        {filtered.map((item: any, i: number) => (
-          <div key={i} className="flex items-center gap-2">
-            <div className="flex-1">
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-foreground font-medium">{item.label}</span>
-                <span className="text-muted-foreground font-mono">{(item.score * 100).toFixed(1)}%</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-border overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${item.score * 100}%` }}
-                  className="h-full rounded-full bg-primary"
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   if (taskType === "object-detection" && Array.isArray(result)) {
     const filtered = result.filter((item: any) => (item.score ?? 0) >= threshold);
     if (filtered.length === 0) {
@@ -279,87 +250,33 @@ function ResultDisplay({ result, taskType, threshold }: { result: any; taskType:
     );
   }
 
-  if (taskType === "sam-segmentation") {
-    const masks = Array.isArray(result) ? result : Array.isArray(result?.masks) ? result.masks : [];
-    if (masks.length > 0) {
-      return (
-        <div className="space-y-2">
-          <p className="text-xs text-foreground font-medium mb-2">{masks.length} mask proposal(s)</p>
-          {masks.slice(0, 5).map((item: any, i: number) => (
-            <div key={i} className="rounded bg-card border border-border p-2 text-xs">
-              <span className="text-primary font-medium">Mask {i + 1}</span>
-              {typeof item.score === "number" && (
-                <span className="text-muted-foreground ml-2">{(item.score * 100).toFixed(1)}%</span>
-              )}
-              {typeof item.label === "string" && <span className="text-muted-foreground ml-2">{item.label}</span>}
-            </div>
-          ))}
-        </div>
-      );
-    }
-  }
-
   if (taskType === "pose-estimation" && Array.isArray(result)) {
-    const filtered = result.filter((person: any) => (person.score ?? 0) >= threshold);
+    const filtered = result.filter((item: any) => (item.score ?? 0) >= threshold);
     if (filtered.length === 0) {
-      return <p className="text-xs text-muted-foreground">No pose instances above threshold.</p>;
+      return <p className="text-xs text-muted-foreground">No pose detections above threshold.</p>;
     }
     return (
       <div className="space-y-2">
-        <p className="text-xs text-foreground font-medium mb-2">{filtered.length} keypoint set(s)</p>
-        {filtered.slice(0, 3).map((person: any, i: number) => (
+        <p className="text-xs text-foreground font-medium mb-2">{filtered.length} person pose(s) detected</p>
+        {filtered.slice(0, 6).map((item: any, i: number) => (
           <div key={i} className="rounded bg-card border border-border p-2 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-primary font-medium">Person {i + 1}</span>
-              {typeof person.score === "number" && (
-                <span className="text-muted-foreground">{(person.score * 100).toFixed(1)}%</span>
-              )}
+              <span className="text-primary font-medium">{item.label || "person"}</span>
+              <span className="text-muted-foreground font-mono">{(item.score * 100).toFixed(1)}%</span>
             </div>
-            {Array.isArray(person.keypoints) && (
-              <p className="text-muted-foreground mt-1">{person.keypoints.length} keypoints predicted</p>
-            )}
+            <p className="text-muted-foreground mt-1">
+              {Array.isArray(item.keypoints) ? item.keypoints.length : 0} keypoints
+            </p>
           </div>
         ))}
       </div>
     );
   }
-
-  if (taskType === "video-action-recognition" && Array.isArray(result)) {
-    const filtered = result
-      .filter((item: any) => (item.score ?? 0) >= threshold)
-      .sort((a: any, b: any) => (b.score ?? 0) - (a.score ?? 0))
-      .slice(0, 5);
-    if (filtered.length === 0) {
-      return <p className="text-xs text-muted-foreground">No actions above threshold.</p>;
-    }
-    return (
-      <div className="space-y-2">
-        {filtered.map((item: any, i: number) => (
-          <div key={i} className="flex items-center gap-2">
-            <div className="flex-1">
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-foreground font-medium">{item.label}</span>
-                <span className="text-muted-foreground font-mono">{(item.score * 100).toFixed(1)}%</span>
-              </div>
-              <div className="h-1.5 rounded-full bg-border overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${item.score * 100}%` }}
-                  className="h-full rounded-full bg-primary"
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   if (taskType === "depth-estimation" && result?.depth_image) {
     return <img src={`data:image/png;base64,${result.depth_image}`} alt="Depth map" className="rounded max-h-48" />;
   }
 
-  if ((taskType === "velocity-estimation" || taskType === "perception-pipeline") && result?.annotated_video) {
+  if (taskType === "velocity-estimation" && result?.annotated_video) {
     return (
       <div className="space-y-3">
         <VideoResult

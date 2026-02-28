@@ -1,139 +1,59 @@
-# Welcome to your Lovable project
+# Perception Playground
 
-## Project info
+Perception Playground is a React + Vercel frontend with a GPU backend for notebook-aligned computer vision inference.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Implemented Playground Tasks
 
-## How can I edit this code?
+The backend and frontend are aligned to the validated `project_sdk/perception_project` notebooks, with pose estimation additionally enabled using Ultralytics YOLO pose models:
 
-There are several ways of editing your application.
+1. `01_kitti_tracking_detection_ultralytics.ipynb` -> `object-detection`
+2. `02_kitti_instance_segmentation_ultralytics.ipynb` -> `image-segmentation`
+3. `03_monocular_depth_ai.ipynb` -> `depth-estimation`
+4. `04_motion_velocity_estimation.ipynb` -> `velocity-estimation`
+5. YOLO Pose (`yolo26n-pose.pt`) -> `pose-estimation`
 
-**Use Lovable**
+Any playground not backed by these implementations has been removed from the UI.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Architecture
 
-Changes made via Lovable will be committed automatically to this repo.
+- Frontend: Vite + React (`src/`)
+- API proxy: Vercel function (`api/hf-inference.ts`)
+- GPU backend: FastAPI (`backend/`)
 
-**Use your preferred IDE**
+Request flow:
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Frontend uploads image/video.
+2. Vercel function forwards request to `INFERENCE_BACKEND_URL`.
+3. FastAPI backend runs inference and returns JSON/video payload.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Local Development
 
-Follow these steps:
+Frontend:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-
-## Run With Vercel Backend
-
-This project now includes a Vercel Serverless backend route at `api/hf-inference.ts` used by all playgrounds.
-
-### Local development
-
-1. Install deps:
+Backend:
 
 ```sh
-npm i
+cd backend
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# Linux/macOS
+# source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-2. Install Vercel CLI (one-time):
+Set frontend env:
 
-```sh
-npm i -g vercel
-```
+- `INFERENCE_BACKEND_URL=http://localhost:8000/infer`
 
-3. Run frontend + API together:
+## Notes
 
-```sh
-vercel dev
-```
-
-### Required environment variables
-
-Set in Vercel Project Settings -> Environment Variables:
-
-- `HUGGINGFACE_API_KEY` (required for HF Inference API mode)
-- `INFERENCE_BACKEND_URL` (recommended; if set, API proxies to your RunPod backend)
-
-### Deployment (frontend + backend)
-
-1. Push this repo to GitHub.
-2. Import it in Vercel.
-3. Framework preset: `Vite`.
-4. Build command: `npm run build`
-5. Output directory: `dist`
-6. Deploy.
-
-## Recommended Production Architecture
-
-For a student-facing CV lab with heavier models/video:
-
-- Frontend on Vercel (React app)
-- API proxy on Vercel (`/api/hf-inference`)
-- GPU backend on RunPod (`backend/` folder)
-
-Flow:
-
-1. Browser uploads image/video to Vercel API.
-2. Vercel API forwards to RunPod `/infer`.
-3. RunPod executes Hugging Face models on GPU and returns predictions.
-4. Frontend renders outputs + educational explanations/checklists.
-
-RunPod backend setup instructions are in:
-
-- `backend/README.md`
-- includes both Docker and non-Docker (direct Python) options
-
-### GPU baseline for RunPod
-
-- CUDA: **12.1**
-- Minimum: **16 GB VRAM**
-- Recommended for chained perception playground: **24 GB VRAM**
+- Velocity estimates are derived from RAFT optical flow magnitude and an approximate `meter_per_pixel` scale.
+- Default model fallbacks mirror notebook behavior (`yolo26*` -> `yolo11*` fallback when unavailable).
+- Pose estimation uses the default 17 COCO keypoints (nose, eyes, ears, shoulders, elbows, wrists, hips, knees, ankles).

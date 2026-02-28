@@ -13,7 +13,6 @@ import {
   GitBranch,
   ArrowRight,
   Sparkles,
-  Workflow,
 } from "lucide-react";
 import Playground from "@/components/Playground";
 
@@ -45,22 +44,6 @@ export default function Dashboard() {
           Build intuition from single-frame recognition to full multi-object perception pipelines with live inference, tracking, depth, and velocity estimation.
         </p>
       </div>
-
-      <section className="mb-10">
-        <div className="flex items-center gap-2 mb-4">
-          <Workflow className="h-4 w-4 text-accent" />
-          <h2 className="text-lg font-semibold text-foreground">Full Perception Stack Playground</h2>
-        </div>
-        <Playground
-          title="Detection + Tracking + Segmentation + Depth + Velocity"
-          description="Upload a video for chained inference with annotated output and metrics. This demonstrates a complete perception stack students can analyze stage-by-stage."
-          taskType="perception-pipeline"
-          acceptVideo
-          acceptImage={false}
-          modelName="DETR + DeepSORT + Segmentation + DPT"
-          learningFocus="Study error propagation: weak detections degrade tracking, which impacts velocity and downstream analytics."
-        />
-      </section>
 
       <h2 className="text-lg font-semibold text-foreground mb-4">All Learning Modules</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
