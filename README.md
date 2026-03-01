@@ -53,6 +53,16 @@ Set frontend env:
 
 - `INFERENCE_BACKEND_URL=http://localhost:8000/infer`
 
+## Public Tunnel (Cloudflared)
+
+To expose backend publicly (for remote frontend like Vercel), run backend locally and tunnel it:
+
+```sh
+wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb && dpkg -i cloudflared-linux-amd64.deb
+uvicorn app.main:app --host 127.0.0.1 --port 8888
+cloudflared tunnel --url http://localhost:8888
+```
+
 ## Notes
 
 - Velocity estimates use Ultralytics `solutions.SpeedEstimator` with YOLO tracking and `meter_per_pixel` scaling.
