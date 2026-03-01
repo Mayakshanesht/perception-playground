@@ -202,7 +202,7 @@ export const moduleContents: Record<string, ModuleContent> = {
       description: "Upload an image to detect objects using Ultralytics YOLO (notebook-aligned implementation with model fallback).",
       taskType: "object-detection",
       acceptImage: true,
-      acceptVideo: true,
+      acceptVideo: false,
       modelName: "yolo26n.pt (fallback yolo11n.pt)",
       learningFocus: "Compare detections across cluttered scenes and inspect how confidence and bounding boxes change with scale.",
     },
@@ -278,7 +278,7 @@ export const moduleContents: Record<string, ModuleContent> = {
         description: "Upload an image to run Ultralytics instance segmentation and inspect instance-level boxes, classes, confidence, and mask area.",
         taskType: "image-segmentation",
         acceptImage: true,
-        acceptVideo: true,
+        acceptVideo: false,
         modelName: "yolo26n-seg.pt (fallback yolo11n-seg.pt)",
         learningFocus: "Contrast segmentation outputs with detection results and inspect mask-area variation per instance.",
       },
@@ -538,7 +538,7 @@ export const moduleContents: Record<string, ModuleContent> = {
       description: "Upload an image to run YOLO pose estimation with 17 COCO keypoints and per-person confidence scores.",
       taskType: "pose-estimation",
       acceptImage: true,
-      acceptVideo: true,
+      acceptVideo: false,
       modelName: "yolo26n-pose.pt (fallback yolo11n-pose.pt)",
       learningFocus: "Inspect keypoint stability under occlusion, unusual poses, and multi-person scenes.",
     },
@@ -746,15 +746,7 @@ export const moduleContents: Record<string, ModuleContent> = {
       { year: 2022, title: "FlowFormer", authors: "Huang et al.", venue: "ECCV", summary: "Transformer-based cost volume processing for accurate optical flow estimation." },
       { year: 2023, title: "UniMatch", authors: "Xu et al.", venue: "TPAMI", summary: "Unified model for flow, stereo, and depth using task-agnostic matching." },
     ],
-    playground: {
-      title: "Speed Estimation Playground",
-      description: "Estimate object speed from video using Ultralytics SpeedEstimator (YOLO tracking + distance-time scaling).",
-      taskType: "velocity-estimation",
-      acceptVideo: true,
-      acceptImage: false,
-      modelName: "Ultralytics SpeedEstimator (YOLO)",
-      learningFocus: "Experiment with different scenes and compare speed stability under camera motion, frame rate changes, and scale assumptions.",
-    },
+    // Playground intentionally removed per product scope: optical-flow page is now theory-only.
   },
 };
 

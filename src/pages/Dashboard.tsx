@@ -53,9 +53,9 @@ export default function Dashboard() {
         </div>
         <Playground
           title="SAM 2 Promptable Segmentation"
-          description="Segment objects with SAM 2 prompts (points/boxes/masks) or run segment-everything on image/video input."
+          description="Segment objects with SAM 2 prompts (points/boxes/masks) or segment-everything on image input."
           taskType="sam2-segmentation"
-          acceptVideo
+          acceptVideo={false}
           acceptImage
           modelName="sam2.1_b.pt"
           learningFocus="Try point/box prompts and compare mask stability across frames."
