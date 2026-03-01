@@ -12,7 +12,7 @@ Supported tasks (and only these tasks):
 - `object-detection` (Ultralytics YOLO detection)
 - `image-segmentation` (Ultralytics YOLO instance segmentation)
 - `pose-estimation` (Ultralytics YOLO human keypoints, 17 COCO joints)
-- `sam2-segmentation` (SAM 2 promptable segmentation for image/video)
+- `sam2-segmentation` (SAM 2 segmentation)
 - `depth-estimation` (Depth Anything small)
 - `velocity-estimation` (Ultralytics SpeedEstimator)
 

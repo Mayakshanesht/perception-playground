@@ -52,7 +52,7 @@ export default function Dashboard() {
           <h2 className="text-lg font-semibold text-foreground">SAM 2 Segmentation Playground</h2>
         </div>
         <Playground
-          title="SAM 2 Promptable Segmentation"
+          title="SAM 2 Segmentation"
           description="Segment objects with SAM 2 prompts (points/boxes/masks) or segment-everything on image input."
           taskType="sam2-segmentation"
           acceptVideo={false}

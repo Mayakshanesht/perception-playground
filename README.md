@@ -11,7 +11,7 @@ The backend and frontend are aligned to the validated `project_sdk/perception_pr
 3. `03_monocular_depth_ai.ipynb` -> `depth-estimation`
 4. `04_motion_velocity_estimation.ipynb` -> `velocity-estimation`
 5. YOLO Pose (`yolo26n-pose.pt`) -> `pose-estimation`
-6. SAM 2 (`sam2.1_b.pt`) -> `sam2-segmentation` (promptable image/video segmentation)
+6. SAM 2 (`sam2.1_b.pt`) -> `sam2-segmentation` (image segmentation)
 
 Any playground not backed by these implementations has been removed from the UI.
 
