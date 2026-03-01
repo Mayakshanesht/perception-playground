@@ -350,22 +350,6 @@ def run_sam2_video(payload_base64: str, model_id: str, options: Dict[str, Any]) 
     cap.release()
 
     try:
-        try:
-            from ultralytics.models.sam import SAM2VideoPredictor  # type: ignore
-        except Exception as exc:
-            raise RuntimeError("SAM2VideoPredictor unavailable. Install ultralytics with SAM2 support.") from exc
-
-        predictor = SAM2VideoPredictor(
-            overrides={
-                "conf": threshold,
-                "task": "segment",
-                "mode": "predict",
-                "imgsz": imgsz,
-                "model": model_id,
-                "verbose": False,
-            }
-        )
-
         kwargs: Dict[str, Any] = {}
         for key in ("points", "labels", "bboxes", "masks", "obj_ids"):
             if key in options and options[key] is not None:
@@ -377,15 +361,55 @@ def run_sam2_video(payload_base64: str, model_id: str, options: Dict[str, Any]) 
             if auto_bboxes:
                 kwargs["bboxes"] = auto_bboxes
 
-        stream = predictor(source=in_path, stream=True, **kwargs)
-
+        has_visual_prompts = any(k in kwargs for k in ("points", "bboxes", "masks"))
         frames: List[np.ndarray] = []
         total_instances = 0
-        for idx, r in enumerate(stream):
-            frames.append(r.plot())
-            total_instances += len(extract_instances_from_result(r))
-            if idx + 1 >= max_frames:
-                break
+
+        if has_visual_prompts:
+            try:
+                from ultralytics.models.sam import SAM2VideoPredictor  # type: ignore
+            except Exception as exc:
+                raise RuntimeError("SAM2VideoPredictor unavailable. Install ultralytics with SAM2 support.") from exc
+
+            predictor = SAM2VideoPredictor(
+                overrides={
+                    "conf": threshold,
+                    "task": "segment",
+                    "mode": "predict",
+                    "imgsz": imgsz,
+                    "model": model_id,
+                    "verbose": False,
+                }
+            )
+
+            stream = predictor(source=in_path, stream=True, **kwargs)
+            for idx, r in enumerate(stream):
+                frames.append(r.plot())
+                total_instances += len(extract_instances_from_result(r))
+                if idx + 1 >= max_frames:
+                    break
+            run_mode = "video_predictor"
+        else:
+            # Some Ultralytics SAM2 video predictor builds require points/boxes.
+            # Fallback: process video frame-by-frame with SAM2 image predictor.
+            sam_model = get_sam2_model(model_id)
+            cap2 = cv2.VideoCapture(in_path)
+            idx = 0
+            while idx < max_frames:
+                ok, frame = cap2.read()
+                if not ok:
+                    break
+                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                results = sam_model.predict(source=rgb, conf=threshold, imgsz=imgsz, verbose=False)
+                if results:
+                    r = results[0]
+                    frames.append(r.plot())
+                    total_instances += len(extract_instances_from_result(r))
+                else:
+                    frames.append(frame)
+                idx += 1
+            cap2.release()
+            run_mode = "framewise_fallback"
 
         if not frames:
             raise RuntimeError("SAM2 video segmentation returned no frames.")
@@ -398,6 +422,7 @@ def run_sam2_video(payload_base64: str, model_id: str, options: Dict[str, Any]) 
                 "frames_processed": len(frames),
                 "instances_detected_total": int(total_instances),
                 "fps_source": float(source_fps or 10.0),
+                "mode": run_mode,
             },
         }
     finally:

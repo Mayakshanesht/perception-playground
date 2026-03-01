@@ -32,7 +32,7 @@ export default function Playground({
 
   const accept = [
     ...(acceptImage ? ["image/jpeg", "image/png", "image/webp"] : []),
-    ...(acceptVideo ? ["video/mp4", "video/webm"] : []),
+    ...(acceptVideo ? ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo", "video/x-matroska"] : []),
   ].join(",");
   const uploadLabel = acceptImage && acceptVideo ? "image or video" : acceptVideo ? "a video" : "an image";
 
@@ -47,8 +47,12 @@ export default function Playground({
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    const isImage = f.type.startsWith("image/");
-    const isVideo = f.type.startsWith("video/");
+    const fileType = (f.type || "").toLowerCase();
+    const ext = (f.name.split(".").pop() || "").toLowerCase();
+    const imageExts = new Set(["jpg", "jpeg", "png", "webp", "bmp"]);
+    const videoExts = new Set(["mp4", "webm", "mov", "avi", "mkv", "m4v"]);
+    const isImage = fileType.startsWith("image/") || (!fileType && imageExts.has(ext));
+    const isVideo = fileType.startsWith("video/") || (!fileType && videoExts.has(ext));
 
     if ((isImage && !acceptImage) || (isVideo && !acceptVideo) || (!isImage && !isVideo)) {
       setError("Unsupported file type for this playground.");
@@ -85,7 +89,7 @@ export default function Playground({
 
     try {
       const isImageTask = ["object-detection", "image-segmentation", "pose-estimation", "depth-estimation"].includes(taskType);
-      const isVideoInput = file.type.startsWith("video/");
+      const isVideoInput = (file.type || "").startsWith("video/") || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(file.name);
 
       let payloadDataUrl: string;
       let requestMimeType = file.type;
@@ -112,11 +116,11 @@ export default function Playground({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          image: isImageTask ? base64 : (file.type.startsWith("image/") ? base64 : undefined),
-          video: isImageTask ? undefined : (file.type.startsWith("video/") ? base64 : undefined),
+          image: isImageTask ? base64 : (((file.type || "").startsWith("image/") || /\.(jpg|jpeg|png|webp|bmp)$/i.test(file.name)) ? base64 : undefined),
+          video: isImageTask ? undefined : ((((file.type || "").startsWith("video/")) || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(file.name)) ? base64 : undefined),
           payloadBase64: base64,
           task: taskType,
-          mimeType: requestMimeType,
+          mimeType: requestMimeType || (isVideoInput ? "video/mp4" : "image/jpeg"),
           options: {
             threshold,
           },
