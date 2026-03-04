@@ -7,6 +7,7 @@ import AppLayout from "@/components/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import GenericModule from "@/pages/GenericModule";
 import KnowledgeGraph from "@/pages/KnowledgeGraph";
+import Tutorials from "@/pages/Tutorials";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/module/:moduleId" element={<GenericModule />} />
+            <Route path="/tutorials" element={<Tutorials />} />
             <Route path="/knowledge-graph" element={<KnowledgeGraph />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

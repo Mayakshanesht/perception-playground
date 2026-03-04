@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Eye, Box, Layers, Mountain, Video, GitBranch, Brain,
-  LayoutDashboard, ChevronRight, Scan, Move3D, Users, Waves
+  LayoutDashboard, ChevronRight, Scan, Move3D, Users, Waves, BookOpen
 } from "lucide-react";
 
 const modules = [
@@ -18,6 +18,7 @@ const modules = [
   { name: "Multi-Object Tracking", path: "/module/tracking", icon: Eye },
   { name: "Action Recognition", path: "/module/action", icon: Video },
   { name: "Optical Flow", path: "/module/opticalflow", icon: Waves },
+  { name: "Tutorials", path: "/tutorials", icon: BookOpen },
   { name: "Knowledge Graph", path: "/knowledge-graph", icon: GitBranch },
 ];
 
