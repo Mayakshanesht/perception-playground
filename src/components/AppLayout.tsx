@@ -2,24 +2,19 @@ import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Eye, Box, Layers, Mountain, Video, GitBranch, Brain,
-  LayoutDashboard, ChevronRight, Scan, Move3D, Users, Waves, BookOpen
+  Camera, Layers, Mountain, Activity, Box, MessageSquare,
+  LayoutDashboard, ChevronRight, BookOpen, Eye
 } from "lucide-react";
 
 const modules = [
   { name: "Dashboard", path: "/", icon: LayoutDashboard },
-  { name: "Classification", path: "/module/classification", icon: Brain },
-  { name: "Object Detection", path: "/module/detection", icon: Scan },
-  { name: "Segmentation", path: "/module/segmentation", icon: Layers },
-  { name: "Depth Estimation", path: "/module/depth", icon: Mountain },
-  { name: "Structure from Motion", path: "/module/sfm", icon: Move3D },
-  { name: "Neural Rendering", path: "/module/nerf", icon: Box },
-  { name: "Pose Estimation", path: "/module/pose", icon: Users },
-  { name: "Multi-Object Tracking", path: "/module/tracking", icon: Eye },
-  { name: "Action Recognition", path: "/module/action", icon: Video },
-  { name: "Optical Flow", path: "/module/opticalflow", icon: Waves },
+  { name: "Camera Image Generation", path: "/module/camera", icon: Camera },
+  { name: "Semantic Information", path: "/module/semantic", icon: Layers },
+  { name: "Geometric Information", path: "/module/geometric", icon: Mountain },
+  { name: "Motion Estimation", path: "/module/motion", icon: Activity },
+  { name: "3D Reconstruction & Rendering", path: "/module/reconstruction", icon: Box },
+  { name: "Scene Reasoning", path: "/module/scene-reasoning", icon: MessageSquare },
   { name: "Tutorials", path: "/tutorials", icon: BookOpen },
-  { name: "Knowledge Graph", path: "/knowledge-graph", icon: GitBranch },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -34,14 +29,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <Eye className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-foreground tracking-tight">Perception Concept Studio</h1>
-            <p className="text-[10px] font-mono text-muted-foreground tracking-wider uppercase">Promptable Vision</p>
+            <h1 className="text-sm font-bold text-foreground tracking-tight">Perception Lab</h1>
+            <p className="text-[10px] font-mono text-muted-foreground tracking-wider uppercase">CV Learning Platform</p>
           </div>
         </Link>
 
         <nav className="flex-1 overflow-y-auto scrollbar-thin py-3 px-3 space-y-0.5">
           {modules.map((mod) => {
-            const isActive = location.pathname === mod.path || 
+            const isActive = location.pathname === mod.path ||
               (mod.path !== "/" && location.pathname.startsWith(mod.path));
             return (
               <Link
@@ -63,7 +58,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
         <div className="p-4 border-t border-border">
           <div className="rounded-lg bg-muted p-3">
-            <p className="text-xs text-muted-foreground font-mono">v1.1 - Concept Segmentation Lab</p>
+            <p className="text-xs text-muted-foreground font-mono">v2.0 — Perception Lab</p>
           </div>
         </div>
       </aside>
