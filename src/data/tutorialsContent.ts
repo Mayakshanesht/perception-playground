@@ -9,6 +9,7 @@ export interface TutorialCard {
   colabUrl: string;
   topics: string[];
   learningObjectives: string[];
+  category?: string;
 }
 
 export const tutorialsContent: TutorialCard[] = [
@@ -113,6 +114,7 @@ export const tutorialsContent: TutorialCard[] = [
       "Evaluate detection performance in real-world conditions",
       "Understand challenges specific to autonomous driving",
     ],
+    category: "Autonomous Driving",
   },
   {
     id: "ad-lane-detection",
@@ -130,6 +132,7 @@ export const tutorialsContent: TutorialCard[] = [
       "Learn curve fitting for lane models",
       "Evaluate lane detection accuracy",
     ],
+    category: "Autonomous Driving",
   },
   {
     id: "ad-depth-estimation",
@@ -147,6 +150,7 @@ export const tutorialsContent: TutorialCard[] = [
       "Work with driving-specific depth datasets",
       "Evaluate depth accuracy for safety-critical applications",
     ],
+    category: "Autonomous Driving",
   },
   {
     id: "ad-semantic-segmentation",
@@ -164,5 +168,6 @@ export const tutorialsContent: TutorialCard[] = [
       "Understand per-pixel classification architectures",
       "Evaluate mIoU and per-class accuracy",
     ],
+    category: "Autonomous Driving",
   },
 ];

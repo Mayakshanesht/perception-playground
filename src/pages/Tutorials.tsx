@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { ExternalLink, Clock, Target, BookOpen, ChevronRight } from "lucide-react";
 import { tutorialsContent, TutorialCard } from "@/data/tutorialsContent";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 const difficultyColor: Record<string, string> = {
   Beginner: "160 84% 39%",
@@ -21,7 +21,6 @@ function TutorialCardComponent({ tutorial, index }: { tutorial: TutorialCard; in
       transition={{ delay: index * 0.06, duration: 0.35 }}
       className="rounded-xl border border-border bg-card overflow-hidden group hover:border-primary/40 transition-colors"
     >
-      {/* Thumbnail */}
       <div className="relative h-40 overflow-hidden bg-muted">
         <img
           src={tutorial.imageUrl}
@@ -47,12 +46,10 @@ function TutorialCardComponent({ tutorial, index }: { tutorial: TutorialCard; in
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-5">
         <h3 className="font-semibold text-foreground text-sm mb-1.5">{tutorial.title}</h3>
         <p className="text-xs text-muted-foreground leading-relaxed mb-3">{tutorial.description}</p>
 
-        {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mb-4">
           {tutorial.tags.slice(0, 3).map((tag) => (
             <Badge key={tag} variant="secondary" className="text-[10px] font-mono">
@@ -66,7 +63,6 @@ function TutorialCardComponent({ tutorial, index }: { tutorial: TutorialCard; in
           )}
         </div>
 
-        {/* Expandable objectives */}
         <button
           onClick={() => setExpanded(!expanded)}
           className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors mb-3"
@@ -89,7 +85,6 @@ function TutorialCardComponent({ tutorial, index }: { tutorial: TutorialCard; in
           </motion.ul>
         )}
 
-        {/* Topics */}
         <div className="flex flex-wrap gap-1.5 mb-4">
           {tutorial.topics.map((topic) => (
             <span
@@ -101,7 +96,6 @@ function TutorialCardComponent({ tutorial, index }: { tutorial: TutorialCard; in
           ))}
         </div>
 
-        {/* CTA */}
         <a
           href={tutorial.colabUrl}
           target="_blank"
@@ -118,6 +112,22 @@ function TutorialCardComponent({ tutorial, index }: { tutorial: TutorialCard; in
 }
 
 export default function Tutorials() {
+  const grouped = useMemo(() => {
+    const general: TutorialCard[] = [];
+    const categories: Record<string, TutorialCard[]> = {};
+
+    for (const t of tutorialsContent) {
+      if (t.category) {
+        if (!categories[t.category]) categories[t.category] = [];
+        categories[t.category].push(t);
+      } else {
+        general.push(t);
+      }
+    }
+
+    return { general, categories };
+  }, []);
+
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto">
       <div className="mb-8">
@@ -127,11 +137,26 @@ export default function Tutorials() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {tutorialsContent.map((tutorial, i) => (
-          <TutorialCardComponent key={tutorial.id} tutorial={tutorial} index={i} />
-        ))}
-      </div>
+      {grouped.general.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+          {grouped.general.map((tutorial, i) => (
+            <TutorialCardComponent key={tutorial.id} tutorial={tutorial} index={i} />
+          ))}
+        </div>
+      )}
+
+      {Object.entries(grouped.categories).map(([category, tutorials]) => (
+        <div key={category} className="mb-10">
+          <h2 className="text-lg font-semibold text-foreground tracking-tight mb-4 border-b border-border pb-2">
+            {category}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {tutorials.map((tutorial, i) => (
+              <TutorialCardComponent key={tutorial.id} tutorial={tutorial} index={i} />
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
