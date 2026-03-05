@@ -1,3 +1,6 @@
+import { QuizQuestion } from "@/components/ConceptQuiz";
+import { FailureMode } from "@/components/FailureModes";
+
 export interface TheorySection {
   title: string;
   content: string; // markdown-ish text
@@ -37,6 +40,8 @@ export interface ModuleContent {
   papers: PaperEntry[];
   playground?: PlaygroundConfig;
   playgrounds?: PlaygroundConfig[];
+  quizQuestions?: QuizQuestion[];
+  failureModes?: FailureMode[];
 }
 
 export const moduleContents: Record<string, ModuleContent> = {

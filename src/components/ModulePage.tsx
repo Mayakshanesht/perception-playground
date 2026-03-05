@@ -1,16 +1,19 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, FlaskConical, FileText, Cpu, GraduationCap, Lightbulb, Calculator, History, Brain, Rocket, ChevronDown } from "lucide-react";
+import { ArrowLeft, BookOpen, FlaskConical, FileText, Cpu, GraduationCap, Lightbulb, Calculator, History, Brain, Rocket, ChevronDown, AlertTriangle, HelpCircle, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ModuleContent } from "@/data/moduleContent";
 import { MathEquation } from "@/components/MathBlock";
 import Playground from "@/components/Playground";
+import ConceptQuiz from "@/components/ConceptQuiz";
+import FailureModesComponent from "@/components/FailureModes";
+import PaperAgent from "@/components/PaperAgent";
+import { moduleQuizzes, moduleFailureModes } from "@/data/moduleQuizData";
 import { useState } from "react";
 
 interface ModulePageProps {
   content: ModuleContent;
 }
 
-// Map theory sections by title keywords to the 6-section structure
 function categorizeSections(theory: ModuleContent["theory"]) {
   const intuition: typeof theory = [];
   const math: typeof theory = [];
@@ -45,7 +48,10 @@ function categorizeSections(theory: ModuleContent["theory"]) {
       t.includes("aperture") || t.includes("sift") || t.includes("feature detection") ||
       t.includes("epipolar") || t.includes("triangulation") || t.includes("bundle") ||
       t.includes("stereo") || t.includes("calibration") || t.includes("pinhole") ||
-      t.includes("lens") || t.includes("image formation") || t.includes("sensor")
+      t.includes("lens") || t.includes("image formation") || t.includes("sensor") ||
+      t.includes("two-stage") || t.includes("one-stage") || t.includes("fcn") ||
+      t.includes("feature pyramid") || t.includes("atrous") || t.includes("monocular") ||
+      t.includes("2d pose") || t.includes("3d pose") || t.includes("tracking by")
     ) {
       classical.push(section);
     } else if (section.equations && section.equations.length > 0) {
@@ -55,7 +61,6 @@ function categorizeSections(theory: ModuleContent["theory"]) {
     }
   }
 
-  // Distribute "other" into intuition if no equations, math otherwise
   for (const s of other) {
     if (s.equations && s.equations.length > 0) math.push(s);
     else intuition.push(s);
@@ -64,16 +69,17 @@ function categorizeSections(theory: ModuleContent["theory"]) {
   return { intuition, math, classical, deepLearning, applications };
 }
 
-function CollapsibleSection({ title, icon: Icon, color, children, defaultOpen = true }: {
+function CollapsibleSection({ title, icon: Icon, color, children, defaultOpen = true, id }: {
   title: string;
   icon: any;
   color: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  id?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <section className="rounded-xl border border-border bg-card/50 overflow-hidden">
+    <section id={id} className="rounded-xl border border-border bg-card/50 overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center gap-3 p-4 hover:bg-muted/30 transition-colors text-left"
@@ -108,7 +114,7 @@ function CollapsibleSection({ title, icon: Icon, color, children, defaultOpen = 
 
 function TheoryCard({ section, color, index }: { section: ModuleContent["theory"][0]; color: string; index: number }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <div className="concept-card">
       <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2 text-sm">
         <span
           className="h-5 w-5 rounded-md flex items-center justify-center text-[10px] font-mono font-bold shrink-0"
@@ -129,6 +135,9 @@ function TheoryCard({ section, color, index }: { section: ModuleContent["theory"
 export default function ModulePage({ content }: ModulePageProps) {
   const playgrounds = content.playgrounds ?? (content.playground ? [content.playground] : []);
   const { intuition, math, classical, deepLearning, applications } = categorizeSections(content.theory);
+  const quizQuestions = content.quizQuestions || moduleQuizzes[content.id] || [];
+  const failureModes = content.failureModes || moduleFailureModes[content.id] || [];
+  const [exploringPaper, setExploringPaper] = useState<string | null>(null);
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -151,25 +160,27 @@ export default function ModulePage({ content }: ModulePageProps) {
       </div>
 
       {/* Learning flow nav */}
-      <div className="rounded-xl border border-border bg-muted/40 p-4 mb-8">
+      <div className="rounded-xl border border-border bg-muted/30 p-4 mb-8">
         <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">Structured Learning Flow</h2>
-        <div className="grid sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-2">
           {[
-            { id: "intuition", label: "Intuition", count: intuition.length },
-            { id: "math", label: "Math", count: math.length },
-            { id: "classical", label: "Classical", count: classical.length },
-            { id: "deep-learning", label: "Deep Learning", count: deepLearning.length },
-            { id: "playground", label: "Playground", count: playgrounds.length },
-            { id: "applications", label: "Applications", count: applications.length },
+            { id: "intuition", label: "Intuition", count: intuition.length, icon: "💡" },
+            { id: "math", label: "Math", count: math.length, icon: "📐" },
+            { id: "classical", label: "Classical", count: classical.length, icon: "📚" },
+            { id: "deep-learning", label: "Deep Learning", count: deepLearning.length, icon: "🧠" },
+            { id: "playground", label: "Playground", count: playgrounds.length, icon: "🧪" },
+            { id: "quiz", label: "Quiz", count: quizQuestions.length, icon: "❓" },
+            { id: "failures", label: "Failure Modes", count: failureModes.length, icon: "⚠️" },
+            { id: "applications", label: "Applications", count: applications.length, icon: "🚀" },
           ].filter(s => s.count > 0).map((item, idx) => (
             <a
               key={item.id}
               href={`#${item.id}`}
               className="rounded-lg border border-border bg-card p-2.5 hover:border-primary/40 transition-colors text-center"
             >
-              <p className="text-[10px] text-muted-foreground font-mono mb-0.5">Step {idx + 1}</p>
+              <p className="text-sm mb-0.5">{item.icon}</p>
               <p className="text-xs text-foreground font-medium">{item.label}</p>
-              <p className="text-[10px] text-muted-foreground">{item.count} section(s)</p>
+              <p className="text-[10px] text-muted-foreground">{item.count}</p>
             </a>
           ))}
         </div>
@@ -178,7 +189,7 @@ export default function ModulePage({ content }: ModulePageProps) {
       <div className="space-y-6">
         {/* Intuition */}
         {intuition.length > 0 && (
-          <CollapsibleSection title="Intuition" icon={Lightbulb} color={content.color}>
+          <CollapsibleSection title="Concept Overview & Intuition" icon={Lightbulb} color={content.color} id="intuition">
             {intuition.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
             ))}
@@ -187,7 +198,7 @@ export default function ModulePage({ content }: ModulePageProps) {
 
         {/* Mathematical Formulation */}
         {math.length > 0 && (
-          <CollapsibleSection title="Mathematical Formulation" icon={Calculator} color={content.color}>
+          <CollapsibleSection title="Mathematical Formulation" icon={Calculator} color={content.color} id="math">
             {math.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
             ))}
@@ -196,7 +207,7 @@ export default function ModulePage({ content }: ModulePageProps) {
 
         {/* Classical Approaches */}
         {classical.length > 0 && (
-          <CollapsibleSection title="Classical Approaches" icon={History} color={content.color}>
+          <CollapsibleSection title="Classical Methods" icon={History} color={content.color} id="classical">
             {classical.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
             ))}
@@ -205,7 +216,7 @@ export default function ModulePage({ content }: ModulePageProps) {
 
         {/* Deep Learning Approaches */}
         {deepLearning.length > 0 && (
-          <CollapsibleSection title="Deep Learning Approaches" icon={Brain} color={content.color}>
+          <CollapsibleSection title="Modern Deep Learning Methods" icon={Brain} color={content.color} id="deep-learning">
             {deepLearning.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
             ))}
@@ -242,9 +253,17 @@ export default function ModulePage({ content }: ModulePageProps) {
         {/* Playground */}
         {playgrounds.length > 0 && (
           <section id="playground">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-2">
               <FlaskConical className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Interactive Playground</h2>
+            </div>
+            <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 mb-4">
+              <div className="flex items-center gap-2">
+                <Zap className="h-3.5 w-3.5 text-accent" />
+                <p className="text-[11px] text-muted-foreground">
+                  Playgrounds run real CV models on GPU infrastructure. Learning modules are free; playground runs may require GPU credits.
+                </p>
+              </div>
             </div>
             <div className="space-y-4">
               {playgrounds.map((pg) => (
@@ -265,26 +284,42 @@ export default function ModulePage({ content }: ModulePageProps) {
 
         {/* Key Papers */}
         {content.papers.length > 0 && (
-          <CollapsibleSection title="Key Papers" icon={FileText} color={content.color} defaultOpen={false}>
+          <CollapsibleSection title="Key Research Papers" icon={FileText} color={content.color} defaultOpen={false}>
             <div className="relative">
               <div className="absolute left-[72px] top-0 bottom-0 w-px bg-border" />
               <div className="space-y-2">
-                {content.papers.map((paper, i) => (
-                  <div key={paper.title} className="flex gap-4 group">
-                    <div className="w-[60px] shrink-0 text-right">
-                      <span className="text-xs font-mono text-muted-foreground">{paper.year}</span>
-                    </div>
-                    <div className="relative shrink-0 mt-1.5">
-                      <div className="h-3 w-3 rounded-full border-2 border-border bg-background group-hover:border-primary transition-colors" />
-                    </div>
-                    <div className="rounded-lg border border-border bg-card p-3 flex-1 group-hover:border-primary/30 transition-colors">
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <h4 className="text-sm font-semibold text-foreground">{paper.title}</h4>
-                        <span className="text-[10px] font-mono text-muted-foreground">{paper.venue}</span>
+                {content.papers.map((paper) => (
+                  <div key={paper.title}>
+                    <div className="flex gap-4 group">
+                      <div className="w-[60px] shrink-0 text-right">
+                        <span className="text-xs font-mono text-muted-foreground">{paper.year}</span>
                       </div>
-                      <p className="text-[10px] text-primary/70 mb-1">{paper.authors}</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{paper.summary}</p>
+                      <div className="relative shrink-0 mt-1.5">
+                        <div className="h-3 w-3 rounded-full border-2 border-border bg-background group-hover:border-primary transition-colors" />
+                      </div>
+                      <div className="rounded-lg border border-border bg-card p-3 flex-1 group-hover:border-primary/30 transition-colors">
+                        <div className="flex items-baseline gap-2 mb-1">
+                          <h4 className="text-sm font-semibold text-foreground">{paper.title}</h4>
+                          <span className="text-[10px] font-mono text-muted-foreground">{paper.venue}</span>
+                        </div>
+                        <p className="text-[10px] text-primary/70 mb-1">{paper.authors}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed mb-2">{paper.summary}</p>
+                        <button
+                          onClick={() => setExploringPaper(exploringPaper === paper.title ? null : paper.title)}
+                          className="text-[10px] font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                        >
+                          <BookOpen className="h-3 w-3" />
+                          {exploringPaper === paper.title ? "Close" : "Explore Paper"}
+                        </button>
+                      </div>
                     </div>
+                    <AnimatePresence>
+                      {exploringPaper === paper.title && (
+                        <div className="ml-[88px]">
+                          <PaperAgent paperTitle={paper.title} onClose={() => setExploringPaper(null)} />
+                        </div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 ))}
               </div>
@@ -292,9 +327,23 @@ export default function ModulePage({ content }: ModulePageProps) {
           </CollapsibleSection>
         )}
 
+        {/* Failure Modes */}
+        {failureModes.length > 0 && (
+          <CollapsibleSection title="Failure Modes" icon={AlertTriangle} color="0 72% 51%" defaultOpen={false} id="failures">
+            <FailureModesComponent failures={failureModes} />
+          </CollapsibleSection>
+        )}
+
+        {/* Quiz */}
+        {quizQuestions.length > 0 && (
+          <section id="quiz">
+            <ConceptQuiz questions={quizQuestions} />
+          </section>
+        )}
+
         {/* Applications */}
         {applications.length > 0 && (
-          <CollapsibleSection title="Real-World Applications" icon={Rocket} color={content.color}>
+          <CollapsibleSection title="Real-World Applications" icon={Rocket} color={content.color} id="applications">
             {applications.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
             ))}
