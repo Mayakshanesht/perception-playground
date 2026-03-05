@@ -31,7 +31,7 @@ export default function MathBlock({ tex, display = false, className = "" }: Math
 
 export function MathEquation({ tex, label }: { tex: string; label?: string }) {
   return (
-    <div className="my-4 rounded-lg bg-muted/50 border border-border p-4">
+    <div className="equation-block">
       {label && (
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 font-mono">{label}</p>
       )}
