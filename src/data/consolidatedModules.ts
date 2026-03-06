@@ -21,10 +21,22 @@ export const cameraModule: ModuleContent = {
         {
           label: "Perspective Projection",
           tex: "\\lambda \\begin{bmatrix} u \\\\ v \\\\ 1 \\end{bmatrix} = K [R | t] \\begin{bmatrix} X \\\\ Y \\\\ Z \\\\ 1 \\end{bmatrix}",
+          variables: [
+            { symbol: "λ", meaning: "scale factor in homogeneous coordinates" },
+            { symbol: "u, v", meaning: "image pixel coordinates" },
+            { symbol: "K", meaning: "intrinsic camera matrix (focal length, principal point)" },
+            { symbol: "R", meaning: "3×3 rotation matrix (camera orientation)" },
+            { symbol: "t", meaning: "3×1 translation vector (camera position)" },
+            { symbol: "X, Y, Z", meaning: "3D point in world coordinates" },
+          ],
         },
         {
           label: "Intrinsic Matrix",
           tex: "K = \\begin{bmatrix} f_x & 0 & c_x \\\\ 0 & f_y & c_y \\\\ 0 & 0 & 1 \\end{bmatrix}",
+          variables: [
+            { symbol: "fx, fy", meaning: "focal lengths in pixels (horizontal and vertical)" },
+            { symbol: "cx, cy", meaning: "principal point — where the optical axis intersects the image plane" },
+          ],
         },
         {
           label: "Homogeneous Coordinates",

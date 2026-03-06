@@ -12,6 +12,8 @@ import MotionModule from "@/pages/MotionModule";
 import ReconstructionModule from "@/pages/ReconstructionModule";
 import SceneReasoningModule from "@/pages/SceneReasoningModule";
 import Tutorials from "@/pages/Tutorials";
+import KnowledgeGraph from "@/pages/KnowledgeGraph";
+import PerceptionStudios from "@/pages/PerceptionStudios";
 import GenericModule from "@/pages/GenericModule";
 import NotFound from "@/pages/NotFound";
 
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/module/reconstruction" element={<ReconstructionModule />} />
             <Route path="/module/scene-reasoning" element={<SceneReasoningModule />} />
             <Route path="/tutorials" element={<Tutorials />} />
+            <Route path="/knowledge-graph" element={<KnowledgeGraph />} />
+            <Route path="/studios" element={<PerceptionStudios />} />
             {/* Legacy routes for individual modules */}
             <Route path="/module/:moduleId" element={<GenericModule />} />
             <Route path="*" element={<NotFound />} />
