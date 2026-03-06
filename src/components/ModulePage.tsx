@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, FlaskConical, FileText, Cpu, GraduationCap, Lightbulb, Calculator, History, Brain, Rocket, ChevronDown, AlertTriangle, HelpCircle, Zap } from "lucide-react";
+import { ArrowLeft, BookOpen, FlaskConical, FileText, Cpu, GraduationCap, Lightbulb, Calculator, History, Brain, Rocket, ChevronDown, AlertTriangle, HelpCircle, Zap, Image, Beaker, Link2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ModuleContent } from "@/data/moduleContent";
 import { MathEquation } from "@/components/MathBlock";
@@ -7,7 +7,11 @@ import Playground from "@/components/Playground";
 import ConceptQuiz from "@/components/ConceptQuiz";
 import FailureModesComponent from "@/components/FailureModes";
 import PaperAgent from "@/components/PaperAgent";
+import ConceptLab from "@/components/ConceptLab";
+import ModuleImage from "@/components/ModuleImage";
 import { moduleQuizzes, moduleFailureModes } from "@/data/moduleQuizData";
+import { moduleLabs } from "@/data/conceptLabs";
+import { moduleImages } from "@/data/moduleImages";
 import { useState } from "react";
 
 interface ModulePageProps {
@@ -126,18 +130,83 @@ function TheoryCard({ section, color, index }: { section: ModuleContent["theory"
       </h3>
       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{section.content}</p>
       {section.equations?.map((eq) => (
-        <MathEquation key={eq.label} tex={eq.tex} label={eq.label} />
+        <div key={eq.label} className="mb-3">
+          <MathEquation tex={eq.tex} label={eq.label} />
+          {eq.variables && eq.variables.length > 0 && (
+            <div className="mt-1.5 rounded-lg bg-muted/30 border border-border p-3">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Where</p>
+              <div className="space-y-0.5">
+                {eq.variables.map((v: any) => (
+                  <p key={v.symbol} className="text-xs text-muted-foreground">
+                    <span className="font-mono text-foreground">{v.symbol}</span> = {v.meaning}
+                  </p>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       ))}
     </div>
   );
 }
+
+// Module connection map
+const moduleConnections: Record<string, { label: string; path: string; relation: string }[]> = {
+  camera: [
+    { label: "Semantic Information", path: "/module/semantic", relation: "Camera images are input to all semantic tasks" },
+    { label: "Geometric Information", path: "/module/geometric", relation: "Calibration is essential for depth and stereo" },
+    { label: "3D Reconstruction", path: "/module/reconstruction", relation: "SfM uses camera intrinsics for triangulation" },
+  ],
+  semantic: [
+    { label: "Camera", path: "/module/camera", relation: "Requires calibrated camera images as input" },
+    { label: "Motion Estimation", path: "/module/motion", relation: "Detection feeds into multi-object tracking" },
+    { label: "Scene Reasoning", path: "/module/scene-reasoning", relation: "Visual features enable multimodal understanding" },
+  ],
+  geometric: [
+    { label: "Camera", path: "/module/camera", relation: "Stereo depth requires camera calibration" },
+    { label: "3D Reconstruction", path: "/module/reconstruction", relation: "Depth maps feed into dense reconstruction" },
+    { label: "Motion Estimation", path: "/module/motion", relation: "Pose estimation connects to action recognition" },
+  ],
+  motion: [
+    { label: "Semantic Information", path: "/module/semantic", relation: "Detection provides input for tracking" },
+    { label: "Camera", path: "/module/camera", relation: "Ego-motion requires camera calibration" },
+    { label: "3D Reconstruction", path: "/module/reconstruction", relation: "Multi-view motion helps SfM" },
+  ],
+  reconstruction: [
+    { label: "Camera", path: "/module/camera", relation: "Requires calibrated cameras with known intrinsics" },
+    { label: "Geometric Information", path: "/module/geometric", relation: "Depth estimation provides dense geometry" },
+    { label: "Scene Reasoning", path: "/module/scene-reasoning", relation: "3D scenes enable spatial reasoning" },
+  ],
+  "scene-reasoning": [
+    { label: "Semantic Information", path: "/module/semantic", relation: "Visual features from detection/segmentation" },
+    { label: "Geometric Information", path: "/module/geometric", relation: "Depth and pose provide spatial context" },
+    { label: "3D Reconstruction", path: "/module/reconstruction", relation: "3D scene understanding for embodied AI" },
+  ],
+};
 
 export default function ModulePage({ content }: ModulePageProps) {
   const playgrounds = content.playgrounds ?? (content.playground ? [content.playground] : []);
   const { intuition, math, classical, deepLearning, applications } = categorizeSections(content.theory);
   const quizQuestions = content.quizQuestions || moduleQuizzes[content.id] || [];
   const failureModes = content.failureModes || moduleFailureModes[content.id] || [];
+  const labs = moduleLabs[content.id] || [];
+  const images = moduleImages[content.id] || [];
+  const connections = moduleConnections[content.id] || [];
   const [exploringPaper, setExploringPaper] = useState<string | null>(null);
+
+  const navItems = [
+    { id: "intuition", label: "Intuition", count: intuition.length, icon: "💡" },
+    { id: "images", label: "Visual", count: images.length, icon: "🖼️" },
+    { id: "math", label: "Math", count: math.length, icon: "📐" },
+    { id: "classical", label: "Classical", count: classical.length, icon: "📚" },
+    { id: "deep-learning", label: "Deep Learning", count: deepLearning.length, icon: "🧠" },
+    { id: "labs", label: "Labs", count: labs.length, icon: "🧪" },
+    { id: "playground", label: "Playground", count: playgrounds.length, icon: "🎮" },
+    { id: "quiz", label: "Quiz", count: quizQuestions.length, icon: "❓" },
+    { id: "failures", label: "Failures", count: failureModes.length, icon: "⚠️" },
+    { id: "applications", label: "Applications", count: applications.length, icon: "🚀" },
+    { id: "connections", label: "Connections", count: connections.length, icon: "🔗" },
+  ].filter(s => s.count > 0);
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -162,17 +231,8 @@ export default function ModulePage({ content }: ModulePageProps) {
       {/* Learning flow nav */}
       <div className="rounded-xl border border-border bg-muted/30 p-4 mb-8">
         <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">Structured Learning Flow</h2>
-        <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-2">
-          {[
-            { id: "intuition", label: "Intuition", count: intuition.length, icon: "💡" },
-            { id: "math", label: "Math", count: math.length, icon: "📐" },
-            { id: "classical", label: "Classical", count: classical.length, icon: "📚" },
-            { id: "deep-learning", label: "Deep Learning", count: deepLearning.length, icon: "🧠" },
-            { id: "playground", label: "Playground", count: playgrounds.length, icon: "🧪" },
-            { id: "quiz", label: "Quiz", count: quizQuestions.length, icon: "❓" },
-            { id: "failures", label: "Failure Modes", count: failureModes.length, icon: "⚠️" },
-            { id: "applications", label: "Applications", count: applications.length, icon: "🚀" },
-          ].filter(s => s.count > 0).map((item, idx) => (
+        <div className="grid sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+          {navItems.map((item) => (
             <a
               key={item.id}
               href={`#${item.id}`}
@@ -192,6 +252,15 @@ export default function ModulePage({ content }: ModulePageProps) {
           <CollapsibleSection title="Concept Overview & Intuition" icon={Lightbulb} color={content.color} id="intuition">
             {intuition.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
+            ))}
+          </CollapsibleSection>
+        )}
+
+        {/* Visual Diagrams */}
+        {images.length > 0 && (
+          <CollapsibleSection title="Visual Diagrams" icon={Image} color={content.color} id="images">
+            {images.map((img) => (
+              <ModuleImage key={img.src} src={img.src} alt={img.alt} caption={img.caption} />
             ))}
           </CollapsibleSection>
         )}
@@ -247,6 +316,16 @@ export default function ModulePage({ content }: ModulePageProps) {
                 </div>
               </div>
             ))}
+          </CollapsibleSection>
+        )}
+
+        {/* Conceptual Labs */}
+        {labs.length > 0 && (
+          <CollapsibleSection title="Conceptual Labs" icon={Beaker} color="168 80% 58%" id="labs" defaultOpen={false}>
+            <p className="text-xs text-muted-foreground mb-3">
+              Hands-on exercises to deepen understanding through reasoning and computation. No GPU required.
+            </p>
+            <ConceptLab labs={labs} />
           </CollapsibleSection>
         )}
 
@@ -347,6 +426,29 @@ export default function ModulePage({ content }: ModulePageProps) {
             {applications.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
             ))}
+          </CollapsibleSection>
+        )}
+
+        {/* Connections to Other Modules */}
+        {connections.length > 0 && (
+          <CollapsibleSection title="Connection to Other Modules" icon={Link2} color={content.color} id="connections" defaultOpen={false}>
+            <div className="space-y-2">
+              {connections.map((conn) => (
+                <Link
+                  key={conn.label}
+                  to={conn.path}
+                  className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3 hover:border-primary/40 transition-colors group"
+                >
+                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Link2 className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{conn.label}</p>
+                    <p className="text-xs text-muted-foreground">{conn.relation}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </CollapsibleSection>
         )}
       </div>

@@ -3,13 +3,14 @@ import { motion } from "framer-motion";
 import {
   Camera, Layers, Mountain, Activity, Box, MessageSquare,
   ArrowRight, Sparkles, WandSparkles, BookOpen, Cpu, Zap, GraduationCap,
+  Brain, Network, FlaskConical, FileText,
 } from "lucide-react";
 import Playground from "@/components/Playground";
 
 const pipelineModules = [
   {
-    name: "Camera Image Generation",
-    desc: "Pinhole model, calibration, lens distortion, image formation",
+    name: "Camera Image Formation",
+    desc: "Pinhole model, calibration, lens distortion, image formation, coordinate systems",
     icon: Camera,
     path: "/module/camera",
     color: "var(--module-camera)",
@@ -17,7 +18,7 @@ const pipelineModules = [
   },
   {
     name: "Semantic Information",
-    desc: "Classification, object detection, and segmentation",
+    desc: "Classification, object detection, segmentation — understanding what's in the scene",
     icon: Layers,
     path: "/module/semantic",
     color: "var(--module-semantic)",
@@ -25,7 +26,7 @@ const pipelineModules = [
   },
   {
     name: "Geometric Information",
-    desc: "Depth estimation and pose estimation",
+    desc: "Depth estimation, stereo vision, pose estimation — recovering 3D structure",
     icon: Mountain,
     path: "/module/geometric",
     color: "var(--module-geometric)",
@@ -33,7 +34,7 @@ const pipelineModules = [
   },
   {
     name: "Motion Estimation",
-    desc: "Tracking, optical flow, action recognition, velocity",
+    desc: "Optical flow, tracking, action recognition, velocity estimation",
     icon: Activity,
     path: "/module/motion",
     color: "var(--module-motion)",
@@ -41,7 +42,7 @@ const pipelineModules = [
   },
   {
     name: "3D Reconstruction & Rendering",
-    desc: "Structure from Motion, NeRF, Gaussian Splatting",
+    desc: "SfM, Multi-View Stereo, NeRF, 3D Gaussian Splatting",
     icon: Box,
     path: "/module/reconstruction",
     color: "var(--module-reconstruction)",
@@ -49,7 +50,7 @@ const pipelineModules = [
   },
   {
     name: "Scene Reasoning",
-    desc: "Multimodal LLMs, visual grounding, Florence-2",
+    desc: "CLIP, Florence-2, multimodal LLMs, visual grounding",
     icon: MessageSquare,
     path: "/module/scene-reasoning",
     color: "var(--module-reasoning)",
@@ -74,6 +75,25 @@ const playgrounds = [
   { name: "Speed Estimation", module: "Motion", path: "/module/motion" },
 ];
 
+const aiTools = [
+  {
+    name: "AI Learning Assistant",
+    desc: "Ask questions about concepts, equations, and learning paths. Available via the floating chat button.",
+    icon: Brain,
+  },
+  {
+    name: "Paper Understanding Agent",
+    desc: "Explore key research papers interactively with structured explanations of methods, equations, and impact.",
+    icon: FileText,
+  },
+  {
+    name: "Knowledge Graph Explorer",
+    desc: "Visualize connections between tasks, architectures, papers, and datasets across the perception pipeline.",
+    icon: Network,
+    path: "/knowledge-graph",
+  },
+];
+
 export default function Dashboard() {
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto aurora-bg rounded-2xl">
@@ -86,9 +106,10 @@ export default function Dashboard() {
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
           <span className="gradient-text">Perception Lab</span>
         </h1>
+        <p className="text-xs font-mono text-accent uppercase tracking-widest mb-3">Interactive Computer Vision Learning Lab for Autonomous Systems</p>
         <p className="text-base md:text-lg text-muted-foreground max-w-3xl leading-relaxed">
-          An interactive environment for learning computer vision and perception systems through theory, equations, and real model experimentation. 
-          Progress through the perception pipeline from camera physics to multimodal reasoning.
+          A complete computer vision curriculum with lecture-grade modules, conceptual labs, perception system design studios, 
+          and AI-assisted research learning. Progress through the perception pipeline from camera physics to multimodal reasoning.
         </p>
       </div>
 
@@ -141,12 +162,51 @@ export default function Dashboard() {
             </div>
             <div className="flex-1">
               <p className="text-xs text-muted-foreground mb-0.5">Start with the foundation</p>
-              <h3 className="font-semibold text-foreground">Camera Image Generation</h3>
+              <h3 className="font-semibold text-foreground">Camera Image Formation</h3>
               <p className="text-sm text-muted-foreground">Understand how cameras capture the 3D world as 2D images</p>
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
         </Link>
+      </section>
+
+      {/* Module Cards */}
+      <section className="mb-10">
+        <h2 className="text-lg font-semibold text-foreground mb-4">Learning Modules</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {pipelineModules.map((mod, i) => (
+            <motion.div
+              key={mod.path}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.04 * i, duration: 0.32 }}
+            >
+              <Link
+                to={mod.path}
+                className="block rounded-xl border border-border/80 bg-card/90 backdrop-blur-sm p-5 group hover:border-primary/40 transition-all duration-200"
+                style={{ boxShadow: `0 0 0px hsl(${mod.color} / 0)` }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = `0 0 28px -10px hsl(${mod.color} / 0.4)`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0px hsl(${mod.color} / 0)`;
+                }}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsl(${mod.color} / 0.12)` }}>
+                      <mod.icon className="h-5 w-5" style={{ color: `hsl(${mod.color})` }} />
+                    </div>
+                    <span className="text-[10px] font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">Step {mod.step}</span>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <h3 className="font-semibold text-foreground text-sm mb-1">{mod.name}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{mod.desc}</p>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
       </section>
 
       {/* SAM2 Playground */}
@@ -186,42 +246,65 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Module Cards */}
-      <h2 className="text-lg font-semibold text-foreground mb-4">Learning Modules</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-        {pipelineModules.map((mod, i) => (
-          <motion.div
-            key={mod.path}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.04 * i, duration: 0.32 }}
-          >
-            <Link
-              to={mod.path}
-              className="block rounded-xl border border-border/80 bg-card/90 backdrop-blur-sm p-5 group hover:border-primary/40 transition-all duration-200"
-              style={{ boxShadow: `0 0 0px hsl(${mod.color} / 0)` }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 28px -10px hsl(${mod.color} / 0.4)`;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0px hsl(${mod.color} / 0)`;
-              }}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `hsl(${mod.color} / 0.12)` }}>
-                    <mod.icon className="h-5 w-5" style={{ color: `hsl(${mod.color})` }} />
-                  </div>
-                  <span className="text-[10px] font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">Step {mod.step}</span>
+      {/* AI Learning Tools */}
+      <section className="mb-10">
+        <div className="flex items-center gap-2 mb-4">
+          <Brain className="h-4 w-4 text-primary" />
+          <h2 className="text-lg font-semibold text-foreground">AI Learning Tools</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+          Built-in AI capabilities to accelerate learning — understand concepts, explore papers, and discover connections across the perception pipeline.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {aiTools.map((tool) => {
+            const content = (
+              <div className="rounded-xl border border-border bg-card/90 p-5 hover:border-primary/30 transition-all group h-full">
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                  <tool.icon className="h-5 w-5 text-primary" />
                 </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                <h3 className="font-semibold text-foreground text-sm mb-1">{tool.name}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{tool.desc}</p>
               </div>
-              <h3 className="font-semibold text-foreground text-sm mb-1">{mod.name}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">{mod.desc}</p>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
+            );
+            return tool.path ? (
+              <Link key={tool.name} to={tool.path}>{content}</Link>
+            ) : (
+              <div key={tool.name}>{content}</div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Tutorials & Studios */}
+      <section className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Link
+          to="/tutorials"
+          className="flex items-center gap-4 rounded-xl border border-border bg-card/90 backdrop-blur-sm p-5 hover:border-primary/50 transition-all duration-200"
+        >
+          <div className="h-12 w-12 rounded-lg bg-primary/15 flex items-center justify-center glow-primary">
+            <BookOpen className="h-6 w-6 text-primary" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-foreground">Hands-On Tutorials</h3>
+            <p className="text-sm text-muted-foreground">Guided Colab notebooks for detection, segmentation, depth, and more</p>
+          </div>
+          <ArrowRight className="h-5 w-5 text-muted-foreground" />
+        </Link>
+
+        <Link
+          to="/studios"
+          className="flex items-center gap-4 rounded-xl border border-border bg-card/90 backdrop-blur-sm p-5 hover:border-accent/50 transition-all duration-200"
+        >
+          <div className="h-12 w-12 rounded-lg bg-accent/15 flex items-center justify-center glow-accent">
+            <FlaskConical className="h-6 w-6 text-accent" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-foreground">Perception Studios</h3>
+            <p className="text-sm text-muted-foreground">Design complete perception pipelines in capstone-style exercises</p>
+          </div>
+          <ArrowRight className="h-5 w-5 text-muted-foreground" />
+        </Link>
+      </section>
 
       {/* GPU Info Banner */}
       <section className="mb-10">
@@ -231,27 +314,12 @@ export default function Dashboard() {
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-1">GPU Playground Info</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Playgrounds run real computer vision models on GPU infrastructure. Learning modules and tutorials remain free. Playground runs may require GPU credits.
+                Playgrounds run real computer vision models on GPU infrastructure. Learning modules, tutorials, and conceptual labs remain free. Playground runs may require GPU credits.
               </p>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Tutorials Link */}
-      <Link
-        to="/tutorials"
-        className="flex items-center gap-4 rounded-xl border border-border bg-card/90 backdrop-blur-sm p-5 hover:border-primary/50 transition-all duration-200"
-      >
-        <div className="h-12 w-12 rounded-lg bg-primary/15 flex items-center justify-center glow-primary">
-          <BookOpen className="h-6 w-6 text-primary" />
-        </div>
-        <div className="flex-1">
-          <h3 className="font-semibold text-foreground">Hands-On Tutorials</h3>
-          <p className="text-sm text-muted-foreground">Guided Colab notebooks for detection, segmentation, depth, and more</p>
-        </div>
-        <ArrowRight className="h-5 w-5 text-muted-foreground" />
-      </Link>
     </div>
   );
 }

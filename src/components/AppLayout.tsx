@@ -3,19 +3,22 @@ import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Camera, Layers, Mountain, Activity, Box, MessageSquare,
-  LayoutDashboard, ChevronRight, BookOpen, Eye, Menu, X
+  LayoutDashboard, ChevronRight, BookOpen, Eye, Menu, X,
+  Network, FlaskConical
 } from "lucide-react";
 import AIAssistant from "@/components/AIAssistant";
 
 const modules = [
   { name: "Dashboard", path: "/", icon: LayoutDashboard },
-  { name: "Camera Image Generation", path: "/module/camera", icon: Camera },
+  { name: "Camera Image Formation", path: "/module/camera", icon: Camera },
   { name: "Semantic Information", path: "/module/semantic", icon: Layers },
   { name: "Geometric Information", path: "/module/geometric", icon: Mountain },
   { name: "Motion Estimation", path: "/module/motion", icon: Activity },
-  { name: "3D Reconstruction & Rendering", path: "/module/reconstruction", icon: Box },
+  { name: "3D Reconstruction", path: "/module/reconstruction", icon: Box },
   { name: "Scene Reasoning", path: "/module/scene-reasoning", icon: MessageSquare },
   { name: "Tutorials", path: "/tutorials", icon: BookOpen },
+  { name: "Perception Studios", path: "/studios", icon: FlaskConical },
+  { name: "Knowledge Graph", path: "/knowledge-graph", icon: Network },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -78,7 +81,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
         <div className="p-4 border-t border-border">
           <div className="rounded-lg bg-muted/50 p-3">
-            <p className="text-[10px] text-muted-foreground font-mono">v2.0 — KnowGraph Perception Lab</p>
+            <p className="text-[10px] text-muted-foreground font-mono">v3.0 — KnowGraph Perception Lab</p>
+            <p className="text-[9px] text-muted-foreground/60 mt-0.5">Interactive CV Learning Lab</p>
           </div>
         </div>
       </aside>
