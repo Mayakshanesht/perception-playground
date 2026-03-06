@@ -4,7 +4,7 @@ import { FailureMode } from "@/components/FailureModes";
 export interface TheorySection {
   title: string;
   content: string; // markdown-ish text
-  equations?: { label: string; tex: string }[];
+  equations?: { label: string; tex: string; variables?: { symbol: string; meaning: string }[] }[];
 }
 
 export interface PaperEntry {
