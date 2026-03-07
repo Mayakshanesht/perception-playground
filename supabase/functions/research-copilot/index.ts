@@ -7,48 +7,91 @@ const corsHeaders = {
 };
 
 const SYSTEM_PROMPTS: Record<string, string> = {
-  analyze: `You are the Cloudbee Research Copilot, an expert AI research assistant for computer vision and perception systems developed by Cloudbee Robotics.
+  analyze: `You are the Cloudbee Research Copilot, an expert AI research assistant for computer vision developed by Cloudbee Robotics.
 
-When a user asks a research question, provide a comprehensive analysis:
+When a user asks a research question, respond with EXACTLY this JSON structure (no markdown, pure JSON):
 
-1. **Paper Analysis**: List 5-8 relevant research papers with:
-   - Paper title, authors, year
-   - Problem solved
-   - Core methodology
-   - Key results
-   - GitHub repo link (if known)
+{
+  "papers": [
+    {
+      "title": "Paper Title",
+      "authors": "Author1, Author2",
+      "year": 2024,
+      "problem": "What problem it solves",
+      "method": "Core methodology",
+      "results": "Key results",
+      "github": "https://github.com/...",
+      "dataset": "Dataset used"
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "A",
+      "name": "Hypothesis name",
+      "architecture": "Architecture description",
+      "expected_accuracy": "Expected performance",
+      "compute": "Compute requirements",
+      "dataset": "Recommended dataset",
+      "reasoning": "Why this approach"
+    }
+  ],
+  "proposal": {
+    "title": "Recommended approach title",
+    "summary": "2-3 sentence summary of the recommended direction",
+    "pipeline": ["Step 1", "Step 2", "Step 3"],
+    "key_insight": "The main insight driving this proposal"
+  },
+  "datasets": [
+    {
+      "name": "Dataset name",
+      "size": "Size info",
+      "source": "ultralytics or other source",
+      "url": "URL to dataset"
+    }
+  ]
+}
 
-2. **Research Hypotheses**: Generate 3 concrete hypotheses/approaches:
-   - Hypothesis name
-   - Architecture description
-   - Expected performance
-   - Compute requirements
-   - Dataset compatibility
+IMPORTANT RULES:
+- Return ONLY papers that have REAL, VERIFIED GitHub repositories. Do not invent GitHub links.
+- If you are not sure a GitHub link exists, set github to null.
+- Include 5-10 relevant papers.
+- Generate exactly 3 hypotheses labeled A, B, C.
+- Datasets should prefer Ultralytics-compatible datasets when applicable.
+- Return ONLY valid JSON, no markdown wrapping, no code fences.`,
 
-3. **Architecture Proposal**: For the most promising approach:
-   - Model architecture diagram (text-based)
-   - Key components explained
-   - Training strategy
-   - Loss functions
+  notebook: `You are the Cloudbee Research Copilot notebook generator. Generate a complete Jupyter notebook in JSON format (.ipynb).
 
-4. **Datasets**: Recommend relevant datasets with sizes and benchmarks.
+The user will provide a hypothesis description. Generate a notebook that implements that hypothesis.
 
-5. **Implementation Roadmap**: Step-by-step plan.
+Return ONLY a valid Jupyter notebook JSON (.ipynb format) with this structure:
+{
+  "nbformat": 4,
+  "nbformat_minor": 5,
+  "metadata": {
+    "kernelspec": { "display_name": "Python 3", "language": "python", "name": "python3" },
+    "language_info": { "name": "python", "version": "3.10.0" }
+  },
+  "cells": [
+    { "cell_type": "markdown", "metadata": {}, "source": ["# Title\\n", "Description"] },
+    { "cell_type": "code", "metadata": {}, "source": ["!pip install ..."], "execution_count": null, "outputs": [] }
+  ]
+}
 
-Use markdown formatting with headers, lists, and code blocks.`,
+Structure the notebook:
+1. Title and hypothesis description (markdown)
+2. Install Dependencies (code) - use pip install
+3. Import Libraries (code)
+4. Dataset Loading (code) - use Ultralytics datasets when possible, with a note about custom dataset connection
+5. Model Architecture (code) - full PyTorch model
+6. Training Loop (code) - with loss, optimizer, scheduler
+7. Evaluation (code) - metrics computation
+8. Save to HuggingFace (code) - include huggingface_hub push_to_hub code
+9. Visualization (code) - plot results
+10. Export and Next Steps (markdown) - mention saving weights to HuggingFace for inference
 
-  notebook: `You are the Cloudbee Research Copilot notebook generator. Generate a complete Python training notebook in markdown format.
-
-Structure:
-1. **Setup & Dependencies** - pip install commands
-2. **Dataset Loading** - DataLoader with transforms
-3. **Model Architecture** - Full PyTorch model definition
-4. **Training Loop** - With loss, optimizer, scheduler
-5. **Evaluation** - Metrics computation
-6. **Visualization** - Plot results
-
-Include complete, runnable Python code. Use PyTorch. Add comments explaining each section.
-The notebook should be ready to copy into Google Colab or Jupyter.`,
+Include complete, runnable Python code. Use PyTorch.
+Add a cell for Weights & Biases logging (optional).
+Return ONLY valid JSON, no markdown, no code fences.`,
 };
 
 serve(async (req) => {
@@ -57,11 +100,16 @@ serve(async (req) => {
   }
 
   try {
-    const { query, action } = await req.json();
+    const { query, action, hypothesis } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = SYSTEM_PROMPTS[action] || SYSTEM_PROMPTS.analyze;
+    let systemPrompt = SYSTEM_PROMPTS[action] || SYSTEM_PROMPTS.analyze;
+    let userMessage = query;
+
+    if (action === "notebook" && hypothesis) {
+      userMessage = `Generate a training notebook for this hypothesis:\n\nHypothesis: ${hypothesis.name}\nArchitecture: ${hypothesis.architecture}\nDataset: ${hypothesis.dataset}\nExpected Accuracy: ${hypothesis.expected_accuracy}\n\nOriginal research question: ${query}`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -73,9 +121,9 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: query },
+          { role: "user", content: userMessage },
         ],
-        stream: true,
+        stream: action === "analyze" ? false : false,
       }),
     });
 
@@ -100,8 +148,18 @@ serve(async (req) => {
       });
     }
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "";
+
+    // Try to parse JSON from the content
+    let cleaned = content.trim();
+    // Remove markdown code fences if present
+    if (cleaned.startsWith("```")) {
+      cleaned = cleaned.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
+    }
+
+    return new Response(JSON.stringify({ result: cleaned }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("research-copilot error:", e);
