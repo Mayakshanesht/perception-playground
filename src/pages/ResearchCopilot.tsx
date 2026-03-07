@@ -191,8 +191,8 @@ export default function ResearchCopilot() {
       // Save to project
       await supabase.from("research_projects").update({
         research_question: query.trim(),
-        papers: parsed.papers,
-        architecture: parsed.proposal,
+        papers: JSON.parse(JSON.stringify(parsed.papers)),
+        architecture: JSON.parse(JSON.stringify(parsed.proposal)),
         updated_at: new Date().toISOString(),
       }).eq("id", activeProject.id);
     } catch (err: any) {
