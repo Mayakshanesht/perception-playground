@@ -1,12 +1,13 @@
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Camera, Layers, Mountain, Activity, Box, MessageSquare,
   LayoutDashboard, ChevronRight, BookOpen, Eye, Menu, X,
-  Network, FlaskConical
+  Network, FlaskConical, Sparkles, LogIn, LogOut, User
 } from "lucide-react";
 import AIAssistant from "@/components/AIAssistant";
+import { useAuth } from "@/hooks/useAuth";
 
 const modules = [
   { name: "Dashboard", path: "/", icon: LayoutDashboard },
@@ -19,11 +20,19 @@ const modules = [
   { name: "Tutorials", path: "/tutorials", icon: BookOpen },
   { name: "Perception Studios", path: "/studios", icon: FlaskConical },
   { name: "Knowledge Graph", path: "/knowledge-graph", icon: Network },
+  { name: "Research Copilot", path: "/research-copilot", icon: Sparkles },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <div className="flex min-h-screen w-full bg-background">
@@ -79,9 +88,34 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border">
+        {/* User section */}
+        <div className="p-3 border-t border-border">
+          {user ? (
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <User className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-foreground truncate font-medium">{user.email}</p>
+              </div>
+              <button onClick={handleSignOut} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Sign out">
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/sign-in"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <LogIn className="h-4 w-4" />
+              <span>Sign In</span>
+            </Link>
+          )}
+        </div>
+
+        <div className="px-4 pb-4">
           <div className="rounded-lg bg-muted/50 p-3">
-            <p className="text-[10px] text-muted-foreground font-mono">v3.0 — KnowGraph Perception Lab</p>
+            <p className="text-[10px] text-muted-foreground font-mono">v3.1 — KnowGraph Perception Lab</p>
             <p className="text-[9px] text-muted-foreground/60 mt-0.5">Interactive CV Learning Lab</p>
           </div>
         </div>

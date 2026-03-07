@@ -14,7 +14,169 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      experiments: {
+        Row: {
+          architecture: Json | null
+          created_at: string
+          hypothesis: string | null
+          id: string
+          metrics: Json | null
+          notebook: string | null
+          project_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          architecture?: Json | null
+          created_at?: string
+          hypothesis?: string | null
+          id?: string
+          metrics?: Json | null
+          notebook?: string | null
+          project_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          architecture?: Json | null
+          created_at?: string
+          hypothesis?: string | null
+          id?: string
+          metrics?: Json | null
+          notebook?: string | null
+          project_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "research_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          area_of_interest: string | null
+          created_at: string
+          email: string
+          id: string
+          institution: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          area_of_interest?: string | null
+          created_at?: string
+          email?: string
+          id: string
+          institution?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Update: {
+          area_of_interest?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          institution?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      research_projects: {
+        Row: {
+          architecture: Json | null
+          created_at: string
+          id: string
+          model_links: Json | null
+          name: string
+          notebooks: Json | null
+          papers: Json | null
+          research_question: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          architecture?: Json | null
+          created_at?: string
+          id?: string
+          model_links?: Json | null
+          name: string
+          notebooks?: Json | null
+          papers?: Json | null
+          research_question?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          architecture?: Json | null
+          created_at?: string
+          id?: string
+          model_links?: Json | null
+          name?: string
+          notebooks?: Json | null
+          papers?: Json | null
+          research_question?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_models: {
+        Row: {
+          created_at: string
+          dataset_used: string | null
+          huggingface_link: string | null
+          id: string
+          metrics: Json | null
+          name: string
+          project_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_used?: string | null
+          huggingface_link?: string | null
+          id?: string
+          metrics?: Json | null
+          name: string
+          project_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dataset_used?: string | null
+          huggingface_link?: string | null
+          id?: string
+          metrics?: Json | null
+          name?: string
+          project_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_models_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "research_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
