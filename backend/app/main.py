@@ -581,7 +581,7 @@ def run_velocity_estimation(payload_base64: str, model_id: str, options: Dict[st
     }
 
 
-app = FastAPI(title="Perception Concept Studio Backend", version="2.2.0")
+app = FastAPI(title="Perception Concept Studio Backend", version="3.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -589,6 +589,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ─── Register Research Copilot routers ───────────────────────────────
+from app.routers.research import router as research_router
+from app.routers.workspace import router as workspace_router
+
+app.include_router(research_router)
+app.include_router(workspace_router)
 
 
 @app.get("/health")
