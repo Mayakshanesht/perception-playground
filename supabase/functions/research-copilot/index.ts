@@ -59,39 +59,49 @@ IMPORTANT RULES:
 - Datasets should prefer Ultralytics-compatible datasets when applicable.
 - Return ONLY valid JSON, no markdown wrapping, no code fences.`,
 
-  notebook: `You are the Cloudbee Research Copilot notebook generator. Generate a complete Jupyter notebook in JSON format (.ipynb).
+  notebook: `You are the Cloudbee Research Copilot notebook generator. You MUST generate a COMPLETE, RUNNABLE Jupyter/Colab notebook in valid .ipynb JSON format.
 
-The user will provide a hypothesis description. Generate a notebook that implements that hypothesis.
+CRITICAL RULES:
+- Output MUST be a valid JSON object with keys: nbformat, nbformat_minor, metadata, cells
+- Every code cell MUST have: cell_type, metadata, source (array of strings), execution_count (null), outputs ([])
+- Every markdown cell MUST have: cell_type, metadata, source (array of strings)
+- Each line in "source" array must end with "\\n" except the last line
+- Do NOT output Python code directly — wrap ALL code inside notebook cells
+- Do NOT use markdown code fences — return raw JSON only
+- The notebook must be COMPLETE with real, working, production-quality code
 
-Return ONLY a valid Jupyter notebook JSON (.ipynb format) with this structure:
+Required .ipynb structure:
 {
   "nbformat": 4,
   "nbformat_minor": 5,
   "metadata": {
     "kernelspec": { "display_name": "Python 3", "language": "python", "name": "python3" },
-    "language_info": { "name": "python", "version": "3.10.0" }
+    "language_info": { "name": "python", "version": "3.10.0" },
+    "colab": { "provenance": [] }
   },
-  "cells": [
-    { "cell_type": "markdown", "metadata": {}, "source": ["# Title\\n", "Description"] },
-    { "cell_type": "code", "metadata": {}, "source": ["!pip install ..."], "execution_count": null, "outputs": [] }
-  ]
+  "cells": [ ... ]
 }
 
-Structure the notebook:
-1. Title and hypothesis description (markdown)
-2. Install Dependencies (code) - use pip install
-3. Import Libraries (code)
-4. Dataset Loading (code) - use Ultralytics datasets when possible, with a note about custom dataset connection
-5. Model Architecture (code) - full PyTorch model
-6. Training Loop (code) - with loss, optimizer, scheduler
-7. Evaluation (code) - metrics computation
-8. Save to HuggingFace (code) - include huggingface_hub push_to_hub code
-9. Visualization (code) - plot results
-10. Export and Next Steps (markdown) - mention saving weights to HuggingFace for inference
+Generate these cells IN ORDER (each as a separate cell):
 
-Include complete, runnable Python code. Use PyTorch.
-Add a cell for Weights & Biases logging (optional).
-Return ONLY valid JSON, no markdown, no code fences.`,
+1. **Title Cell** (markdown): Hypothesis name, description, expected outcomes
+2. **Environment Setup** (code): !pip install torch torchvision ultralytics huggingface_hub wandb matplotlib numpy tqdm
+3. **Imports** (code): Import ALL required libraries (torch, torch.nn, torchvision, ultralytics, huggingface_hub, wandb, matplotlib, numpy, tqdm, os, etc.)
+4. **Configuration** (code): Hyperparameters dict (lr, batch_size, epochs, device, model_name, dataset_name, hf_repo_id) with clear comments
+5. **Dataset Setup** (code): Complete dataset loading with Ultralytics or torchvision. Include train/val split, DataLoader creation, data augmentation transforms. Add comment about connecting custom datasets.
+6. **Model Architecture** (code): COMPLETE PyTorch nn.Module class definition. Include __init__ and forward methods with full layer definitions. Not pseudocode — real tensors, real layers.
+7. **Training Utilities** (code): Loss function, optimizer (AdamW), learning rate scheduler (CosineAnnealingLR), early stopping logic
+8. **W&B Logging Setup** (code): wandb.init with project name, config logging (wrap in try/except for optional use)
+9. **Training Loop** (code): COMPLETE training loop with: epoch iteration, batch iteration, forward pass, loss computation, backward pass, optimizer step, scheduler step, validation after each epoch, metric logging, best model checkpoint saving, progress bars with tqdm
+10. **Evaluation** (code): Load best checkpoint, run full evaluation on test/val set, compute metrics (accuracy, precision, recall, F1, confusion matrix), print results table
+11. **Visualization** (code): Plot training/validation loss curves, accuracy curves, sample predictions using matplotlib. At least 3 plots.
+12. **Save to HuggingFace** (code): Complete huggingface_hub integration — login, create_repo, push model weights, push model config, push training metrics JSON
+13. **Inference Example** (code): Load saved model, run inference on a sample input, display result
+14. **Next Steps** (markdown): Summary of results, suggestions for improvement, mention that weights are on HuggingFace for deployment
+
+IMPORTANT: Every code cell must contain COMPLETE, RUNNABLE Python code. No placeholders like "# TODO" or "pass" or "...". Write the actual implementation. This notebook should run end-to-end in Google Colab without modification.
+
+Return ONLY the valid .ipynb JSON object. No markdown wrapping. No code fences. No explanation outside the notebook.`,
 };
 
 serve(async (req) => {
