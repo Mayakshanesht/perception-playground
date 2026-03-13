@@ -17,6 +17,7 @@ import { useState } from "react";
 interface ModulePageProps {
   content: ModuleContent;
   hideHeader?: boolean;
+  hideTheory?: boolean;
 }
 
 function categorizeSections(theory: ModuleContent["theory"]) {
