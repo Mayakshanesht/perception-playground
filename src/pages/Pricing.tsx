@@ -26,11 +26,25 @@ const proFeatures = [
 
 export default function Pricing() {
   const { user } = useAuth();
-  const { isSubscribed } = useSubscription();
+  const { isSubscribed, isPending } = useSubscription();
+  const { toast } = useToast();
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
+    // Open Stripe payment link in new tab
     const url = user ? `${STRIPE_LINK}?prefilled_email=${encodeURIComponent(user.email || "")}` : STRIPE_LINK;
     window.open(url, "_blank");
+
+    // Create a pending subscription record so admin can see it
+    if (user) {
+      await supabase.from("subscriptions").upsert({
+        user_id: user.id,
+        status: "pending",
+      }, { onConflict: "user_id" });
+      toast({
+        title: "Payment started",
+        description: "Complete payment in the new tab. An admin will approve your access shortly after.",
+      });
+    }
   };
 
   return (
