@@ -162,6 +162,50 @@ export const moduleQuizzes: Record<string, QuizQuestion[]> = {
       correctIndex: 1,
       explanation: "RAFT computes correlations between ALL pairs of pixels (4D volume), then iteratively refines flow estimates using a GRU. This enables strong generalization and state-of-the-art accuracy.",
     },
+    {
+      question: "Why does DeepSORT add appearance features to SORT?",
+      options: [
+        "To increase detection accuracy",
+        "To handle re-identification after long occlusions via cosine similarity",
+        "To reduce computational cost",
+        "To remove the need for Kalman filtering",
+      ],
+      correctIndex: 1,
+      explanation: "SORT uses only IoU for matching, failing after occlusions. DeepSORT adds a 128-d Re-ID feature per detection and maintains a gallery per track, enabling re-identification via cosine distance even after long gaps.",
+    },
+    {
+      question: "How does 3D MOT differ from 2D MOT in state representation?",
+      options: [
+        "3D MOT only uses camera images",
+        "3D MOT tracks objects in metric world coordinates with 3D bounding boxes (x,y,z,θ,l,w,h)",
+        "3D MOT does not use the Kalman filter",
+        "3D MOT only works with a single camera",
+      ],
+      correctIndex: 1,
+      explanation: "3D MOT operates in metric 3D space, tracking objects with 7-DoF bounding boxes and velocity vectors. This enables accurate distance and velocity estimation critical for autonomous driving planning.",
+    },
+    {
+      question: "What is scene flow?",
+      options: [
+        "The 2D motion field between consecutive images",
+        "Per-point 3D motion vectors — the 3D analog of optical flow",
+        "The camera's ego-motion between frames",
+        "The flow of data through a neural network",
+      ],
+      correctIndex: 1,
+      explanation: "Scene flow assigns a 3D displacement vector (Δx, Δy, Δz) to every point in a 3D point cloud, capturing both object motion and ego-motion in full 3D space.",
+    },
+    {
+      question: "Why do SlowFast networks use two pathways?",
+      options: [
+        "One for training and one for inference",
+        "Slow pathway captures spatial semantics at low frame rate; Fast pathway captures temporal dynamics at high frame rate",
+        "One processes RGB and the other processes depth",
+        "To double the number of parameters for better accuracy",
+      ],
+      correctIndex: 1,
+      explanation: "The Slow pathway processes few frames with many channels (spatial detail), while the Fast pathway processes many frames with few channels (β=1/8, temporal dynamics). Lateral connections fuse both for efficient spatiotemporal modeling.",
+    },
   ],
   reconstruction: [
     {
@@ -211,6 +255,39 @@ export const moduleQuizzes: Record<string, QuizQuestion[]> = {
       ],
       correctIndex: 1,
       explanation: "CLIP learns a shared embedding space where matching image-text pairs are close and non-matching ones are far apart. This enables zero-shot classification by comparing image embeddings with text descriptions of classes.",
+    },
+    {
+      question: "How does Florence-2 unify multiple vision tasks?",
+      options: [
+        "Using separate task-specific heads for each task",
+        "A single sequence-to-sequence architecture with task prompts, outputting text sequences with coordinates",
+        "Training a different model per task and ensembling",
+        "Using only classification outputs for all tasks",
+      ],
+      correctIndex: 1,
+      explanation: "Florence-2 uses a DaViT encoder + seq2seq decoder. Tasks are specified via text prompts (<OD>, <CAPTION>, <SEG>), and all outputs are formatted as text tokens including bounding box coordinates.",
+    },
+    {
+      question: "What enables 3D Visual QA to go beyond 2D VQA?",
+      options: [
+        "Higher resolution images",
+        "Direct reasoning over 3D point clouds with metric spatial relationships",
+        "Faster inference speed",
+        "Larger language models",
+      ],
+      correctIndex: 1,
+      explanation: "3D VQA operates on point clouds with metric coordinates, enabling precise spatial reasoning ('how far is the chair from the table?') that's impossible from 2D images alone due to perspective ambiguity.",
+    },
+    {
+      question: "What is the core challenge of Vision-Language Navigation (VLN)?",
+      options: [
+        "Generating high-quality images",
+        "Grounding language instructions in egocentric visual observations while navigating unseen 3D environments",
+        "Training very large models",
+        "Processing video at high frame rates",
+      ],
+      correctIndex: 1,
+      explanation: "VLN agents must map natural language ('go past the kitchen') to visual observations in never-before-seen environments, maintaining spatial memory and planning paths through unknown space.",
     },
   ],
 };
