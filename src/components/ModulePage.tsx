@@ -254,7 +254,7 @@ export default function ModulePage({ content, hideHeader, hideTheory }: ModulePa
 
       <div className="space-y-6">
         {/* Intuition */}
-        {intuition.length > 0 && (
+        {!hideTheory && intuition.length > 0 && (
           <CollapsibleSection title="Concept Overview & Intuition" icon={Lightbulb} color={content.color} id="intuition">
             {intuition.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
@@ -272,7 +272,7 @@ export default function ModulePage({ content, hideHeader, hideTheory }: ModulePa
         )}
 
         {/* Mathematical Formulation */}
-        {math.length > 0 && (
+        {!hideTheory && math.length > 0 && (
           <CollapsibleSection title="Mathematical Formulation" icon={Calculator} color={content.color} id="math">
             {math.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
@@ -281,7 +281,7 @@ export default function ModulePage({ content, hideHeader, hideTheory }: ModulePa
         )}
 
         {/* Classical Approaches */}
-        {classical.length > 0 && (
+        {!hideTheory && classical.length > 0 && (
           <CollapsibleSection title="Classical Methods" icon={History} color={content.color} id="classical">
             {classical.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
@@ -290,7 +290,7 @@ export default function ModulePage({ content, hideHeader, hideTheory }: ModulePa
         )}
 
         {/* Deep Learning Approaches */}
-        {deepLearning.length > 0 && (
+        {!hideTheory && deepLearning.length > 0 && (
           <CollapsibleSection title="Modern Deep Learning Methods" icon={Brain} color={content.color} id="deep-learning">
             {deepLearning.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />

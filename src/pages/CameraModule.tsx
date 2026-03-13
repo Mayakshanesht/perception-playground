@@ -178,7 +178,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ Rest of module content (Algorithms, Papers, Quiz, etc.) ═══ */}
-        <ModulePage content={cameraModule} hideHeader />
+        <ModulePage content={cameraModule} hideHeader hideTheory />
       </div>
     </div>
   );
