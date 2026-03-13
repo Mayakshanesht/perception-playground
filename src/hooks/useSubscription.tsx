@@ -12,6 +12,7 @@ export function useSubscription() {
   useEffect(() => {
     if (!user) {
       setIsSubscribed(false);
+      setIsPending(false);
       setIsAdmin(false);
       setLoading(false);
       return;
