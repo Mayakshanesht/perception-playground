@@ -86,9 +86,54 @@ export const cameraModule: ModuleContent = {
       ],
     },
     {
+      title: "Color Spaces & Representations",
+      content:
+        "Digital images store color as multi-channel arrays. RGB (Red, Green, Blue) is the default sensor output, but other color spaces are critical for CV. HSV (Hue, Saturation, Value) separates chromatic content from brightness, making color-based segmentation robust to lighting changes. LAB (CIELAB) is perceptually uniform — equal numerical distances correspond to equal perceived color differences. Grayscale conversion uses luminance weights: L = 0.299R + 0.587G + 0.114B, reflecting human sensitivity (most sensitive to green, least to blue).",
+      equations: [
+        {
+          label: "Grayscale Conversion",
+          tex: "L = 0.299 R + 0.587 G + 0.114 B",
+        },
+        {
+          label: "HSV Hue",
+          tex: "H = \\arctan2(\\sqrt{3}(G-B),\\; 2R - G - B)",
+        },
+      ],
+    },
+    {
+      title: "Gamma Correction & Dynamic Range",
+      content:
+        "Human vision perceives brightness logarithmically, not linearly. Gamma encoding compresses the linear sensor output so that more bits are allocated to dark tones (where humans are more sensitive). Standard sRGB uses γ ≈ 2.2. Before any linear image processing (filtering, blending), images must be gamma-decoded. HDR imaging captures multiple exposures and merges them to extend dynamic range beyond 8-bit limits.",
+      equations: [
+        {
+          label: "Gamma Encoding",
+          tex: "V_{\\text{out}} = V_{\\text{in}}^{1/\\gamma}",
+        },
+        {
+          label: "Brightness / Contrast",
+          tex: "I' = \\alpha \\cdot I + \\beta",
+          variables: [
+            { symbol: "α", meaning: "contrast gain (multiplier)" },
+            { symbol: "β", meaning: "brightness offset" },
+          ],
+        },
+      ],
+    },
+    {
+      title: "Basic Image Operations",
+      content:
+        "Point operations transform each pixel independently: thresholding, histogram equalization, contrast stretching. Histogram equalization redistributes pixel intensities to span the full dynamic range, improving contrast. Spatial filtering uses kernels: blurring (Gaussian), sharpening (Laplacian), edge detection (Sobel). These operations form the pre-processing backbone of every CV pipeline.",
+      equations: [
+        {
+          label: "2D Convolution",
+          tex: "(I * K)(x,y) = \\sum_{i}\\sum_{j} I(x-i, y-j) \\cdot K(i,j)",
+        },
+      ],
+    },
+    {
       title: "Real-World Applications",
       content:
-        "Camera calibration is critical in autonomous driving (multi-camera rigs), augmented reality (camera-world alignment), robotics (hand-eye calibration), and 3D reconstruction (Structure from Motion requires known intrinsics). Stereo camera calibration additionally requires estimating the relative pose between two cameras for depth computation.",
+        "Camera calibration is critical in autonomous driving (multi-camera rigs), augmented reality (camera-world alignment), robotics (hand-eye calibration), and 3D reconstruction (Structure from Motion requires known intrinsics). Stereo camera calibration additionally requires estimating the relative pose between two cameras for depth computation. Color space selection impacts every downstream task — HSV for color filtering in robotics, LAB for perceptual image quality metrics, and proper gamma handling for photometrically correct compositing.",
     },
   ],
   algorithms: [
