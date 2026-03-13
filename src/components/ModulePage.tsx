@@ -17,6 +17,7 @@ import { useState } from "react";
 interface ModulePageProps {
   content: ModuleContent;
   hideHeader?: boolean;
+  hideTheory?: boolean;
 }
 
 function categorizeSections(theory: ModuleContent["theory"]) {
@@ -185,7 +186,7 @@ const moduleConnections: Record<string, { label: string; path: string; relation:
   ],
 };
 
-export default function ModulePage({ content, hideHeader }: ModulePageProps) {
+export default function ModulePage({ content, hideHeader, hideTheory }: ModulePageProps) {
   const playgrounds = content.playgrounds ?? (content.playground ? [content.playground] : []);
   const { intuition, math, classical, deepLearning, applications } = categorizeSections(content.theory);
   const quizQuestions = content.quizQuestions || moduleQuizzes[content.id] || [];
@@ -196,16 +197,18 @@ export default function ModulePage({ content, hideHeader }: ModulePageProps) {
   const [exploringPaper, setExploringPaper] = useState<string | null>(null);
 
   const navItems = [
-    { id: "intuition", label: "Intuition", count: intuition.length, icon: "💡" },
+    ...(!hideTheory ? [{ id: "intuition", label: "Intuition", count: intuition.length, icon: "💡" }] : []),
     { id: "images", label: "Visual", count: images.length, icon: "🖼️" },
-    { id: "math", label: "Math", count: math.length, icon: "📐" },
-    { id: "classical", label: "Classical", count: classical.length, icon: "📚" },
-    { id: "deep-learning", label: "Deep Learning", count: deepLearning.length, icon: "🧠" },
+    ...(!hideTheory ? [
+      { id: "math", label: "Math", count: math.length, icon: "📐" },
+      { id: "classical", label: "Classical", count: classical.length, icon: "📚" },
+      { id: "deep-learning", label: "Deep Learning", count: deepLearning.length, icon: "🧠" },
+    ] : []),
     { id: "labs", label: "Labs", count: labs.length, icon: "🧪" },
     { id: "playground", label: "Playground", count: playgrounds.length, icon: "🎮" },
     { id: "quiz", label: "Quiz", count: quizQuestions.length, icon: "❓" },
     { id: "failures", label: "Failures", count: failureModes.length, icon: "⚠️" },
-    { id: "applications", label: "Applications", count: applications.length, icon: "🚀" },
+    ...(!hideTheory ? [{ id: "applications", label: "Applications", count: applications.length, icon: "🚀" }] : []),
     { id: "connections", label: "Connections", count: connections.length, icon: "🔗" },
   ].filter(s => s.count > 0);
 
@@ -253,7 +256,7 @@ export default function ModulePage({ content, hideHeader }: ModulePageProps) {
 
       <div className="space-y-6">
         {/* Intuition */}
-        {intuition.length > 0 && (
+        {!hideTheory && intuition.length > 0 && (
           <CollapsibleSection title="Concept Overview & Intuition" icon={Lightbulb} color={content.color} id="intuition">
             {intuition.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
@@ -271,7 +274,7 @@ export default function ModulePage({ content, hideHeader }: ModulePageProps) {
         )}
 
         {/* Mathematical Formulation */}
-        {math.length > 0 && (
+        {!hideTheory && math.length > 0 && (
           <CollapsibleSection title="Mathematical Formulation" icon={Calculator} color={content.color} id="math">
             {math.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
@@ -280,7 +283,7 @@ export default function ModulePage({ content, hideHeader }: ModulePageProps) {
         )}
 
         {/* Classical Approaches */}
-        {classical.length > 0 && (
+        {!hideTheory && classical.length > 0 && (
           <CollapsibleSection title="Classical Methods" icon={History} color={content.color} id="classical">
             {classical.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
@@ -289,7 +292,7 @@ export default function ModulePage({ content, hideHeader }: ModulePageProps) {
         )}
 
         {/* Deep Learning Approaches */}
-        {deepLearning.length > 0 && (
+        {!hideTheory && deepLearning.length > 0 && (
           <CollapsibleSection title="Modern Deep Learning Methods" icon={Brain} color={content.color} id="deep-learning">
             {deepLearning.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
@@ -426,7 +429,7 @@ export default function ModulePage({ content, hideHeader }: ModulePageProps) {
         )}
 
         {/* Applications */}
-        {applications.length > 0 && (
+        {!hideTheory && applications.length > 0 && (
           <CollapsibleSection title="Real-World Applications" icon={Rocket} color={content.color} id="applications">
             {applications.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
