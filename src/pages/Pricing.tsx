@@ -144,7 +144,7 @@ export default function Pricing() {
 
         {/* Info */}
         <p className="text-center text-xs text-muted-foreground mt-8">
-          After payment, your access is activated automatically. Manage your subscription anytime.
+          After payment, an admin will review and approve your access. You'll get full access once approved.
         </p>
       </div>
     </div>

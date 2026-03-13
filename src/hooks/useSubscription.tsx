@@ -44,5 +44,5 @@ export function useSubscription() {
     return { error };
   };
 
-  return { isSubscribed, isAdmin, loading, activateSubscription };
+  return { isSubscribed, isPending, isAdmin, loading, activateSubscription };
 }

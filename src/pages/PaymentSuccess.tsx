@@ -1,29 +1,16 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CheckCircle, ArrowRight } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useSubscription } from "@/hooks/useSubscription";
+import { Clock, ArrowRight } from "lucide-react";
 
 export default function PaymentSuccess() {
-  const { user } = useAuth();
-  const { activateSubscription } = useSubscription();
-  const [activated, setActivated] = useState(false);
-
-  useEffect(() => {
-    if (user && !activated) {
-      activateSubscription().then(() => setActivated(true));
-    }
-  }, [user]);
-
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="text-center max-w-md">
-        <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="h-8 w-8 text-primary" />
+        <div className="h-16 w-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-6">
+          <Clock className="h-8 w-8 text-accent" />
         </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">Payment Successful!</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Payment Received!</h1>
         <p className="text-muted-foreground text-sm mb-6">
-          Your Pro subscription is now active. You have full access to all modules, tutorials, and the Research Copilot.
+          Thank you for subscribing! An admin will review and approve your access shortly. You'll get full access to all modules once approved.
         </p>
         <Link
           to="/"
