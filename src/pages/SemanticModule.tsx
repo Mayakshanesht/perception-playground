@@ -2,8 +2,8 @@ import ModulePage from "@/components/ModulePage";
 import { ModuleContent } from "@/data/moduleContent";
 import { moduleContents } from "@/data/moduleContent";
 import { MathEquation } from "@/components/MathBlock";
-import SemanticSceneVisualizer from "@/components/SemanticAnimations";
-import { ArrowLeft, GraduationCap, Lightbulb, Target, Grid3X3, Layers, Brain, Eye } from "lucide-react";
+import { ClassificationScene, DetectionScene, SemanticSegScene, InstanceSegScene } from "@/components/SemanticAnimations";
+import { ArrowLeft, GraduationCap, Lightbulb, Target, Grid3X3, Layers, Eye, Puzzle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -108,30 +108,24 @@ export default function SemanticModule() {
       </div>
 
       <div className="space-y-10">
-        {/* ═══ Part 1: The Semantic Hierarchy ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <SectionHeader icon={Eye} title="The Semantic Hierarchy" number={1} subtitle="From scene labels to pixel-level understanding" />
 
-          <div className="rounded-xl border border-border bg-card/50 p-4 mb-4">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Semantic understanding in computer vision follows a natural hierarchy of increasing spatial precision:
-              <strong className="text-foreground"> Classification</strong> (one label per image) →
-              <strong className="text-foreground"> Detection</strong> (locate + classify objects) →
-              <strong className="text-foreground"> Semantic Segmentation</strong> (label every pixel by class) →
-              <strong className="text-foreground"> Instance Segmentation</strong> (separate individual objects at pixel level).
-              Each step adds spatial granularity to the model's understanding.
-            </p>
+        {/* ═══ Part 1: Image Classification ═══ */}
+        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+          <SectionHeader icon={Lightbulb} title="Image Classification" number={1} subtitle="Assign a single label to an entire image — f(x) → class label" />
+
+          {/* Theory intro */}
+          <div className="space-y-4 mb-6">
+            <TheoryInline title="What is Image Classification?" />
           </div>
 
-          {/* Interactive scene visualizer */}
-          <SemanticSceneVisualizer />
-        </motion.section>
+          {/* Classification animation — placed after the task definition */}
+          <div className="mb-6">
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-2">🔍 Interactive · Classification Visualization</p>
+            <ClassificationScene />
+          </div>
 
-        {/* ═══ Part 2: Classification ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
-          <SectionHeader icon={Lightbulb} title="Image Classification" number={2} subtitle="Assign a single label to an entire image" />
+          {/* Deeper theory */}
           <div className="space-y-4">
-            <TheoryInline title="What is Image Classification?" />
             <TheoryInline title="Convolutional Neural Networks (CNNs)" />
             <TheoryInline title="Batch Normalization" />
             <TheoryInline title="Residual Learning (ResNet)" />
@@ -139,11 +133,21 @@ export default function SemanticModule() {
           </div>
         </motion.section>
 
-        {/* ═══ Part 3: Object Detection ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
-          <SectionHeader icon={Target} title="Object Detection" number={3} subtitle="Localize and classify multiple objects" />
-          <div className="space-y-4">
+        {/* ═══ Part 2: Object Detection ═══ */}
+        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
+          <SectionHeader icon={Target} title="Object Detection" number={2} subtitle="Localize and classify multiple objects — f(x) → {class, bbox, conf}" />
+
+          <div className="space-y-4 mb-6">
             <TheoryInline title="What is Object Detection?" />
+          </div>
+
+          {/* Detection animation — after introducing the task */}
+          <div className="mb-6">
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-2">🎯 Interactive · Detection Visualization</p>
+            <DetectionScene />
+          </div>
+
+          <div className="space-y-4">
             <TheoryInline title="Two-Stage Detectors: R-CNN Family" />
             <TheoryInline title="One-Stage Detectors: YOLO & SSD" />
             <TheoryInline title="Non-Maximum Suppression (NMS)" />
@@ -151,19 +155,43 @@ export default function SemanticModule() {
           </div>
         </motion.section>
 
-        {/* ═══ Part 4: Segmentation ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.4 }}>
-          <SectionHeader icon={Grid3X3} title="Segmentation" number={4} subtitle="Pixel-level scene understanding" />
-          <div className="space-y-4">
+        {/* ═══ Part 3: Semantic Segmentation ═══ */}
+        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
+          <SectionHeader icon={Grid3X3} title="Semantic Segmentation" number={3} subtitle="Pixel-level class labeling — f(x) → pixel-class map (H×W)" />
+
+          <div className="space-y-4 mb-6">
             <TheoryInline title="Types of Segmentation" />
+          </div>
+
+          {/* Semantic segmentation animation */}
+          <div className="mb-6">
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-2">🎨 Interactive · Semantic Segmentation Visualization</p>
+            <SemanticSegScene />
+          </div>
+
+          <div className="space-y-4">
             <TheoryInline title="Fully Convolutional Networks (FCN)" />
             <TheoryInline title="U-Net Architecture" />
             <TheoryInline title="Atrous/Dilated Convolutions (DeepLab)" />
-            <TheoryInline title="Instance Segmentation: Mask R-CNN" />
           </div>
         </motion.section>
 
-        {/* ═══ Part 5: Remaining module content (Algorithms, Papers, Playground, Quiz, etc.) ═══ */}
+        {/* ═══ Part 4: Instance Segmentation ═══ */}
+        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.4 }}>
+          <SectionHeader icon={Puzzle} title="Instance Segmentation" number={4} subtitle="Separate individual objects at pixel level — f(x) → {class, mask, id} × N" />
+
+          <div className="space-y-4 mb-6">
+            <TheoryInline title="Instance Segmentation: Mask R-CNN" />
+          </div>
+
+          {/* Instance segmentation animation */}
+          <div className="mb-6">
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-2">🧩 Interactive · Instance Segmentation Visualization</p>
+            <InstanceSegScene />
+          </div>
+        </motion.section>
+
+        {/* ═══ Part 5: Algorithms, Papers & Practice ═══ */}
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.4 }}>
           <SectionHeader icon={Layers} title="Algorithms, Papers & Practice" number={5} subtitle="Pipelines, key papers, playgrounds, and quizzes" />
           <ModulePage content={semanticModule} hideHeader hideTheory />
