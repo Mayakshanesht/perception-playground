@@ -497,7 +497,7 @@ export function PerspectiveScene() {
     ctx.fillStyle = ptColor;
     ctx.beginPath(); ctx.arc(cpx, cpy, 6, 0, Math.PI * 2); ctx.fill();
     const glow2 = ctx.createRadialGradient(cpx, cpy, 0, cpx, cpy, 16);
-    glow2.addColorStop(0, "hsl(0, 85%, 60% / 0.4)"); glow2.addColorStop(1, "transparent");
+    glow2.addColorStop(0, "hsla(0, 85%, 60%, 0.4)"); glow2.addColorStop(1, "transparent");
     ctx.fillStyle = glow2;
     ctx.beginPath(); ctx.arc(cpx, cpy, 16, 0, Math.PI * 2); ctx.fill();
 
