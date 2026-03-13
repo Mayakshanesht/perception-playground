@@ -429,7 +429,7 @@ export default function ModulePage({ content, hideHeader, hideTheory }: ModulePa
         )}
 
         {/* Applications */}
-        {applications.length > 0 && (
+        {!hideTheory && applications.length > 0 && (
           <CollapsibleSection title="Real-World Applications" icon={Rocket} color={content.color} id="applications">
             {applications.map((s, i) => (
               <TheoryCard key={s.title} section={s} color={content.color} index={i} />
