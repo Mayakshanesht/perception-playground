@@ -1,10 +1,11 @@
-import { Check, Crown, Zap, ArrowRight, Shield } from "lucide-react";
+import { Check, Crown, Zap, ArrowRight, Shield, Clock, ExternalLink } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const STRIPE_LINK = "https://buy.stripe.com/eVqdR93RD9664BGbs12kw09";
-
 const freeFeatures = [
   "Dashboard overview",
   "Pipeline visualization",
