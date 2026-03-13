@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import CameraModule from "@/pages/CameraModule";
@@ -19,6 +20,9 @@ import GenericModule from "@/pages/GenericModule";
 import SignIn from "@/pages/SignIn";
 import SignUp from "@/pages/SignUp";
 import ResearchCopilot from "@/pages/ResearchCopilot";
+import Pricing from "@/pages/Pricing";
+import PaymentSuccess from "@/pages/PaymentSuccess";
+import AdminPanel from "@/pages/AdminPanel";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,21 +36,31 @@ const App = () => (
         <AuthProvider>
           <AppLayout>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/module/camera" element={<CameraModule />} />
-              <Route path="/module/semantic" element={<SemanticModule />} />
-              <Route path="/module/geometric" element={<GeometricModule />} />
-              <Route path="/module/motion" element={<MotionModule />} />
-              <Route path="/module/reconstruction" element={<ReconstructionModule />} />
-              <Route path="/module/scene-reasoning" element={<SceneReasoningModule />} />
-              <Route path="/tutorials" element={<Tutorials />} />
-              <Route path="/knowledge-graph" element={<KnowledgeGraph />} />
-              <Route path="/studios" element={<PerceptionStudios />} />
-              <Route path="/research-copilot" element={<ResearchCopilot />} />
+              {/* Public routes */}
               <Route path="/sign-in" element={<SignIn />} />
               <Route path="/sign-up" element={<SignUp />} />
-              {/* Legacy routes for individual modules */}
-              <Route path="/module/:moduleId" element={<GenericModule />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
+
+              {/* Free - just needs auth */}
+              <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
+              {/* Pro - needs subscription */}
+              <Route path="/module/camera" element={<ProtectedRoute requireSubscription><CameraModule /></ProtectedRoute>} />
+              <Route path="/module/semantic" element={<ProtectedRoute requireSubscription><SemanticModule /></ProtectedRoute>} />
+              <Route path="/module/geometric" element={<ProtectedRoute requireSubscription><GeometricModule /></ProtectedRoute>} />
+              <Route path="/module/motion" element={<ProtectedRoute requireSubscription><MotionModule /></ProtectedRoute>} />
+              <Route path="/module/reconstruction" element={<ProtectedRoute requireSubscription><ReconstructionModule /></ProtectedRoute>} />
+              <Route path="/module/scene-reasoning" element={<ProtectedRoute requireSubscription><SceneReasoningModule /></ProtectedRoute>} />
+              <Route path="/tutorials" element={<ProtectedRoute requireSubscription><Tutorials /></ProtectedRoute>} />
+              <Route path="/knowledge-graph" element={<ProtectedRoute requireSubscription><KnowledgeGraph /></ProtectedRoute>} />
+              <Route path="/studios" element={<ProtectedRoute requireSubscription><PerceptionStudios /></ProtectedRoute>} />
+              <Route path="/research-copilot" element={<ProtectedRoute requireSubscription><ResearchCopilot /></ProtectedRoute>} />
+              <Route path="/module/:moduleId" element={<ProtectedRoute requireSubscription><GenericModule /></ProtectedRoute>} />
+
+              {/* Admin */}
+              <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppLayout>

@@ -4,23 +4,25 @@ import { motion } from "framer-motion";
 import {
   Camera, Layers, Mountain, Activity, Box, MessageSquare,
   LayoutDashboard, ChevronRight, BookOpen, Eye, Menu, X,
-  Network, FlaskConical, Sparkles, LogIn, LogOut, User
+  Network, FlaskConical, Sparkles, LogIn, LogOut, User,
+  Crown, Shield, CreditCard
 } from "lucide-react";
 import AIAssistant from "@/components/AIAssistant";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const modules = [
-  { name: "Dashboard", path: "/", icon: LayoutDashboard },
-  { name: "Camera Image Formation", path: "/module/camera", icon: Camera },
-  { name: "Semantic Information", path: "/module/semantic", icon: Layers },
-  { name: "Geometric Information", path: "/module/geometric", icon: Mountain },
-  { name: "Motion Estimation", path: "/module/motion", icon: Activity },
-  { name: "3D Reconstruction", path: "/module/reconstruction", icon: Box },
-  { name: "Scene Reasoning", path: "/module/scene-reasoning", icon: MessageSquare },
-  { name: "Tutorials", path: "/tutorials", icon: BookOpen },
-  { name: "Perception Studios", path: "/studios", icon: FlaskConical },
-  { name: "Knowledge Graph", path: "/knowledge-graph", icon: Network },
-  { name: "Research Copilot", path: "/research-copilot", icon: Sparkles },
+  { name: "Dashboard", path: "/", icon: LayoutDashboard, premium: false },
+  { name: "Camera Image Formation", path: "/module/camera", icon: Camera, premium: true },
+  { name: "Semantic Information", path: "/module/semantic", icon: Layers, premium: true },
+  { name: "Geometric Information", path: "/module/geometric", icon: Mountain, premium: true },
+  { name: "Motion Estimation", path: "/module/motion", icon: Activity, premium: true },
+  { name: "3D Reconstruction", path: "/module/reconstruction", icon: Box, premium: true },
+  { name: "Scene Reasoning", path: "/module/scene-reasoning", icon: MessageSquare, premium: true },
+  { name: "Tutorials", path: "/tutorials", icon: BookOpen, premium: true },
+  { name: "Perception Studios", path: "/studios", icon: FlaskConical, premium: true },
+  { name: "Knowledge Graph", path: "/knowledge-graph", icon: Network, premium: true },
+  { name: "Research Copilot", path: "/research-copilot", icon: Sparkles, premium: true },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -28,11 +30,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { isSubscribed, isAdmin } = useSubscription();
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/");
+    navigate("/sign-in");
   };
+
+  // Hide sidebar on auth pages
+  const authPages = ["/sign-in", "/sign-up"];
+  const isAuthPage = authPages.includes(location.pathname);
+
+  if (isAuthPage) {
+    return <div className="min-h-screen w-full bg-background">{children}</div>;
+  }
 
   return (
     <div className="flex min-h-screen w-full bg-background">
@@ -69,6 +80,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           {modules.map((mod) => {
             const isActive = location.pathname === mod.path ||
               (mod.path !== "/" && location.pathname.startsWith(mod.path));
+            const locked = mod.premium && !isSubscribed;
             return (
               <Link
                 key={mod.path}
@@ -81,11 +93,43 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 }`}
               >
                 <mod.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
-                <span className="truncate">{mod.name}</span>
+                <span className="truncate flex-1">{mod.name}</span>
+                {locked && <Crown className="h-3 w-3 text-accent shrink-0" />}
                 {isActive && <ChevronRight className="h-3 w-3 ml-auto text-primary" />}
               </Link>
             );
           })}
+
+          {/* Pricing link */}
+          <Link
+            to="/pricing"
+            onClick={() => setMobileOpen(false)}
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-150 group ${
+              location.pathname === "/pricing"
+                ? "bg-primary/10 text-primary font-medium"
+                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
+            }`}
+          >
+            <CreditCard className={`h-4 w-4 shrink-0 ${location.pathname === "/pricing" ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
+            <span className="truncate">{isSubscribed ? "My Plan" : "Upgrade to Pro"}</span>
+            {!isSubscribed && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-accent/15 text-accent font-semibold">PRO</span>}
+          </Link>
+
+          {/* Admin link */}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              onClick={() => setMobileOpen(false)}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-150 group ${
+                location.pathname === "/admin"
+                  ? "bg-primary/10 text-primary font-medium"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground"
+              }`}
+            >
+              <Shield className={`h-4 w-4 shrink-0 ${location.pathname === "/admin" ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
+              <span className="truncate">Admin Panel</span>
+            </Link>
+          )}
         </nav>
 
         {/* User section */}
@@ -97,6 +141,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-foreground truncate font-medium">{user.email}</p>
+                {isSubscribed && (
+                  <p className="text-[9px] text-primary font-semibold">PRO</p>
+                )}
               </div>
               <button onClick={handleSignOut} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" title="Sign out">
                 <LogOut className="h-3.5 w-3.5" />

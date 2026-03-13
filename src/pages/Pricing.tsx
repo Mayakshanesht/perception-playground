@@ -1,0 +1,132 @@
+import { Check, Crown, Zap, ArrowRight, Shield } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { Link } from "react-router-dom";
+
+const STRIPE_LINK = "https://buy.stripe.com/eVqdR93RD9664BGbs12kw09";
+
+const freeFeatures = [
+  "Dashboard overview",
+  "Pipeline visualization",
+  "Community access",
+];
+
+const proFeatures = [
+  "All Dashboard features",
+  "Camera, Semantic, Geometric modules",
+  "Motion, Reconstruction, Scene Reasoning",
+  "Full Tutorials library",
+  "Perception Studios",
+  "Knowledge Graph",
+  "Research Copilot with AI",
+  "Notebook generation & export",
+  "Priority support",
+];
+
+export default function Pricing() {
+  const { user } = useAuth();
+  const { isSubscribed } = useSubscription();
+
+  const handleSubscribe = () => {
+    const url = user ? `${STRIPE_LINK}?prefilled_email=${encodeURIComponent(user.email || "")}` : STRIPE_LINK;
+    window.open(url, "_blank");
+  };
+
+  return (
+    <div className="min-h-screen p-6 md:p-10">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
+            <Crown className="h-3.5 w-3.5" />
+            Perception Lab Pro
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+            Unlock the Full Research Lab
+          </h1>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Get unlimited access to all modules, tutorials, research copilot, and perception studios.
+          </p>
+        </div>
+
+        {/* Cards */}
+        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          {/* Free */}
+          <div className="rounded-xl border border-border bg-card p-6 flex flex-col">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-foreground mb-1">Free</h3>
+              <p className="text-muted-foreground text-sm">Get started with basics</p>
+              <div className="mt-4">
+                <span className="text-3xl font-bold text-foreground">€0</span>
+                <span className="text-muted-foreground text-sm">/month</span>
+              </div>
+            </div>
+            <ul className="space-y-3 flex-1">
+              {freeFeatures.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <Check className="h-4 w-4 text-muted-foreground/60 mt-0.5 shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6 pt-4 border-t border-border">
+              {user ? (
+                <span className="text-xs text-muted-foreground">Current plan</span>
+              ) : (
+                <Link to="/sign-up" className="inline-flex items-center gap-2 text-sm text-primary hover:underline font-medium">
+                  Sign up free <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Pro */}
+          <div className="rounded-xl border-2 border-primary/40 bg-card p-6 flex flex-col relative overflow-hidden">
+            <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-bl-lg">
+              Recommended
+            </div>
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-foreground mb-1 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-primary" />
+                Pro
+              </h3>
+              <p className="text-muted-foreground text-sm">Full research lab access</p>
+              <div className="mt-4">
+                <span className="text-3xl font-bold text-foreground">€9.99</span>
+                <span className="text-muted-foreground text-sm">/month</span>
+              </div>
+            </div>
+            <ul className="space-y-3 flex-1">
+              {proFeatures.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm text-foreground">
+                  <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6 pt-4 border-t border-border">
+              {isSubscribed ? (
+                <div className="flex items-center gap-2 text-sm text-primary">
+                  <Shield className="h-4 w-4" />
+                  <span className="font-medium">Active subscription</span>
+                </div>
+              ) : (
+                <button
+                  onClick={handleSubscribe}
+                  className="w-full rounded-lg bg-primary text-primary-foreground py-2.5 text-sm font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                >
+                  Subscribe Now <ArrowRight className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Info */}
+        <p className="text-center text-xs text-muted-foreground mt-8">
+          After payment, your access is activated automatically. Manage your subscription anytime.
+        </p>
+      </div>
+    </div>
+  );
+}
