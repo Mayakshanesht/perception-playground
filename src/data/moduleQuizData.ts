@@ -37,6 +37,39 @@ export const moduleQuizzes: Record<string, QuizQuestion[]> = {
       correctIndex: 2,
       explanation: "DETR treats detection as a set prediction problem. Hungarian matching ensures each prediction is unique, eliminating duplicate detections that NMS would normally filter.",
     },
+    {
+      question: "Why does Faster R-CNN outperform R-CNN despite using the same classification head?",
+      options: [
+        "It uses a more powerful ResNet backbone",
+        "It runs the CNN once on the whole image and extracts RoIs from the shared feature map",
+        "It predicts bounding boxes in a single forward pass without proposals",
+        "It replaces cross-entropy loss with focal loss",
+      ],
+      correctIndex: 1,
+      explanation: "R-CNN ran AlexNet separately on each of ~2000 warped proposals — extremely slow. Faster R-CNN computes the feature map once, then uses RoI Pooling to extract fixed-size regions from it. The RPN also replaces Selective Search with learned proposals.",
+    },
+    {
+      question: "Why does Vision Transformer (ViT) need very large datasets to match CNN performance?",
+      options: [
+        "ViT uses more parameters than ResNet",
+        "ViT cannot process images larger than 224×224",
+        "CNN has built-in inductive biases (translation equivariance, locality) that ViT must learn from data",
+        "ViT requires higher resolution patches to capture fine details",
+      ],
+      correctIndex: 2,
+      explanation: "CNNs have strong inductive biases baked in: local receptive fields and weight sharing encode the assumption that nearby pixels are related and features are translation-invariant. ViT has no such priors — it treats every patch equally via global attention and must learn spatial structure from scratch, requiring massive datasets.",
+    },
+    {
+      question: "In U-Net, what information do skip connections preserve?",
+      options: [
+        "Class probability distributions from deep layers",
+        "High-resolution spatial detail from the encoder that is lost during pooling",
+        "Gradient flow to prevent vanishing gradients",
+        "Channel statistics for batch normalization",
+      ],
+      correctIndex: 1,
+      explanation: "Pooling layers in the encoder compress spatial dimensions to capture global context, but lose fine-grained location detail. U-Net's skip connections concatenate the full-resolution encoder feature maps directly to the corresponding decoder level, giving the decoder both semantic understanding AND precise localization.",
+    },
   ],
   geometric: [
     {
