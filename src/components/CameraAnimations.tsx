@@ -394,7 +394,7 @@ export function PerspectiveScene() {
     ctx.fillStyle = ptColor;
     ctx.beginPath(); ctx.arc(worldScreenX, worldScreenY, 8, 0, Math.PI * 2); ctx.fill();
     const glow = ctx.createRadialGradient(worldScreenX, worldScreenY, 0, worldScreenX, worldScreenY, 20);
-    glow.addColorStop(0, "hsl(0, 85%, 60% / 0.3)"); glow.addColorStop(1, "transparent");
+    glow.addColorStop(0, "hsla(0, 85%, 60%, 0.3)"); glow.addColorStop(1, "transparent");
     ctx.fillStyle = glow;
     ctx.beginPath(); ctx.arc(worldScreenX, worldScreenY, 20, 0, Math.PI * 2); ctx.fill();
     labelText(ctx, worldScreenX + 12, worldScreenY - 12, `P(${Math.round(animX)}, ${Math.round(animY)}, ${Z})`, ptColor);
