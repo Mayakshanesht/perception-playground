@@ -186,7 +186,7 @@ const moduleConnections: Record<string, { label: string; path: string; relation:
   ],
 };
 
-export default function ModulePage({ content, hideHeader }: ModulePageProps) {
+export default function ModulePage({ content, hideHeader, hideTheory }: ModulePageProps) {
   const playgrounds = content.playgrounds ?? (content.playground ? [content.playground] : []);
   const { intuition, math, classical, deepLearning, applications } = categorizeSections(content.theory);
   const quizQuestions = content.quizQuestions || moduleQuizzes[content.id] || [];
