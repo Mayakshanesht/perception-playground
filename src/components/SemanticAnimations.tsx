@@ -581,8 +581,6 @@ export default function SemanticSceneVisualizer() {
     </div>
   );
 }
-
-  const switchMode = useCallback((m: Mode) => {
     setMode(m);
     setAnimKey((k) => k + 1);
   }, []);
