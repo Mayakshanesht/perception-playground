@@ -1,8 +1,8 @@
-import { Projection3DScene, PinholeScene, PerspectiveScene, IntrinsicScene, LensScene, SensorScene } from "@/components/CameraAnimations";
+import { Projection3DScene, PinholeScene, PerspectiveScene, IntrinsicScene, LensScene, SensorScene, ColorSpaceScene } from "@/components/CameraAnimations";
 import ModulePage from "@/components/ModulePage";
 import { cameraModule } from "@/data/consolidatedModules";
 import { MathEquation } from "@/components/MathBlock";
-import { ArrowLeft, GraduationCap, Lightbulb, BookOpen, Cpu, Aperture } from "lucide-react";
+import { ArrowLeft, GraduationCap, Lightbulb, BookOpen, Cpu, Aperture, Palette, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -36,7 +36,7 @@ function TheoryInline({ section }: { section: typeof cameraModule.theory[0] }) {
   );
 }
 
-function SectionHeader({ icon: Icon, title, number }: { icon: any; title: string; number: number }) {
+function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; title: string; number: number; subtitle?: string }) {
   return (
     <div className="flex items-center gap-3 mb-4">
       <div
@@ -48,6 +48,7 @@ function SectionHeader({ icon: Icon, title, number }: { icon: any; title: string
       <div>
         <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Part {number}</p>
         <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">{title}</h2>
+        {subtitle && <p className="text-[10px] text-muted-foreground mt-0.5">{subtitle}</p>}
       </div>
     </div>
   );
@@ -80,62 +81,99 @@ export default function CameraModule() {
         </div>
       </motion.div>
 
-      <div className="space-y-10">
+      <div className="space-y-12">
         {/* ═══ PART 1: Image Formation & Projection ═══ */}
         <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <SectionHeader icon={Lightbulb} title="Image Formation & Projection" number={1} />
+          <SectionHeader icon={Lightbulb} title="Image Formation & Projection" number={1} subtitle="How does a camera turn the 3D world into a flat image?" />
 
           <div className="space-y-6">
-            {/* Intuition theory */}
+            {/* Start with the intuition */}
             {theoryByTitle["Intuition"] && <TheoryInline section={theoryByTitle["Intuition"]} />}
 
-            {/* 3D → 2D Projection animation */}
+            {/* Immediately show the 3D → 2D animation so students visualize the concept */}
             <Projection3DScene />
 
-            {/* Pinhole Camera Model theory */}
+            {/* Now the formal pinhole model */}
             {theoryByTitle["Pinhole Camera Model"] && <TheoryInline section={theoryByTitle["Pinhole Camera Model"]} />}
 
-            {/* Pinhole animation */}
+            {/* Interactive pinhole to let them play with the parameters */}
             <PinholeScene />
           </div>
         </motion.section>
 
-        {/* ═══ PART 2: Perspective Projection ═══ */}
+        {/* ═══ PART 2: Perspective Projection & Similar Triangles ═══ */}
         <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <SectionHeader icon={BookOpen} title="Perspective Projection & Similar Triangles" number={2} />
+          <SectionHeader icon={BookOpen} title="Perspective Projection & Similar Triangles" number={2} subtitle="The geometry that makes projection work — connect f, Z, and image coordinates" />
 
           <div className="space-y-6">
+            <div className="concept-card">
+              <h3 className="font-semibold text-foreground mb-3 text-sm">Why Similar Triangles?</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                The pinhole model creates two similar triangles: one from the camera center to the 3D point (base = Z, height = Y), 
+                and one from the camera center to the image plane (base = f, height = y'). Since these triangles share the same angle 
+                at the camera center, their ratios are equal: <strong>y'/f = Y/Z</strong>. This single relationship is the foundation 
+                of all perspective projection — it explains why distant objects appear smaller and why focal length controls field of view.
+              </p>
+            </div>
+
+            {/* The improved perspective animation with split-view */}
             <PerspectiveScene />
           </div>
         </motion.section>
 
-        {/* ═══ PART 3: Lens & Distortion ═══ */}
+        {/* ═══ PART 3: Lens, Distortion & Depth of Field ═══ */}
         <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <SectionHeader icon={Aperture} title="Lenses, Distortion & Depth of Field" number={3} />
+          <SectionHeader icon={Aperture} title="Lenses, Distortion & Depth of Field" number={3} subtitle="Real cameras use lenses — introducing blur, distortion, and optical trade-offs" />
 
           <div className="space-y-6">
             {theoryByTitle["Lens Distortion"] && <TheoryInline section={theoryByTitle["Lens Distortion"]} />}
 
+            {/* Lens animation showing thin lens equation, DOF, CoC */}
             <LensScene />
           </div>
         </motion.section>
 
         {/* ═══ PART 4: Intrinsic Matrix, Sensor & Calibration ═══ */}
         <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <SectionHeader icon={Cpu} title="Intrinsic Matrix, Sensor & Calibration" number={4} />
+          <SectionHeader icon={Cpu} title="Intrinsic Matrix, Sensor & Calibration" number={4} subtitle="From camera geometry to pixel coordinates — the K matrix and digital sensors" />
 
           <div className="space-y-6">
-            {/* Intrinsic matrix animation */}
+            {/* Intrinsic matrix animation — normalized coords → K → pixel coords */}
             <IntrinsicScene />
 
-            {/* Image Formation & Sensor theory */}
+            {/* Sensor theory */}
             {theoryByTitle["Image Formation & Sensor"] && <TheoryInline section={theoryByTitle["Image Formation & Sensor"]} />}
 
-            {/* Sensor animation */}
+            {/* Sensor animation with corrected Bayer pattern */}
             <SensorScene />
 
             {/* Calibration theory */}
             {theoryByTitle["Camera Calibration (Zhang's Method)"] && <TheoryInline section={theoryByTitle["Camera Calibration (Zhang's Method)"]} />}
+          </div>
+        </motion.section>
+
+        {/* ═══ PART 5: Color Spaces & Image Manipulation ═══ */}
+        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <SectionHeader icon={Palette} title="Color Spaces & Image Manipulation" number={5} subtitle="RGB, HSV, gamma correction, and the pixel operations that power every CV pipeline" />
+
+          <div className="space-y-6">
+            {theoryByTitle["Color Spaces & Representations"] && <TheoryInline section={theoryByTitle["Color Spaces & Representations"]} />}
+
+            {/* Interactive color space visualization */}
+            <ColorSpaceScene />
+
+            {theoryByTitle["Gamma Correction & Dynamic Range"] && <TheoryInline section={theoryByTitle["Gamma Correction & Dynamic Range"]} />}
+
+            {theoryByTitle["Basic Image Operations"] && <TheoryInline section={theoryByTitle["Basic Image Operations"]} />}
+          </div>
+        </motion.section>
+
+        {/* ═══ PART 6: Applications ═══ */}
+        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+          <SectionHeader icon={Eye} title="Real-World Applications" number={6} subtitle="Where camera models and image formation matter in practice" />
+
+          <div className="space-y-6">
+            {theoryByTitle["Real-World Applications"] && <TheoryInline section={theoryByTitle["Real-World Applications"]} />}
           </div>
         </motion.section>
 
