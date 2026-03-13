@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 export function useSubscription() {
   const { user } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
