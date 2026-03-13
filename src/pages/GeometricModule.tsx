@@ -123,8 +123,8 @@ export default function GeometricModule() {
         <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">Structured Learning Flow</h2>
         <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-2">
           {[
-            { id: "mono-depth", icon: "🔭", label: "Monocular Depth" },
             { id: "stereo", icon: "👀", label: "Stereo Vision" },
+            { id: "mono-depth", icon: "🔭", label: "Monocular Depth" },
             { id: "pose-2d", icon: "🦴", label: "2D Pose" },
             { id: "pose-3d", icon: "🧊", label: "3D Pose Lifting" },
             { id: "self-sup", icon: "🔄", label: "Self-Supervised" },
@@ -142,12 +142,48 @@ export default function GeometricModule() {
       </div>
 
       <div className="space-y-12">
-        {/* ═══════ Part 1: Monocular Depth ═══════ */}
+        {/* ═══════ Part 1: Stereo Vision ═══════ */}
+        <section id="stereo">
+          <SectionHeader
+            icon={Scan}
+            title="Stereo Vision & Disparity"
+            number={1}
+            subtitle="Two cameras, known baseline. Depth from triangulation: find the same point in both images, measure the pixel shift (disparity), recover metric depth via Z = fB/d."
+          />
+          <div className="space-y-4">
+            <StereoVisionCanvas />
+
+            <TheoryInline title="Stereo Vision & Disparity" />
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <ContentCard title="Core Formula" accent="#e8b84b">
+                Depth Z is inversely proportional to disparity d. Large disparity = nearby object. Near-zero disparity makes depth blow up — the stereo horizon.
+                <div className="mt-2 font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border">
+                  Z = f · B / d<br />d = xL − xR
+                </div>
+              </ContentCard>
+              <ContentCard title="Epipolar Constraint" accent="#2dd4bf">
+                A 3D point's image must lie on a known line in the other camera — the epipolar line. This reduces matching from 2D search to 1D search.
+                <div className="mt-2 font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border">
+                  p_R^T · F · p_L = 0
+                </div>
+              </ContentCard>
+              <ContentCard title="Cost Volume" accent="#fb7185">
+                For each pixel and disparity candidate, compute a matching cost. The 3D cost volume C[x,y,d] is regularized (SGM) or processed by a 3D CNN to find the best disparity.
+                <div className="mt-2 font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border">
+                  C[x,y,d] = cost(IL(x,y), IR(x-d,y))
+                </div>
+              </ContentCard>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════ Part 2: Monocular Depth ═══════ */}
         <section id="mono-depth">
           <SectionHeader
             icon={Eye}
             title="Monocular Depth Estimation"
-            number={1}
+            number={2}
             subtitle="From a single image, predict the depth of every pixel — an ill-posed problem solved by learning perceptual cues: occlusion, relative size, texture gradients, and perspective convergence."
           />
           <div className="space-y-4">
@@ -184,42 +220,6 @@ export default function GeometricModule() {
                 <div className="mt-2 font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border">
                   B(x) = |x| if |x| ≤ c<br />
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= (x²+c²)/2c if |x| &gt; c
-                </div>
-              </ContentCard>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════ Part 2: Stereo Vision ═══════ */}
-        <section id="stereo">
-          <SectionHeader
-            icon={Scan}
-            title="Stereo Vision & Disparity"
-            number={2}
-            subtitle="Two cameras, known baseline. Depth from triangulation: find the same point in both images, measure the pixel shift (disparity), recover metric depth via Z = fB/d."
-          />
-          <div className="space-y-4">
-            <StereoVisionCanvas />
-
-            <TheoryInline title="Stereo Vision & Disparity" />
-
-            <div className="grid md:grid-cols-3 gap-4">
-              <ContentCard title="Core Formula" accent="#e8b84b">
-                Depth Z is inversely proportional to disparity d. Large disparity = nearby object. Near-zero disparity makes depth blow up — the stereo horizon.
-                <div className="mt-2 font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border">
-                  Z = f · B / d<br />d = xL − xR
-                </div>
-              </ContentCard>
-              <ContentCard title="Epipolar Constraint" accent="#2dd4bf">
-                A 3D point's image must lie on a known line in the other camera — the epipolar line. This reduces matching from 2D search to 1D search.
-                <div className="mt-2 font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border">
-                  p_R^T · F · p_L = 0
-                </div>
-              </ContentCard>
-              <ContentCard title="Cost Volume" accent="#fb7185">
-                For each pixel and disparity candidate, compute a matching cost. The 3D cost volume C[x,y,d] is regularized (SGM) or processed by a 3D CNN to find the best disparity.
-                <div className="mt-2 font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border">
-                  C[x,y,d] = cost(IL(x,y), IR(x-d,y))
                 </div>
               </ContentCard>
             </div>
