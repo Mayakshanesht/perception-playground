@@ -150,12 +150,21 @@ export default function Pricing() {
                 </li>
               ))}
             </ul>
-            <div className="mt-6 pt-4 border-t border-border">
+            <div className="mt-6 pt-4 border-t border-border space-y-2">
               {isSubscribed ? (
-                <div className="flex items-center gap-2 text-sm text-primary">
-                  <Shield className="h-4 w-4" />
-                  <span className="font-medium">Active subscription</span>
-                </div>
+                <>
+                  <div className="flex items-center gap-2 text-sm text-primary">
+                    <Shield className="h-4 w-4" />
+                    <span className="font-medium">Active subscription</span>
+                  </div>
+                  <button
+                    onClick={handleCancel}
+                    disabled={cancelling}
+                    className="w-full rounded-lg border border-destructive/30 text-destructive py-2 text-xs font-medium hover:bg-destructive/10 transition-colors disabled:opacity-50"
+                  >
+                    {cancelling ? "Cancelling..." : "Cancel Subscription"}
+                  </button>
+                </>
               ) : isPending ? (
                 <div className="flex items-center gap-2 text-sm text-accent">
                   <Clock className="h-4 w-4" />
