@@ -394,7 +394,7 @@ export function PerspectiveScene() {
     ctx.fillStyle = ptColor;
     ctx.beginPath(); ctx.arc(worldScreenX, worldScreenY, 8, 0, Math.PI * 2); ctx.fill();
     const glow = ctx.createRadialGradient(worldScreenX, worldScreenY, 0, worldScreenX, worldScreenY, 20);
-    glow.addColorStop(0, "hsl(0, 85%, 60% / 0.3)"); glow.addColorStop(1, "transparent");
+    glow.addColorStop(0, "hsla(0, 85%, 60%, 0.3)"); glow.addColorStop(1, "transparent");
     ctx.fillStyle = glow;
     ctx.beginPath(); ctx.arc(worldScreenX, worldScreenY, 20, 0, Math.PI * 2); ctx.fill();
     labelText(ctx, worldScreenX + 12, worldScreenY - 12, `P(${Math.round(animX)}, ${Math.round(animY)}, ${Z})`, ptColor);
@@ -497,7 +497,7 @@ export function PerspectiveScene() {
     ctx.fillStyle = ptColor;
     ctx.beginPath(); ctx.arc(cpx, cpy, 6, 0, Math.PI * 2); ctx.fill();
     const glow2 = ctx.createRadialGradient(cpx, cpy, 0, cpx, cpy, 16);
-    glow2.addColorStop(0, "hsl(0, 85%, 60% / 0.4)"); glow2.addColorStop(1, "transparent");
+    glow2.addColorStop(0, "hsla(0, 85%, 60%, 0.4)"); glow2.addColorStop(1, "transparent");
     ctx.fillStyle = glow2;
     ctx.beginPath(); ctx.arc(cpx, cpy, 16, 0, Math.PI * 2); ctx.fill();
 
@@ -778,7 +778,7 @@ export function IntrinsicScene() {
       ctx.fillStyle = pt.color;
       ctx.beginPath(); ctx.arc(csx, csy, 6, 0, Math.PI * 2); ctx.fill();
       const gl = ctx.createRadialGradient(csx, csy, 0, csx, csy, 14);
-      gl.addColorStop(0, pt.color.replace(")", " / 0.3)").replace("hsl(", "hsla(")); gl.addColorStop(1, "transparent");
+      gl.addColorStop(0, pt.color.replace("hsl(", "hsla(").replace(")", ", 0.3)")); gl.addColorStop(1, "transparent");
       ctx.fillStyle = gl;
       ctx.beginPath(); ctx.arc(csx, csy, 14, 0, Math.PI * 2); ctx.fill();
       labelText(ctx, csx + 8, csy - 4, `${pt.label}(${Math.round(u)}, ${Math.round(v)})`, pt.color);
