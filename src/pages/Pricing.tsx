@@ -1,10 +1,11 @@
-import { Check, Crown, Zap, ArrowRight, Shield } from "lucide-react";
+import { Check, Crown, Zap, ArrowRight, Shield, Clock, ExternalLink } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const STRIPE_LINK = "https://buy.stripe.com/eVqdR93RD9664BGbs12kw09";
-
 const freeFeatures = [
   "Dashboard overview",
   "Pipeline visualization",
@@ -25,11 +26,25 @@ const proFeatures = [
 
 export default function Pricing() {
   const { user } = useAuth();
-  const { isSubscribed } = useSubscription();
+  const { isSubscribed, isPending } = useSubscription();
+  const { toast } = useToast();
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
+    // Open Stripe payment link in new tab
     const url = user ? `${STRIPE_LINK}?prefilled_email=${encodeURIComponent(user.email || "")}` : STRIPE_LINK;
     window.open(url, "_blank");
+
+    // Create a pending subscription record so admin can see it
+    if (user) {
+      await supabase.from("subscriptions").upsert({
+        user_id: user.id,
+        status: "pending",
+      }, { onConflict: "user_id" });
+      toast({
+        title: "Payment started",
+        description: "Complete payment in the new tab. An admin will approve your access shortly after.",
+      });
+    }
   };
 
   return (
@@ -110,12 +125,17 @@ export default function Pricing() {
                   <Shield className="h-4 w-4" />
                   <span className="font-medium">Active subscription</span>
                 </div>
+              ) : isPending ? (
+                <div className="flex items-center gap-2 text-sm text-accent">
+                  <Clock className="h-4 w-4" />
+                  <span className="font-medium">Pending admin approval</span>
+                </div>
               ) : (
                 <button
                   onClick={handleSubscribe}
                   className="w-full rounded-lg bg-primary text-primary-foreground py-2.5 text-sm font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                 >
-                  Subscribe Now <ArrowRight className="h-4 w-4" />
+                  Subscribe Now <ExternalLink className="h-4 w-4" />
                 </button>
               )}
             </div>
@@ -124,7 +144,7 @@ export default function Pricing() {
 
         {/* Info */}
         <p className="text-center text-xs text-muted-foreground mt-8">
-          After payment, your access is activated automatically. Manage your subscription anytime.
+          After payment, an admin will review and approve your access. You'll get full access once approved.
         </p>
       </div>
     </div>

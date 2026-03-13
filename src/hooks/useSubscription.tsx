@@ -5,12 +5,14 @@ import { useAuth } from "@/hooks/useAuth";
 export function useSubscription() {
   const { user } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
       setIsSubscribed(false);
+      setIsPending(false);
       setIsAdmin(false);
       setLoading(false);
       return;
@@ -24,6 +26,7 @@ export function useSubscription() {
       ]);
 
       setIsSubscribed(subResult.data?.status === "active");
+      setIsPending(subResult.data?.status === "pending");
       setIsAdmin(roleResult.data?.some((r: any) => r.role === "admin") ?? false);
       setLoading(false);
     };
@@ -41,5 +44,5 @@ export function useSubscription() {
     return { error };
   };
 
-  return { isSubscribed, isAdmin, loading, activateSubscription };
+  return { isSubscribed, isPending, isAdmin, loading, activateSubscription };
 }
