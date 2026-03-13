@@ -125,12 +125,17 @@ export default function Pricing() {
                   <Shield className="h-4 w-4" />
                   <span className="font-medium">Active subscription</span>
                 </div>
+              ) : isPending ? (
+                <div className="flex items-center gap-2 text-sm text-accent">
+                  <Clock className="h-4 w-4" />
+                  <span className="font-medium">Pending admin approval</span>
+                </div>
               ) : (
                 <button
                   onClick={handleSubscribe}
                   className="w-full rounded-lg bg-primary text-primary-foreground py-2.5 text-sm font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                 >
-                  Subscribe Now <ArrowRight className="h-4 w-4" />
+                  Subscribe Now <ExternalLink className="h-4 w-4" />
                 </button>
               )}
             </div>
