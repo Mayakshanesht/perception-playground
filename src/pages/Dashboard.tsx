@@ -84,6 +84,7 @@ const copilotWorkflow = [
 ];
 
 export default function Dashboard() {
+  const { isSubscribed } = useSubscription();
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto aurora-bg rounded-2xl">
       {/* Header */}
