@@ -581,9 +581,6 @@ export default function SemanticSceneVisualizer() {
     </div>
   );
 }
-export default function SemanticSceneVisualizer() {
-  const [mode, setMode] = useState<Mode>("clf");
-  const [animKey, setAnimKey] = useState(0);
 
   const switchMode = useCallback((m: Mode) => {
     setMode(m);
