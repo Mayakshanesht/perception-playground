@@ -40,9 +40,19 @@ export function useSubscription() {
       user_id: user.id,
       status: "active",
     }, { onConflict: "user_id" });
-    if (!error) setIsSubscribed(true);
+    if (!error) { setIsSubscribed(true); setIsPending(false); }
     return { error };
   };
 
-  return { isSubscribed, isPending, isAdmin, loading, activateSubscription };
+  const cancelSubscription = async () => {
+    if (!user) return { error: "Not authenticated" };
+    const { error } = await supabase.from("subscriptions").update({
+      status: "cancelled",
+      updated_at: new Date().toISOString(),
+    }).eq("user_id", user.id);
+    if (!error) { setIsSubscribed(false); setIsPending(false); }
+    return { error };
+  };
+
+  return { isSubscribed, isPending, isAdmin, loading, activateSubscription, cancelSubscription };
 }

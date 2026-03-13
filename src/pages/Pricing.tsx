@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Check, Crown, Zap, ArrowRight, Shield, Clock, ExternalLink } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -26,24 +27,55 @@ const proFeatures = [
 
 export default function Pricing() {
   const { user } = useAuth();
-  const { isSubscribed, isPending } = useSubscription();
+  const { isSubscribed, isPending, cancelSubscription } = useSubscription();
   const { toast } = useToast();
+  const [cancelling, setCancelling] = useState(false);
 
   const handleSubscribe = async () => {
+    if (!user) return;
+
+    // Prevent double-charge: don't allow if already pending or active
+    const { data: existing } = await supabase
+      .from("subscriptions")
+      .select("status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existing?.status === "active") {
+      toast({ title: "Already subscribed", description: "You already have an active subscription." });
+      return;
+    }
+    if (existing?.status === "pending") {
+      toast({ title: "Payment pending", description: "Your previous payment is awaiting admin approval." });
+      // Still open the link in case they didn't complete it
+      const url = `${STRIPE_LINK}?prefilled_email=${encodeURIComponent(user.email || "")}`;
+      window.open(url, "_blank");
+      return;
+    }
+
     // Open Stripe payment link in new tab
-    const url = user ? `${STRIPE_LINK}?prefilled_email=${encodeURIComponent(user.email || "")}` : STRIPE_LINK;
+    const url = `${STRIPE_LINK}?prefilled_email=${encodeURIComponent(user.email || "")}`;
     window.open(url, "_blank");
 
-    // Create a pending subscription record so admin can see it
-    if (user) {
-      await supabase.from("subscriptions").upsert({
-        user_id: user.id,
-        status: "pending",
-      }, { onConflict: "user_id" });
-      toast({
-        title: "Payment started",
-        description: "Complete payment in the new tab. An admin will approve your access shortly after.",
-      });
+    // Create a pending subscription record
+    await supabase.from("subscriptions").upsert({
+      user_id: user.id,
+      status: "pending",
+    }, { onConflict: "user_id" });
+    toast({
+      title: "Payment started",
+      description: "Complete payment in the new tab. An admin will approve your access shortly after.",
+    });
+  };
+
+  const handleCancel = async () => {
+    setCancelling(true);
+    const { error } = await cancelSubscription();
+    setCancelling(false);
+    if (error) {
+      toast({ title: "Error", description: "Failed to cancel subscription.", variant: "destructive" });
+    } else {
+      toast({ title: "Subscription cancelled", description: "You've been moved to the Free plan." });
     }
   };
 
@@ -119,12 +151,21 @@ export default function Pricing() {
                 </li>
               ))}
             </ul>
-            <div className="mt-6 pt-4 border-t border-border">
+            <div className="mt-6 pt-4 border-t border-border space-y-2">
               {isSubscribed ? (
-                <div className="flex items-center gap-2 text-sm text-primary">
-                  <Shield className="h-4 w-4" />
-                  <span className="font-medium">Active subscription</span>
-                </div>
+                <>
+                  <div className="flex items-center gap-2 text-sm text-primary">
+                    <Shield className="h-4 w-4" />
+                    <span className="font-medium">Active subscription</span>
+                  </div>
+                  <button
+                    onClick={handleCancel}
+                    disabled={cancelling}
+                    className="w-full rounded-lg border border-destructive/30 text-destructive py-2 text-xs font-medium hover:bg-destructive/10 transition-colors disabled:opacity-50"
+                  >
+                    {cancelling ? "Cancelling..." : "Cancel Subscription"}
+                  </button>
+                </>
               ) : isPending ? (
                 <div className="flex items-center gap-2 text-sm text-accent">
                   <Clock className="h-4 w-4" />
