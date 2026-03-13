@@ -52,7 +52,7 @@ const App = () => (
               <Route path="/module/motion" element={<ProtectedRoute><MotionModule /></ProtectedRoute>} />
               <Route path="/module/reconstruction" element={<ProtectedRoute><ReconstructionModule /></ProtectedRoute>} />
               <Route path="/module/scene-reasoning" element={<ProtectedRoute><SceneReasoningModule /></ProtectedRoute>} />
-              <Route path="/tutorials" element={<ProtectedRoute><Tutorials /></ProtectedRoute>} />
+              <Route path="/tutorials" element={<ProtectedRoute requireSubscription><Tutorials /></ProtectedRoute>} />
               <Route path="/knowledge-graph" element={<ProtectedRoute><KnowledgeGraph /></ProtectedRoute>} />
               <Route path="/studios" element={<ProtectedRoute><PerceptionStudios /></ProtectedRoute>} />
               <Route path="/module/:moduleId" element={<ProtectedRoute><GenericModule /></ProtectedRoute>} />
