@@ -76,23 +76,11 @@ const playgrounds = [
   { name: "Speed Estimation", module: "Motion", path: "/module/motion" },
 ];
 
-const aiTools = [
-  {
-    name: "AI Learning Assistant",
-    desc: "Ask questions about concepts, equations, and learning paths. Available via the floating chat button.",
-    icon: Brain,
-  },
-  {
-    name: "Paper Understanding Agent",
-    desc: "Explore key research papers interactively with structured explanations of methods, equations, and impact.",
-    icon: FileText,
-  },
-  {
-    name: "Knowledge Graph Explorer",
-    desc: "Visualize connections between tasks, architectures, papers, and datasets across the perception pipeline.",
-    icon: Network,
-    path: "/knowledge-graph",
-  },
+const copilotWorkflow = [
+  { step: "1", label: "Create Project", desc: "Define your research question", icon: Lightbulb },
+  { step: "2", label: "AI Analysis", desc: "Get papers, repos & insights", icon: Brain },
+  { step: "3", label: "Hypotheses", desc: "Choose from AI-generated hypotheses", icon: GitBranch },
+  { step: "4", label: "Notebook", desc: "Export runnable Jupyter notebooks", icon: Rocket },
 ];
 
 export default function Dashboard() {
