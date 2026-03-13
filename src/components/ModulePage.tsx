@@ -16,6 +16,7 @@ import { useState } from "react";
 
 interface ModulePageProps {
   content: ModuleContent;
+  hideHeader?: boolean;
 }
 
 function categorizeSections(theory: ModuleContent["theory"]) {
@@ -184,7 +185,7 @@ const moduleConnections: Record<string, { label: string; path: string; relation:
   ],
 };
 
-export default function ModulePage({ content }: ModulePageProps) {
+export default function ModulePage({ content, hideHeader }: ModulePageProps) {
   const playgrounds = content.playgrounds ?? (content.playground ? [content.playground] : []);
   const { intuition, math, classical, deepLearning, applications } = categorizeSections(content.theory);
   const quizQuestions = content.quizQuestions || moduleQuizzes[content.id] || [];
@@ -209,24 +210,28 @@ export default function ModulePage({ content }: ModulePageProps) {
   ].filter(s => s.count > 0);
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto">
-      <Link to="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6">
-        <ArrowLeft className="h-3 w-3" /> Back to Dashboard
-      </Link>
+    <div className={hideHeader ? "" : "p-6 md:p-8 max-w-5xl mx-auto"}>
+      {!hideHeader && (
+        <>
+          <Link to="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6">
+            <ArrowLeft className="h-3 w-3" /> Back to Dashboard
+          </Link>
 
-      {/* Header */}
-      <div className="flex items-start gap-4 mb-8">
-        <div
-          className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
-          style={{ backgroundColor: `hsl(${content.color} / 0.12)` }}
-        >
-          <GraduationCap className="h-6 w-6" style={{ color: `hsl(${content.color})` }} />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">{content.title}</h1>
-          <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">{content.subtitle}</p>
-        </div>
-      </div>
+          {/* Header */}
+          <div className="flex items-start gap-4 mb-8">
+            <div
+              className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `hsl(${content.color} / 0.12)` }}
+            >
+              <GraduationCap className="h-6 w-6" style={{ color: `hsl(${content.color})` }} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">{content.title}</h1>
+              <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">{content.subtitle}</p>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Learning flow nav */}
       <div className="rounded-xl border border-border bg-muted/30 p-4 mb-8">
