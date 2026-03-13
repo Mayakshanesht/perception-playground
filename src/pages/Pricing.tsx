@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Check, Crown, Zap, ArrowRight, Shield, Clock, ExternalLink } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
