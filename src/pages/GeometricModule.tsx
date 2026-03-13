@@ -123,8 +123,8 @@ export default function GeometricModule() {
         <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">Structured Learning Flow</h2>
         <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-2">
           {[
-            { id: "mono-depth", icon: "🔭", label: "Monocular Depth" },
             { id: "stereo", icon: "👀", label: "Stereo Vision" },
+            { id: "mono-depth", icon: "🔭", label: "Monocular Depth" },
             { id: "pose-2d", icon: "🦴", label: "2D Pose" },
             { id: "pose-3d", icon: "🧊", label: "3D Pose Lifting" },
             { id: "self-sup", icon: "🔄", label: "Self-Supervised" },
