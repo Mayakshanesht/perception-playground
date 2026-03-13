@@ -582,7 +582,7 @@ export function VLMArchitectureCanvas() {
     ctx.fillText("b̂ = argmax P(b | I, query) — language-guided detection", 10, h - 12);
   }, []);
 
-  const draw = mode === "contrastive" ? drawContrastive : mode === "embedding" ? drawEmbedding : drawGrounding;
+  const draw = mode === "llava" ? drawLLaVA : mode === "florence" ? drawFlorence : drawGrounding;
   const canvasRef = useCanvas(draw, [mode]);
 
   return (
