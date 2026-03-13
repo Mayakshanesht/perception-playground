@@ -778,7 +778,7 @@ export function IntrinsicScene() {
       ctx.fillStyle = pt.color;
       ctx.beginPath(); ctx.arc(csx, csy, 6, 0, Math.PI * 2); ctx.fill();
       const gl = ctx.createRadialGradient(csx, csy, 0, csx, csy, 14);
-      gl.addColorStop(0, pt.color.replace(")", " / 0.3)").replace("hsl(", "hsla(")); gl.addColorStop(1, "transparent");
+      gl.addColorStop(0, pt.color.replace("hsl(", "hsla(").replace(")", ", 0.3)")); gl.addColorStop(1, "transparent");
       ctx.fillStyle = gl;
       ctx.beginPath(); ctx.arc(csx, csy, 14, 0, Math.PI * 2); ctx.fill();
       labelText(ctx, csx + 8, csy - 4, `${pt.label}(${Math.round(u)}, ${Math.round(v)})`, pt.color);
