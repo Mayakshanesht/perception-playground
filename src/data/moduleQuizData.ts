@@ -94,6 +94,50 @@ export const moduleQuizzes: Record<string, QuizQuestion[]> = {
       correctIndex: 1,
       explanation: "Z = fB/d means depth is inversely proportional to disparity. Closer objects have larger disparity (appear to shift more between left and right views), giving smaller Z.",
     },
+    {
+      question: "What do Part Affinity Fields (PAFs) encode in OpenPose?",
+      options: [
+        "The confidence score of each keypoint detection",
+        "The 3D depth of each joint in camera space",
+        "2D vector fields pointing along limbs to associate keypoints across people",
+        "The color appearance of each body part for re-identification",
+      ],
+      correctIndex: 2,
+      explanation: "PAFs are 2D vector fields that point along the direction of each limb at every pixel on that limb. They encode which keypoints belong together, enabling bottom-up multi-person pose assembly via bipartite matching.",
+    },
+    {
+      question: "Why does self-supervised depth training not need ground-truth depth labels?",
+      options: [
+        "It uses LiDAR data instead of depth labels",
+        "It predicts depth + ego-motion to synthesize views, using photometric error as loss",
+        "It trains on synthetic rendered scenes where depth is known",
+        "It learns depth from image classification features",
+      ],
+      correctIndex: 1,
+      explanation: "Self-supervised depth (Monodepth2) predicts depth and ego-motion, then warps one frame to synthesize another. The photometric error between synthesized and real frames provides the training signal — no depth labels needed, just unlabeled video.",
+    },
+    {
+      question: "What is the core challenge of 3D pose lifting from 2D detections?",
+      options: [
+        "2D pose estimation is too inaccurate for 3D lifting",
+        "Multiple 3D poses can project to the same 2D skeleton (depth ambiguity)",
+        "3D joint coordinates cannot be represented as numbers",
+        "Human skeletons have too many degrees of freedom to model",
+      ],
+      correctIndex: 1,
+      explanation: "The projection from 3D to 2D is non-invertible — e.g., a leg raised forward vs backward looks identical from a front-facing camera. Networks resolve this via temporal context, bone-length priors, and learned pose distributions.",
+    },
+    {
+      question: "How does the epipolar constraint reduce stereo matching cost?",
+      options: [
+        "It eliminates the need for feature extraction",
+        "It reduces the matching search from 2D to 1D along the epipolar line",
+        "It guarantees a unique match for every pixel",
+        "It removes the need for camera calibration",
+      ],
+      correctIndex: 1,
+      explanation: "The epipolar constraint (p_R^T · F · p_L = 0) tells us that a point's match must lie on a specific line in the other image. This reduces the search space from the full 2D image to a single 1D line, dramatically cutting computation.",
+    },
   ],
   motion: [
     {
