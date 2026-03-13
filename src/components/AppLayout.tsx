@@ -20,8 +20,8 @@ const modules = [
   { name: "3D Reconstruction", path: "/module/reconstruction", icon: Box, premium: false },
   { name: "Scene Reasoning", path: "/module/scene-reasoning", icon: MessageSquare, premium: false },
   { name: "Tutorials", path: "/tutorials", icon: BookOpen, premium: true },
-  { name: "Perception Studios", path: "/studios", icon: FlaskConical, premium: false },
   { name: "Knowledge Graph", path: "/knowledge-graph", icon: Network, premium: false },
+  { name: "Perception Studios", path: "/studios", icon: FlaskConical, premium: false },
   { name: "Research Copilot", path: "/research-copilot", icon: Sparkles, premium: true },
 ];
 
