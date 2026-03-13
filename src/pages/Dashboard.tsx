@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 import {
   Camera, Layers, Mountain, Activity, Box, MessageSquare,
   ArrowRight, Sparkles, WandSparkles, BookOpen, Cpu, Zap, GraduationCap,
-  Brain, Network, FlaskConical, FileText,
+  Brain, Network, FlaskConical, FileText, Crown, Rocket, GitBranch, BarChart3, Lightbulb,
 } from "lucide-react";
 import Playground from "@/components/Playground";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const pipelineModules = [
   {
