@@ -478,7 +478,47 @@ function InfoPanel({ mode }: { mode: Mode }) {
   );
 }
 
-/* ══════ MAIN EXPORTED COMPONENT ══════ */
+/* ══════ STANDALONE SCENE COMPONENTS ══════ */
+
+function StandaloneScene({ overlay: Overlay, tag, info }: { overlay: () => JSX.Element; tag: string; info: Mode }) {
+  return (
+    <div className="rounded-xl border border-border overflow-hidden">
+      <div className="relative bg-[#0A0C15]">
+        <BaseScene />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="absolute inset-0"
+        >
+          <Overlay />
+        </motion.div>
+        <span className="absolute bottom-2 right-3 text-[8px] font-mono text-muted-foreground/40 uppercase tracking-wider pointer-events-none">
+          {tag}
+        </span>
+      </div>
+      <InfoPanel mode={info} />
+    </div>
+  );
+}
+
+export function ClassificationScene() {
+  return <StandaloneScene overlay={ClassificationOverlay} tag={TAGS.clf} info="clf" />;
+}
+
+export function DetectionScene() {
+  return <StandaloneScene overlay={DetectionOverlay} tag={TAGS.det} info="det" />;
+}
+
+export function SemanticSegScene() {
+  return <StandaloneScene overlay={SemanticSegOverlay} tag={TAGS.sem} info="sem" />;
+}
+
+export function InstanceSegScene() {
+  return <StandaloneScene overlay={InstanceSegOverlay} tag={TAGS.inst} info="inst" />;
+}
+
+/* ══════ COMBINED TABBED COMPONENT (kept for reference) ══════ */
 
 const OVERLAYS: Record<Mode, () => JSX.Element> = {
   clf: ClassificationOverlay,
@@ -500,7 +540,6 @@ export default function SemanticSceneVisualizer() {
 
   return (
     <div className="space-y-0">
-      {/* Tabs */}
       <div className="flex border border-border border-b-0 rounded-t-lg overflow-hidden">
         {TAB_LABELS.map((tab) => (
           <button
@@ -520,8 +559,6 @@ export default function SemanticSceneVisualizer() {
           </button>
         ))}
       </div>
-
-      {/* Scene */}
       <div className="relative border border-border rounded-b-lg overflow-hidden bg-[#0A0C15]">
         <BaseScene />
         <AnimatePresence mode="wait">
@@ -536,35 +573,11 @@ export default function SemanticSceneVisualizer() {
             <OverlayComponent />
           </motion.div>
         </AnimatePresence>
-        {/* Output tag */}
         <span className="absolute bottom-2 right-3 text-[8px] font-mono text-muted-foreground/40 uppercase tracking-wider pointer-events-none">
           {TAGS[mode]}
         </span>
       </div>
-
-      {/* Info panels */}
       <InfoPanel mode={mode} />
-
-      {/* Task flow mini-nav */}
-      <div className="flex items-center gap-1.5 mt-3 flex-wrap">
-        {TAB_LABELS.map((tab, i) => (
-          <div key={tab.id} className="flex items-center gap-1.5">
-            <button
-              onClick={() => switchMode(tab.id)}
-              className={`text-[9px] font-mono uppercase tracking-wider px-2 py-1 rounded border transition-colors ${
-                mode === tab.id
-                  ? "text-primary border-primary"
-                  : "text-muted-foreground border-border hover:text-foreground hover:border-muted-foreground"
-              }`}
-            >
-              {tab.label}
-            </button>
-            {i < TAB_LABELS.length - 1 && (
-              <span className="text-muted-foreground/30 text-[10px]">→</span>
-            )}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
