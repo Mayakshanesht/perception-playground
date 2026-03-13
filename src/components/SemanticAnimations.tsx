@@ -453,7 +453,7 @@ function InfoPanel({ mode }: { mode: Mode }) {
   const data = infoPanels[mode];
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
-      {[data.left, data.right].map((card) => (
+      {[data.left, data.right].map((card: any) => (
         <div key={card.title} className="rounded-lg border border-border bg-card p-3">
           <p className="text-[8px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">{card.title}</p>
           <p className="text-[11px] text-muted-foreground leading-relaxed">{card.body}</p>
