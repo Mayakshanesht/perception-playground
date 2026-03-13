@@ -197,16 +197,18 @@ export default function ModulePage({ content, hideHeader, hideTheory }: ModulePa
   const [exploringPaper, setExploringPaper] = useState<string | null>(null);
 
   const navItems = [
-    { id: "intuition", label: "Intuition", count: intuition.length, icon: "💡" },
+    ...(!hideTheory ? [{ id: "intuition", label: "Intuition", count: intuition.length, icon: "💡" }] : []),
     { id: "images", label: "Visual", count: images.length, icon: "🖼️" },
-    { id: "math", label: "Math", count: math.length, icon: "📐" },
-    { id: "classical", label: "Classical", count: classical.length, icon: "📚" },
-    { id: "deep-learning", label: "Deep Learning", count: deepLearning.length, icon: "🧠" },
+    ...(!hideTheory ? [
+      { id: "math", label: "Math", count: math.length, icon: "📐" },
+      { id: "classical", label: "Classical", count: classical.length, icon: "📚" },
+      { id: "deep-learning", label: "Deep Learning", count: deepLearning.length, icon: "🧠" },
+    ] : []),
     { id: "labs", label: "Labs", count: labs.length, icon: "🧪" },
     { id: "playground", label: "Playground", count: playgrounds.length, icon: "🎮" },
     { id: "quiz", label: "Quiz", count: quizQuestions.length, icon: "❓" },
     { id: "failures", label: "Failures", count: failureModes.length, icon: "⚠️" },
-    { id: "applications", label: "Applications", count: applications.length, icon: "🚀" },
+    ...(!hideTheory ? [{ id: "applications", label: "Applications", count: applications.length, icon: "🚀" }] : []),
     { id: "connections", label: "Connections", count: connections.length, icon: "🔗" },
   ].filter(s => s.count > 0);
 
