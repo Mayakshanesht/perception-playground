@@ -26,6 +26,7 @@ export function useSubscription() {
       ]);
 
       setIsSubscribed(subResult.data?.status === "active");
+      setIsPending(subResult.data?.status === "pending");
       setIsAdmin(roleResult.data?.some((r: any) => r.role === "admin") ?? false);
       setLoading(false);
     };
