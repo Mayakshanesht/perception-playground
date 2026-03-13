@@ -265,7 +265,7 @@ function PinholeScene() {
     // Rays
     const nRays = showAllRays ? 7 : 2;
     for (let i = 0; i < nRays; i++) {
-      const t = nRays === 1 ? 0.5 : i / (nRays - 1);
+      const t = nRays <= 1 ? 0.5 : i / (nRays - 1);
       const srcY = cy - (objHeight - objAnim) + (objHeight - objAnim) * 2 * t;
       const alpha = showAllRays ? 0.25 : 0.7;
       drawRay(ctx, objX, srcY, cxp, cy, `hsl(var(--primary) / ${alpha})`, 1.2);
