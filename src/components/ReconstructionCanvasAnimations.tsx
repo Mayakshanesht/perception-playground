@@ -752,11 +752,12 @@ const sceneDepth = Array.from({ length: sceneH * sceneW }, (_, i) => {
 });
 
 function depthColor(d: number, a = 1) {
+  // Turbo-inspired colormap: blue → cyan → green → yellow → red
   const t = clamp(d, 0, 1);
-  const r = t < 0.5 ? Math.floor(lerp(230, 50, t * 2)) : Math.floor(lerp(50, 10, (t - 0.5) * 2));
-  const g = t < 0.5 ? Math.floor(lerp(30, 200, t * 2)) : Math.floor(lerp(200, 80, (t - 0.5) * 2));
-  const b = t < 0.5 ? Math.floor(lerp(20, 60, t * 2)) : Math.floor(lerp(60, 220, (t - 0.5) * 2));
-  return `rgba(${r},${g},${b},${a})`;
+  const h = lerp(240, 0, t);        // hue: blue(240) → red(0)
+  const s = lerp(85, 90, Math.abs(t - 0.5) * 2); // saturation stays high
+  const l = lerp(55, 50, t);        // lightness
+  return `hsla(${h}, ${s}%, ${l}%, ${a})`;
 }
 
 export function MVSCanvas() {
