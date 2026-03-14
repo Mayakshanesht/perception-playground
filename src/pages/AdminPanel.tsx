@@ -67,10 +67,10 @@ export default function AdminPanel() {
     fetchData();
   };
 
-  const copyEmails = (list: { email: string }[]) => {
-    const emails = list.map(u => u.email).filter(e => e !== "Unknown").join(", ");
+  const copyEmails = (list: { email?: string }[]) => {
+    const emails = list.map(u => u.email).filter((e): e is string => !!e && e !== "Unknown").join(", ");
     navigator.clipboard.writeText(emails);
-    toast({ title: "Copied!", description: `${list.length} email(s) copied to clipboard.` });
+    toast({ title: "Copied!", description: `${list.filter(u => u.email && u.email !== "Unknown").length} email(s) copied to clipboard.` });
   };
 
   if (subLoading) return <div className="p-8 text-muted-foreground">Loading...</div>;
