@@ -6,31 +6,24 @@ function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 function clamp(v: number, a: number, b: number) { return Math.max(a, Math.min(b, v)); }
 function rnd(a: number, b: number) { return a + Math.random() * (b - a); }
 
-// ── Canvas-safe theme colors (from CSS vars) ──
+// ── Canvas-safe theme colors ──
+// Canvas API cannot parse hsl(var(--xxx)) so we resolve to actual values
 const C = {
   primary: "hsla(168, 80%, 58%, 1)",
-  primaryDim: "hsla(168, 80%, 58%, 0.5)",
-  primaryFaint: "hsla(168, 80%, 58%, 0.15)",
-  primaryGhost: "hsla(168, 80%, 58%, 0.06)",
+  primaryA: (a: number) => `hsla(168, 80%, 58%, ${a})`,
   accent: "hsla(38, 92%, 60%, 1)",
-  accentDim: "hsla(38, 92%, 60%, 0.5)",
-  accentFaint: "hsla(38, 92%, 60%, 0.15)",
+  accentA: (a: number) => `hsla(38, 92%, 60%, ${a})`,
   green: "hsla(160, 80%, 55%, 1)",
-  greenDim: "hsla(160, 80%, 55%, 0.5)",
-  greenFaint: "hsla(160, 80%, 55%, 0.15)",
+  greenA: (a: number) => `hsla(160, 80%, 55%, ${a})`,
   red: "hsla(0, 70%, 60%, 1)",
-  redDim: "hsla(0, 70%, 60%, 0.5)",
-  redFaint: "hsla(0, 70%, 60%, 0.08)",
+  redA: (a: number) => `hsla(0, 70%, 60%, ${a})`,
   purple: "hsla(265, 70%, 60%, 1)",
-  purpleDim: "hsla(265, 70%, 60%, 0.5)",
-  bg: "hsla(222, 47%, 8%, 0.9)",
-  bgSolid: "hsla(222, 47%, 8%, 1)",
+  purpleA: (a: number) => `hsla(265, 70%, 60%, ${a})`,
+  bg: (a = 0.9) => `hsla(222, 47%, 8%, ${a})`,
   fg: "hsla(210, 40%, 96%, 1)",
-  muted: "hsla(222, 28%, 15%, 1)",
-  mutedDim: "hsla(222, 28%, 15%, 0.3)",
+  muted: (a = 1) => `hsla(222, 28%, 15%, ${a})`,
   mutedFg: "hsla(215, 20%, 60%, 1)",
   border: "hsla(222, 24%, 20%, 1)",
-  card: "hsla(222, 44%, 11%, 0.3)",
 };
 
 function useCanvas(draw: (ctx: CanvasRenderingContext2D, w: number, h: number, t: number) => void, height = 420) {
