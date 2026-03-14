@@ -45,16 +45,18 @@ const App = () => (
               {/* Free - just needs auth */}
               <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 
-              {/* Free with auth - learning modules & tutorials */}
+              {/* Free with auth */}
               <Route path="/module/camera" element={<ProtectedRoute><CameraModule /></ProtectedRoute>} />
               <Route path="/module/semantic" element={<ProtectedRoute><SemanticModule /></ProtectedRoute>} />
-              <Route path="/module/geometric" element={<ProtectedRoute><GeometricModule /></ProtectedRoute>} />
-              <Route path="/module/motion" element={<ProtectedRoute><MotionModule /></ProtectedRoute>} />
-              <Route path="/module/reconstruction" element={<ProtectedRoute><ReconstructionModule /></ProtectedRoute>} />
-              <Route path="/module/scene-reasoning" element={<ProtectedRoute><SceneReasoningModule /></ProtectedRoute>} />
-              <Route path="/tutorials" element={<ProtectedRoute requireSubscription><Tutorials /></ProtectedRoute>} />
               <Route path="/knowledge-graph" element={<ProtectedRoute><KnowledgeGraph /></ProtectedRoute>} />
               <Route path="/studios" element={<ProtectedRoute><PerceptionStudios /></ProtectedRoute>} />
+
+              {/* Pro - needs subscription */}
+              <Route path="/module/geometric" element={<ProtectedRoute requireSubscription><GeometricModule /></ProtectedRoute>} />
+              <Route path="/module/motion" element={<ProtectedRoute requireSubscription><MotionModule /></ProtectedRoute>} />
+              <Route path="/module/reconstruction" element={<ProtectedRoute requireSubscription><ReconstructionModule /></ProtectedRoute>} />
+              <Route path="/module/scene-reasoning" element={<ProtectedRoute requireSubscription><SceneReasoningModule /></ProtectedRoute>} />
+              <Route path="/tutorials" element={<ProtectedRoute requireSubscription><Tutorials /></ProtectedRoute>} />
               <Route path="/module/:moduleId" element={<ProtectedRoute><GenericModule /></ProtectedRoute>} />
 
               {/* Pro - needs subscription */}
