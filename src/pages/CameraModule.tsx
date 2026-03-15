@@ -2,6 +2,7 @@ import { Projection3DScene, PinholeScene, PerspectiveScene, IntrinsicScene, Lens
 import ModulePage from "@/components/ModulePage";
 import { cameraModule } from "@/data/consolidatedModules";
 import { MathEquation } from "@/components/MathBlock";
+import AITutor from "@/components/AITutor";
 import { ArrowLeft, GraduationCap, Lightbulb, BookOpen, Cpu, Aperture, Palette, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
