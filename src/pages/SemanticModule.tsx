@@ -2,6 +2,7 @@ import ModulePage from "@/components/ModulePage";
 import { ModuleContent } from "@/data/moduleContent";
 import { moduleContents } from "@/data/moduleContent";
 import { MathEquation } from "@/components/MathBlock";
+import AITutor from "@/components/AITutor";
 import { ClassificationScene, DetectionScene, SemanticSegScene, InstanceSegScene } from "@/components/SemanticAnimations";
 import { CNNArchitectureCanvas, ConvFilterCanvas, DetectionPipelineCanvas, SegmentationArchCanvas, ViTCanvas } from "@/components/SemanticCanvasAnimations";
 import { ArrowLeft, GraduationCap, Lightbulb, Target, Grid3X3, Layers, Puzzle, Brain, Zap } from "lucide-react";
