@@ -2,6 +2,7 @@ import ModulePage from "@/components/ModulePage";
 import { ModuleContent } from "@/data/moduleContent";
 import { moduleContents } from "@/data/moduleContent";
 import { MathEquation } from "@/components/MathBlock";
+import AITutor from "@/components/AITutor";
 import {
   FeatureMatchingCanvas,
   EpipolarGeometryCanvas,
