@@ -2,6 +2,7 @@ import ModulePage from "@/components/ModulePage";
 import { ModuleContent, PlaygroundConfig } from "@/data/moduleContent";
 import { moduleContents } from "@/data/moduleContent";
 import { MathEquation } from "@/components/MathBlock";
+import AITutor from "@/components/AITutor";
 import { OpticalFlowCanvas, TrackingCanvas, Tracking3DCanvas, ActionRecognitionCanvas } from "@/components/MotionCanvasAnimations";
 import { ArrowLeft, GraduationCap, Waves, Eye, Box, Clapperboard, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
