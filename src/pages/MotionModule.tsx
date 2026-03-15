@@ -95,7 +95,10 @@ function TheoryInline({ title }: { title: string }) {
   if (!section) return null;
   return (
     <div className="concept-card">
-      <h3 className="font-semibold text-foreground mb-3 text-sm">{section.title}</h3>
+      <div className="flex items-center flex-wrap gap-y-1 mb-3">
+        <h3 className="font-semibold text-foreground text-sm">{section.title}</h3>
+        <AITutor conceptTitle={section.title} conceptContent={section.content} moduleName="Motion Estimation" />
+      </div>
       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{section.content}</p>
       {section.equations?.map((eq) => (
         <div key={eq.label} className="mb-3">
