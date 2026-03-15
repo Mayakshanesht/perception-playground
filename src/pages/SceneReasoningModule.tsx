@@ -2,6 +2,7 @@ import ModulePage from "@/components/ModulePage";
 import { ModuleContent } from "@/data/moduleContent";
 import { sceneReasoningModule as baseSceneModule } from "@/data/consolidatedModules";
 import { MathEquation } from "@/components/MathBlock";
+import AITutor from "@/components/AITutor";
 import { CLIPEmbeddingCanvas, VLMArchitectureCanvas, Scene3DCanvas } from "@/components/SceneReasoningCanvasAnimations";
 import { ArrowLeft, GraduationCap, Sparkles, Brain, Eye, Box, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -80,7 +81,10 @@ function TheoryInline({ title }: { title: string }) {
   if (!section) return null;
   return (
     <div className="concept-card">
-      <h3 className="font-semibold text-foreground mb-3 text-sm">{section.title}</h3>
+      <div className="flex items-center flex-wrap gap-y-1 mb-3">
+        <h3 className="font-semibold text-foreground text-sm">{section.title}</h3>
+        <AITutor conceptTitle={section.title} conceptContent={section.content} moduleName="Scene Reasoning" />
+      </div>
       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{section.content}</p>
       {section.equations?.map((eq) => (
         <div key={eq.label} className="mb-3">
