@@ -110,11 +110,15 @@ export default function Playground({
       setInferencePreview(payloadDataUrl);
 
       const endpoint = import.meta.env.VITE_INFERENCE_API_URL || "/api/hf-inference";
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120_000); // 2 min timeout
+
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        signal: controller.signal,
         body: JSON.stringify({
           image: isImageTask ? base64 : (((file.type || "").startsWith("image/") || /\.(jpg|jpeg|png|webp|bmp)$/i.test(file.name)) ? base64 : undefined),
           video: isImageTask ? undefined : ((((file.type || "").startsWith("video/")) || /\.(mp4|webm|mov|avi|mkv|m4v)$/i.test(file.name)) ? base64 : undefined),
@@ -126,6 +130,7 @@ export default function Playground({
           },
         }),
       });
+      clearTimeout(timeoutId);
 
       const data = await response.json();
       if (!response.ok) {
@@ -134,7 +139,10 @@ export default function Playground({
       if (data?.error) throw new Error(data.error);
       setResult(data);
     } catch (err: any) {
-      setError(err.message || "Inference failed. Please try again.");
+      const msg = err.name === "AbortError"
+        ? "Inference timed out. The model may be loading — please try again in a moment."
+        : (err.message || "Inference failed. Please try again.");
+      setError(msg);
     } finally {
       setLoading(false);
     }
