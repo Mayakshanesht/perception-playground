@@ -2,6 +2,7 @@ import ModulePage from "@/components/ModulePage";
 import { ModuleContent } from "@/data/moduleContent";
 import { sceneReasoningModule as baseSceneModule } from "@/data/consolidatedModules";
 import { MathEquation } from "@/components/MathBlock";
+import AITutor from "@/components/AITutor";
 import { CLIPEmbeddingCanvas, VLMArchitectureCanvas, Scene3DCanvas } from "@/components/SceneReasoningCanvasAnimations";
 import { ArrowLeft, GraduationCap, Sparkles, Brain, Eye, Box, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
