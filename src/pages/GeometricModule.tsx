@@ -2,6 +2,7 @@ import ModulePage from "@/components/ModulePage";
 import { ModuleContent } from "@/data/moduleContent";
 import { moduleContents } from "@/data/moduleContent";
 import { MathEquation } from "@/components/MathBlock";
+import AITutor from "@/components/AITutor";
 import { MonocularDepthCanvas, StereoVisionCanvas, Pose2DCanvas, Pose3DCanvas, SelfSupervisedDepthCanvas } from "@/components/GeometricCanvasAnimations";
 import { ArrowLeft, GraduationCap, Eye, Scan, PersonStanding, Rotate3D, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
