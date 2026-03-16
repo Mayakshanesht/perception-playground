@@ -61,6 +61,8 @@
     --module-motion: 280 70% 60%;
     --module-reconstruction: 340 75% 58%;
     --module-reasoning: 265 70% 60%;
+    --module-nlp: 200 80% 55%;
+    --module-generative: 340 75% 58%;
   }
 }
 

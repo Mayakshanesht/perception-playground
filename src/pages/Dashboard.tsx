@@ -4,7 +4,7 @@ import {
   Camera, Layers, Mountain, Activity, Box, MessageSquare,
   ArrowRight, Sparkles, WandSparkles, BookOpen, Cpu, Zap, GraduationCap,
   Brain, Network, FlaskConical, FileText, Crown, Rocket, GitBranch, BarChart3, Lightbulb,
-  Eye, ChevronRight,
+  Eye, ChevronRight, Type, Paintbrush,
 } from "lucide-react";
 import Playground from "@/components/Playground";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -16,6 +16,8 @@ const pipelineModules = [
   { name: "Motion Estimation", desc: "Optical flow, tracking, action recognition, velocity", icon: Activity, path: "/module/motion", color: "var(--module-motion)", step: 4 },
   { name: "3D Reconstruction", desc: "SfM, Multi-View Stereo, NeRF, Gaussian Splatting", icon: Box, path: "/module/reconstruction", color: "var(--module-reconstruction)", step: 5 },
   { name: "Scene Reasoning", desc: "CLIP, Florence-2, multimodal LLMs, visual grounding", icon: MessageSquare, path: "/module/scene-reasoning", color: "var(--module-reasoning)", step: 6 },
+  { name: "NLP & Large Language Models", desc: "Tokenization, transformers, BERT/GPT, RLHF, agents, LoRA", icon: Type, path: "/module/nlp-llm", color: "var(--module-nlp)", step: 7 },
+  { name: "Generative Vision", desc: "VAEs, GANs, diffusion models, Stable Diffusion, ControlNet", icon: Paintbrush, path: "/module/generative-vision", color: "var(--module-generative)", step: 8 },
 ];
 
 const pipelineSteps = [
@@ -25,6 +27,8 @@ const pipelineSteps = [
   { label: "Motion", color: "var(--module-motion)" },
   { label: "Reconstruction", color: "var(--module-reconstruction)" },
   { label: "Reasoning", color: "var(--module-reasoning)" },
+  { label: "NLP & LLMs", color: "var(--module-nlp)" },
+  { label: "Generative", color: "var(--module-generative)" },
 ];
 
 const playgrounds = [
@@ -240,7 +244,7 @@ export default function Dashboard() {
       <section className="mb-8">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Learning Modules</h2>
-          <span className="text-[10px] text-muted-foreground font-mono">6 modules</span>
+          <span className="text-[10px] text-muted-foreground font-mono">8 modules</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {pipelineModules.map((mod, i) => (
