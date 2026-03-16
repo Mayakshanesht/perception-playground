@@ -13,6 +13,8 @@ import GeometricModule from "@/pages/GeometricModule";
 import MotionModule from "@/pages/MotionModule";
 import ReconstructionModule from "@/pages/ReconstructionModule";
 import SceneReasoningModule from "@/pages/SceneReasoningModule";
+import NLPModule from "@/pages/NLPModule";
+import GenerativeVisionModule from "@/pages/GenerativeVisionModule";
 import Tutorials from "@/pages/Tutorials";
 import KnowledgeGraph from "@/pages/KnowledgeGraph";
 import PerceptionStudios from "@/pages/PerceptionStudios";
