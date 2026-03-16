@@ -16,6 +16,8 @@ const pipelineModules = [
   { name: "Motion Estimation", desc: "Optical flow, tracking, action recognition, velocity", icon: Activity, path: "/module/motion", color: "var(--module-motion)", step: 4 },
   { name: "3D Reconstruction", desc: "SfM, Multi-View Stereo, NeRF, Gaussian Splatting", icon: Box, path: "/module/reconstruction", color: "var(--module-reconstruction)", step: 5 },
   { name: "Scene Reasoning", desc: "CLIP, Florence-2, multimodal LLMs, visual grounding", icon: MessageSquare, path: "/module/scene-reasoning", color: "var(--module-reasoning)", step: 6 },
+  { name: "NLP & Large Language Models", desc: "Tokenization, transformers, BERT/GPT, RLHF, agents, LoRA", icon: Type, path: "/module/nlp-llm", color: "var(--module-nlp)", step: 7 },
+  { name: "Generative Vision", desc: "VAEs, GANs, diffusion models, Stable Diffusion, ControlNet", icon: Paintbrush, path: "/module/generative-vision", color: "var(--module-generative)", step: 8 },
 ];
 
 const pipelineSteps = [
