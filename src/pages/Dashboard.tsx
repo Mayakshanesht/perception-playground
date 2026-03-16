@@ -27,6 +27,8 @@ const pipelineSteps = [
   { label: "Motion", color: "var(--module-motion)" },
   { label: "Reconstruction", color: "var(--module-reconstruction)" },
   { label: "Reasoning", color: "var(--module-reasoning)" },
+  { label: "NLP & LLMs", color: "var(--module-nlp)" },
+  { label: "Generative", color: "var(--module-generative)" },
 ];
 
 const playgrounds = [
