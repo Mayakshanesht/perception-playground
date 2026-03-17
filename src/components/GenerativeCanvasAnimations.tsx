@@ -47,7 +47,7 @@ export function VAEElboViz() {
     ctx.strokeStyle = "rgba(168,85,247,0.9)"; ctx.lineWidth = 2.5; ctx.beginPath();
     for (let x = 0; x < W - 70; x++) {
       const z = (x / (W - 70)) * 6 - 3;
-      const y = Math.exp(-(z - mean) ** 2 / (2 * sigma ** 2)) / (sigma * Math.sqrt(2 * Math.PI));
+      const y = Math.exp(-((z - mean) ** 2) / (2 * sigma ** 2)) / (sigma * Math.sqrt(2 * Math.PI));
       const px = 50 + x, py = H - 40 - y * (H - 80) * sigma * 0.6;
       if (x === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     }
