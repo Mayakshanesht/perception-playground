@@ -15,8 +15,8 @@ const pipelineModules = [
   { name: "Geometric Information", desc: "Depth estimation, stereo vision, pose — recovering 3D structure", icon: Mountain, path: "/module/geometric", color: "var(--module-geometric)", step: 3 },
   { name: "Motion Estimation", desc: "Optical flow, tracking, action recognition, velocity", icon: Activity, path: "/module/motion", color: "var(--module-motion)", step: 4 },
   { name: "3D Reconstruction", desc: "SfM, Multi-View Stereo, NeRF, Gaussian Splatting", icon: Box, path: "/module/reconstruction", color: "var(--module-reconstruction)", step: 5 },
-  { name: "Scene Reasoning", desc: "CLIP, Florence-2, multimodal LLMs, visual grounding", icon: MessageSquare, path: "/module/scene-reasoning", color: "var(--module-reasoning)", step: 6 },
-  { name: "NLP & Large Language Models", desc: "Tokenization, transformers, BERT/GPT, RLHF, agents, LoRA", icon: Type, path: "/module/nlp-llm", color: "var(--module-nlp)", step: 7 },
+  { name: "NLP & Large Language Models", desc: "Tokenization, transformers, BERT/GPT, RLHF, agents, LoRA", icon: Type, path: "/module/nlp-llm", color: "var(--module-nlp)", step: 6 },
+  { name: "Scene Reasoning & VLMs", desc: "ViT, CLIP, LLaVA, Flamingo, visual grounding, NeRF, 3D scenes", icon: MessageSquare, path: "/module/scene-reasoning", color: "var(--module-reasoning)", step: 7 },
   { name: "Generative Vision", desc: "VAEs, GANs, diffusion models, Stable Diffusion, ControlNet", icon: Paintbrush, path: "/module/generative-vision", color: "var(--module-generative)", step: 8 },
 ];
 
@@ -26,8 +26,8 @@ const pipelineSteps = [
   { label: "Geometry", color: "var(--module-geometric)" },
   { label: "Motion", color: "var(--module-motion)" },
   { label: "Reconstruction", color: "var(--module-reconstruction)" },
-  { label: "Reasoning", color: "var(--module-reasoning)" },
   { label: "NLP & LLMs", color: "var(--module-nlp)" },
+  { label: "Reasoning", color: "var(--module-reasoning)" },
   { label: "Generative", color: "var(--module-generative)" },
 ];
 

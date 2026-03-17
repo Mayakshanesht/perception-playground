@@ -168,6 +168,9 @@ const edges: GraphEdge[] = [
   { from: "a14", to: "d11" },
   { from: "a20", to: "d8" }, { from: "a19", to: "d9" },
   { from: "a22", to: "d9" },
+  { from: "a25", to: "d12" }, { from: "a26", to: "d12" }, { from: "a24", to: "d12" },
+  { from: "a27", to: "d11" }, { from: "a29", to: "d13" },
+  { from: "a31", to: "d1" }, { from: "a31", to: "d11" },
 
   // Cross-task relationships
   { from: "t2", to: "t3" }, { from: "t3", to: "t5" }, { from: "t3", to: "t4" },
