@@ -2,6 +2,7 @@ import ModulePage from "@/components/ModulePage";
 import { nlpLLMModule } from "@/data/nlpModuleData";
 import { MathEquation } from "@/components/MathBlock";
 import AITutor from "@/components/AITutor";
+import { BPETokenizerDemo, AttentionHeatmap, TransformerPipelineViz, AgentLoopViz } from "@/components/NLPCanvasAnimations";
 import { ArrowLeft, GraduationCap, Type, Brain, Cpu, Layers, Zap, Bot, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -59,10 +60,7 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
       viewport={{ once: true }}
       className="flex items-start gap-4 mb-6"
     >
-      <div
-        className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 mt-1"
-        style={{ backgroundColor: `hsl(${color} / 0.12)` }}
-      >
+      <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 mt-1" style={{ backgroundColor: `hsl(${color} / 0.12)` }}>
         <Icon className="h-5 w-5" style={{ color: `hsl(${color})` }} />
       </div>
       <div>
@@ -104,11 +102,7 @@ export default function NLPModule() {
             { id: "efficiency", icon: "🔧", label: "RAG & LoRA" },
             { id: "review", icon: "📚", label: "Agents & Review" },
           ].map((item) => (
-            <a
-              key={item.id}
-              href={`#${item.id}`}
-              className="rounded-lg border border-border bg-card p-2.5 hover:border-primary/40 transition-colors text-center"
-            >
+            <a key={item.id} href={`#${item.id}`} className="rounded-lg border border-border bg-card p-2.5 hover:border-primary/40 transition-colors text-center">
               <p className="text-sm mb-0.5">{item.icon}</p>
               <p className="text-[10px] text-foreground font-medium">{item.label}</p>
             </a>
@@ -120,14 +114,10 @@ export default function NLPModule() {
 
         {/* ═══ Part 1: Tokenization & Embeddings ═══ */}
         <section id="foundations">
-          <SectionHeader
-            icon={Type}
-            title="Tokenization & Embeddings"
-            number={1}
-            subtitle="Convert raw text into numerical representations — BPE tokenization and learned word embeddings that capture semantic relationships."
-          />
+          <SectionHeader icon={Type} title="Tokenization & Embeddings" number={1} subtitle="Convert raw text into numerical representations — BPE tokenization and learned word embeddings that capture semantic relationships." />
           <div className="space-y-4">
             <TheoryInline title="Intuition" />
+            <BPETokenizerDemo />
             <TheoryInline title="Tokenization & BPE" />
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -164,13 +154,9 @@ export default function NLPModule() {
 
         {/* ═══ Part 2: Self-Attention ═══ */}
         <section id="attention">
-          <SectionHeader
-            icon={Brain}
-            title="Self-Attention Mechanism"
-            number={2}
-            subtitle="The core operation that lets every token attend to every other token — understanding the QKV computation, scaling, and masking."
-          />
+          <SectionHeader icon={Brain} title="Self-Attention Mechanism" number={2} subtitle="The core operation that lets every token attend to every other token — understanding the QKV computation, scaling, and masking." />
           <div className="space-y-4">
+            <AttentionHeatmap />
             <TheoryInline title="Self-Attention Mechanism" />
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -204,13 +190,9 @@ export default function NLPModule() {
 
         {/* ═══ Part 3: Transformer Architecture ═══ */}
         <section id="transformer">
-          <SectionHeader
-            icon={Cpu}
-            title="Full Transformer Architecture"
-            number={3}
-            subtitle="Combine attention, FFN, normalization, and residuals into the universal backbone for text, images, and generation."
-          />
+          <SectionHeader icon={Cpu} title="Full Transformer Architecture" number={3} subtitle="Combine attention, FFN, normalization, and residuals into the universal backbone for text, images, and generation." />
           <div className="space-y-4">
+            <TransformerPipelineViz />
             <TheoryInline title="Full Transformer Block" />
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -234,12 +216,7 @@ export default function NLPModule() {
 
         {/* ═══ Part 4: BERT vs GPT ═══ */}
         <section id="models">
-          <SectionHeader
-            icon={Layers}
-            title="BERT vs GPT — Model Families"
-            number={4}
-            subtitle="Bidirectional understanding (BERT) vs autoregressive generation (GPT) — two paradigms that shaped modern NLP."
-          />
+          <SectionHeader icon={Layers} title="BERT vs GPT — Model Families" number={4} subtitle="Bidirectional understanding (BERT) vs autoregressive generation (GPT) — two paradigms that shaped modern NLP." />
           <div className="space-y-4">
             <TheoryInline title="BERT vs GPT — Encoder vs Decoder" />
 
@@ -262,12 +239,7 @@ export default function NLPModule() {
 
         {/* ═══ Part 5: Training & Alignment ═══ */}
         <section id="training">
-          <SectionHeader
-            icon={Zap}
-            title="LLM Training & Alignment"
-            number={5}
-            subtitle="The four-stage pipeline: pre-training → SFT → RLHF/DPO — and the scaling laws that predict model capabilities."
-          />
+          <SectionHeader icon={Zap} title="LLM Training & Alignment" number={5} subtitle="The four-stage pipeline: pre-training → SFT → RLHF/DPO — and the scaling laws that predict model capabilities." />
           <div className="space-y-4">
             <TheoryInline title="LLM Training Pipeline — SFT, RLHF & DPO" />
             <TheoryInline title="Neural Scaling Laws" />
@@ -295,12 +267,7 @@ export default function NLPModule() {
 
         {/* ═══ Part 6: RAG & LoRA ═══ */}
         <section id="efficiency">
-          <SectionHeader
-            icon={BookOpen}
-            title="RAG & Efficient Fine-Tuning"
-            number={6}
-            subtitle="Ground LLMs in external knowledge with retrieval-augmented generation, and adapt them efficiently with LoRA."
-          />
+          <SectionHeader icon={BookOpen} title="RAG & Efficient Fine-Tuning" number={6} subtitle="Ground LLMs in external knowledge with retrieval-augmented generation, and adapt them efficiently with LoRA." />
           <div className="space-y-4">
             <TheoryInline title="RAG & LoRA — Retrieval and Efficient Fine-Tuning" />
 
@@ -327,13 +294,9 @@ export default function NLPModule() {
 
         {/* ═══ Part 7: Agents & Review ═══ */}
         <section id="review">
-          <SectionHeader
-            icon={Bot}
-            title="Agentic AI, Papers & Practice"
-            number={7}
-            subtitle="LLM agents with tool use, consolidated algorithms, key research papers, and quizzes."
-          />
+          <SectionHeader icon={Bot} title="Agentic AI, Papers & Practice" number={7} subtitle="LLM agents with tool use, consolidated algorithms, key research papers, and quizzes." />
           <div className="space-y-4">
+            <AgentLoopViz />
             <TheoryInline title="Agentic AI & Tool Use" />
 
             <ContentCard title="ReAct Trajectory" accent="#f59e0b">
@@ -345,7 +308,6 @@ export default function NLPModule() {
             </ContentCard>
 
             <TheoryInline title="Real-World Applications" />
-
             <ModulePage content={nlpLLMModule} hideHeader hideTheory />
           </div>
         </section>

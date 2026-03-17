@@ -2,6 +2,7 @@ import ModulePage from "@/components/ModulePage";
 import { generativeVisionModule } from "@/data/generativeVisionModuleData";
 import { MathEquation } from "@/components/MathBlock";
 import AITutor from "@/components/AITutor";
+import { VAEElboViz, GANMinimaxViz, DiffusionTimeline, StableDiffusionPipelineViz } from "@/components/GenerativeCanvasAnimations";
 import { ArrowLeft, GraduationCap, Sparkles, Layers, Zap, Paintbrush, BarChart3, Wand2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -53,16 +54,8 @@ function ContentCard({ title, children, accent }: { title: string; children: Rea
 
 function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; title: string; number: number; subtitle?: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="flex items-start gap-4 mb-6"
-    >
-      <div
-        className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 mt-1"
-        style={{ backgroundColor: `hsl(${color} / 0.12)` }}
-      >
+    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-start gap-4 mb-6">
+      <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 mt-1" style={{ backgroundColor: `hsl(${color} / 0.12)` }}>
         <Icon className="h-5 w-5" style={{ color: `hsl(${color})` }} />
       </div>
       <div>
@@ -103,11 +96,7 @@ export default function GenerativeVisionModule() {
             { id: "latent", icon: "🎨", label: "Stable Diffusion" },
             { id: "review", icon: "📚", label: "Evaluation & Review" },
           ].map((item) => (
-            <a
-              key={item.id}
-              href={`#${item.id}`}
-              className="rounded-lg border border-border bg-card p-2.5 hover:border-primary/40 transition-colors text-center"
-            >
+            <a key={item.id} href={`#${item.id}`} className="rounded-lg border border-border bg-card p-2.5 hover:border-primary/40 transition-colors text-center">
               <p className="text-sm mb-0.5">{item.icon}</p>
               <p className="text-[10px] text-foreground font-medium">{item.label}</p>
             </a>
@@ -119,14 +108,10 @@ export default function GenerativeVisionModule() {
 
         {/* ═══ Part 1: VAE ═══ */}
         <section id="vae">
-          <SectionHeader
-            icon={Sparkles}
-            title="Variational Autoencoders"
-            number={1}
-            subtitle="Learn smooth latent representations via the ELBO — the mathematical foundation of latent generative models."
-          />
+          <SectionHeader icon={Sparkles} title="Variational Autoencoders" number={1} subtitle="Learn smooth latent representations via the ELBO — the mathematical foundation of latent generative models." />
           <div className="space-y-4">
             <TheoryInline title="Intuition" />
+            <VAEElboViz />
             <TheoryInline title="VAE — Variational Autoencoders" />
 
             <ContentCard title="Worked Example — VAE Forward Pass" accent="#ec4899">
@@ -136,7 +121,6 @@ export default function GenerativeVisionModule() {
                 <p>ε ~ N(0,I) = [0.8, -0.5]</p>
                 <p>z = μ + σ⊙ε = [1.224, -0.826]</p>
                 <p>KL = ½·[(0.25+0.819+0.2-1)+(0.09+1.104-0.1-1)] = 0.182</p>
-                <p>Total: L = L_recon + 1.0 × 0.182</p>
               </div>
             </ContentCard>
 
@@ -146,28 +130,24 @@ export default function GenerativeVisionModule() {
 
         {/* ═══ Part 2: GANs ═══ */}
         <section id="gan">
-          <SectionHeader
-            icon={Zap}
-            title="Generative Adversarial Networks"
-            number={2}
-            subtitle="Two-player minimax game: Generator vs Discriminator — from vanilla GANs to the stable Wasserstein formulation."
-          />
+          <SectionHeader icon={Zap} title="Generative Adversarial Networks" number={2} subtitle="Two-player minimax game: Generator vs Discriminator — from vanilla GANs to Wasserstein formulation." />
           <div className="space-y-4">
+            <GANMinimaxViz />
             <TheoryInline title="GANs — Adversarial Training" />
             <TheoryInline title="WGAN — Wasserstein Distance" />
 
             <div className="grid md:grid-cols-2 gap-4">
               <ContentCard title="GAN Failure Modes" accent="#ec4899">
-                <strong className="text-foreground">Mode collapse:</strong> G produces limited diversity, cycling through few outputs.<br /><br />
-                <strong className="text-foreground">Training instability:</strong> D too strong → vanishing gradients for G. D too weak → no learning signal.<br /><br />
+                <strong className="text-foreground">Mode collapse:</strong> G produces limited diversity.<br /><br />
+                <strong className="text-foreground">Training instability:</strong> D too strong → vanishing gradients.<br /><br />
                 <strong className="text-foreground">WGAN fix:</strong> Wasserstein distance gives continuous gradients even without overlap.
               </ContentCard>
-              <ContentCard title="GAN vs VAE vs Diffusion" accent="#38bdf8">
+              <ContentCard title="StyleGAN2" accent="#38bdf8">
                 <div className="space-y-1.5 text-xs">
-                  <p><span className="text-foreground font-medium">GAN:</span> Sharp samples, unstable training, no likelihood</p>
-                  <p><span className="text-foreground font-medium">VAE:</span> Smooth latent space, stable, blurry samples</p>
-                  <p><span className="text-foreground font-medium">Diffusion:</span> Best quality, stable, but slow sampling</p>
-                  <p><span className="text-foreground font-medium">LDM:</span> Diffusion quality + fast via latent space</p>
+                  <p><span className="text-foreground font-medium">W-space:</span> z → mapping network → w (more disentangled)</p>
+                  <p><span className="text-foreground font-medium">AdaIN:</span> Adaptive instance normalization per layer</p>
+                  <p><span className="text-foreground font-medium">Path length regularization:</span> smooth latent space</p>
+                  <p><span className="text-foreground font-medium">Controls:</span> style at each resolution independently</p>
                 </div>
               </ContentCard>
             </div>
@@ -176,13 +156,9 @@ export default function GenerativeVisionModule() {
 
         {/* ═══ Part 3: DDPM ═══ */}
         <section id="diffusion">
-          <SectionHeader
-            icon={Layers}
-            title="Diffusion Models (DDPM)"
-            number={3}
-            subtitle="Learn to reverse a noise-adding Markov chain — the mathematical foundation powering Stable Diffusion, DALL-E, and Midjourney."
-          />
+          <SectionHeader icon={Layers} title="Diffusion Models (DDPM)" number={3} subtitle="Learn to reverse a noise-adding Markov chain — powering Stable Diffusion, DALL-E, and Midjourney." />
           <div className="space-y-4">
+            <DiffusionTimeline />
             <TheoryInline title="DDPM — Denoising Diffusion Probabilistic Models" />
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -194,7 +170,7 @@ export default function GenerativeVisionModule() {
                 </div>
               </ContentCard>
               <ContentCard title="Reverse Process" accent="#38bdf8">
-                <p className="mb-2">Learn to predict the noise ε added at each step — much simpler than predicting the mean.</p>
+                <p className="mb-2">Learn to predict the noise ε added at each step.</p>
                 <div className="font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border">
                   μ_θ(xₜ,t) = (xₜ - √(1-ᾱₜ)·ε_θ) / √ᾱₜ<br />
                   Predict noise directly → stable training
@@ -206,12 +182,7 @@ export default function GenerativeVisionModule() {
 
         {/* ═══ Part 4: DDIM & CFG ═══ */}
         <section id="sampling">
-          <SectionHeader
-            icon={Wand2}
-            title="DDIM, Flow Matching & Guidance"
-            number={4}
-            subtitle="Accelerated deterministic sampling, ODE-based generation, and classifier-free guidance for steering outputs."
-          />
+          <SectionHeader icon={Wand2} title="DDIM, Flow Matching & Guidance" number={4} subtitle="Accelerated deterministic sampling, ODE-based generation, and classifier-free guidance." />
           <div className="space-y-4">
             <TheoryInline title="DDIM & Flow Matching" />
 
@@ -229,13 +200,9 @@ export default function GenerativeVisionModule() {
 
         {/* ═══ Part 5: Latent Diffusion ═══ */}
         <section id="latent">
-          <SectionHeader
-            icon={Paintbrush}
-            title="Latent Diffusion & Stable Diffusion"
-            number={5}
-            subtitle="Diffusion in compressed latent space — 64× compute savings via VQ-VAE encoding, U-Net denoising, and ControlNet conditioning."
-          />
+          <SectionHeader icon={Paintbrush} title="Latent Diffusion & Stable Diffusion" number={5} subtitle="Diffusion in compressed latent space — 64× compute savings via VQ-VAE encoding and ControlNet conditioning." />
           <div className="space-y-4">
+            <StableDiffusionPipelineViz />
             <TheoryInline title="Latent Diffusion & Stable Diffusion" />
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -245,13 +212,12 @@ export default function GenerativeVisionModule() {
                   <p><span className="text-foreground font-medium">Self-Attn:</span> Q=K=V from spatial features</p>
                   <p><span className="text-foreground font-medium">Cross-Attn:</span> Q=features, K=V=CLIP text tokens</p>
                   <p><span className="text-foreground font-medium">Down:</span> strided conv 2× (32→16→8→4)</p>
-                  <p><span className="text-foreground font-medium">Bottleneck:</span> full attention at 4×4 or 8×8</p>
                   <p><span className="text-foreground font-medium">Up:</span> bilinear 2× + skip connections</p>
                 </div>
               </ContentCard>
               <ContentCard title="ControlNet & LoRA" accent="#38bdf8">
-                <p className="mb-2 text-xs"><strong className="text-foreground">ControlNet:</strong> zero-conv init → starts as no-op. Trainable encoder copy learns edge/depth/pose conditioning.</p>
-                <p className="text-xs"><strong className="text-foreground">LoRA in U-Net:</strong> Low-rank adapters in Q,K,V projections of attention layers.</p>
+                <p className="text-xs"><strong className="text-foreground">ControlNet:</strong> zero-conv init → starts as no-op. Trainable encoder copy learns edge/depth/pose conditioning.</p>
+                <p className="text-xs mt-1"><strong className="text-foreground">LoRA:</strong> Low-rank adapters in Q,K,V projections.</p>
                 <p className="text-xs mt-1"><strong className="text-foreground">DreamBooth:</strong> subject LoRA on ~5 photos.</p>
                 <p className="text-xs mt-1"><strong className="text-foreground">IP-Adapter:</strong> image prompt via separate cross-attention K,V.</p>
               </ContentCard>
@@ -259,14 +225,9 @@ export default function GenerativeVisionModule() {
           </div>
         </section>
 
-        {/* ═══ Part 6: Evaluation & Review ═══ */}
+        {/* ═══ Part 6: Evaluation ═══ */}
         <section id="review">
-          <SectionHeader
-            icon={BarChart3}
-            title="Evaluation Metrics, Papers & Practice"
-            number={6}
-            subtitle="FID, Inception Score, CLIPScore — measuring generative quality. Plus consolidated algorithms and key papers."
-          />
+          <SectionHeader icon={BarChart3} title="Evaluation Metrics, Papers & Practice" number={6} subtitle="FID, Inception Score, CLIPScore — measuring generative quality." />
           <div className="space-y-4">
             <TheoryInline title="Evaluation Metrics — FID, IS & CLIPScore" />
             <TheoryInline title="Real-World Applications" />
