@@ -16,13 +16,15 @@ interface GraphEdge {
 }
 
 const nodes: GraphNode[] = [
-  // Modules (top row, large)
+  // Modules (top row)
   { id: "mod-cam", label: "Camera", type: "module", x: 80, y: 40 },
-  { id: "mod-sem", label: "Semantic", type: "module", x: 230, y: 40 },
-  { id: "mod-geo", label: "Geometric", type: "module", x: 420, y: 40 },
-  { id: "mod-mot", label: "Motion", type: "module", x: 600, y: 40 },
-  { id: "mod-rec", label: "Reconstruction", type: "module", x: 780, y: 40 },
+  { id: "mod-sem", label: "Semantic", type: "module", x: 200, y: 40 },
+  { id: "mod-geo", label: "Geometric", type: "module", x: 350, y: 40 },
+  { id: "mod-mot", label: "Motion", type: "module", x: 500, y: 40 },
+  { id: "mod-rec", label: "Reconstruction", type: "module", x: 650, y: 40 },
+  { id: "mod-nlp", label: "NLP & LLMs", type: "module", x: 800, y: 40 },
   { id: "mod-rea", label: "Scene Reasoning", type: "module", x: 950, y: 40 },
+  { id: "mod-gen", label: "Generative", type: "module", x: 1100, y: 40 },
 
   // Tasks (row 2)
   { id: "t1", label: "Classification", type: "task", x: 120, y: 140 },
@@ -38,6 +40,13 @@ const nodes: GraphNode[] = [
   { id: "t11", label: "Image Captioning", type: "task", x: 1050, y: 220 },
   { id: "t12", label: "Stereo Matching", type: "task", x: 530, y: 210 },
   { id: "t13", label: "3D Detection", type: "task", x: 320, y: 210 },
+  // NLP tasks
+  { id: "t14", label: "Tokenization", type: "task", x: 750, y: 130 },
+  { id: "t15", label: "Text Generation", type: "task", x: 830, y: 140 },
+  { id: "t16", label: "Agent Planning", type: "task", x: 870, y: 220 },
+  // Generative tasks
+  { id: "t17", label: "Image Generation", type: "task", x: 1100, y: 140 },
+  { id: "t18", label: "Image Editing", type: "task", x: 1150, y: 220 },
 
   // Architectures (row 3)
   { id: "a1", label: "ResNet", type: "architecture", x: 100, y: 300 },
@@ -62,6 +71,19 @@ const nodes: GraphNode[] = [
   { id: "a20", label: "BEVDet", type: "architecture", x: 330, y: 370 },
   { id: "a21", label: "FlowNet", type: "architecture", x: 720, y: 310 },
   { id: "a22", label: "ORB-SLAM", type: "architecture", x: 790, y: 370 },
+  // NLP architectures
+  { id: "a23", label: "Transformer", type: "architecture", x: 780, y: 300 },
+  { id: "a24", label: "BERT", type: "architecture", x: 830, y: 370 },
+  { id: "a25", label: "GPT", type: "architecture", x: 870, y: 300 },
+  { id: "a26", label: "LLaMA", type: "architecture", x: 900, y: 370 },
+  // Generative architectures
+  { id: "a27", label: "Stable Diffusion", type: "architecture", x: 1080, y: 300 },
+  { id: "a28", label: "DALL-E", type: "architecture", x: 1140, y: 310 },
+  { id: "a29", label: "StyleGAN", type: "architecture", x: 1180, y: 370 },
+  { id: "a30", label: "VAE", type: "architecture", x: 1060, y: 370 },
+  // VLM architectures
+  { id: "a31", label: "ViT", type: "architecture", x: 940, y: 300 },
+  { id: "a32", label: "LLaVA", type: "architecture", x: 980, y: 370 },
 
   // Papers (row 4)
   { id: "p1", label: "He 2016", type: "paper", x: 80, y: 440 },
@@ -93,6 +115,8 @@ const nodes: GraphNode[] = [
   { id: "d9", label: "KITTI", type: "dataset", x: 500, y: 580 },
   { id: "d10", label: "ScanNet", type: "dataset", x: 860, y: 540 },
   { id: "d11", label: "LAION-5B", type: "dataset", x: 1000, y: 540 },
+  { id: "d12", label: "Common Crawl", type: "dataset", x: 780, y: 580 },
+  { id: "d13", label: "FFHQ", type: "dataset", x: 1140, y: 540 },
 ];
 
 const edges: GraphEdge[] = [
@@ -102,7 +126,9 @@ const edges: GraphEdge[] = [
   { from: "mod-geo", to: "t4" }, { from: "mod-geo", to: "t5" }, { from: "mod-geo", to: "t12" },
   { from: "mod-mot", to: "t6" }, { from: "mod-mot", to: "t7" },
   { from: "mod-rec", to: "t8" }, { from: "mod-rec", to: "t9" },
+  { from: "mod-nlp", to: "t14" }, { from: "mod-nlp", to: "t15" }, { from: "mod-nlp", to: "t16" },
   { from: "mod-rea", to: "t10" }, { from: "mod-rea", to: "t11" },
+  { from: "mod-gen", to: "t17" }, { from: "mod-gen", to: "t18" },
 
   // Task → Architecture
   { from: "t1", to: "a1" }, { from: "t1", to: "a2" },
@@ -118,6 +144,10 @@ const edges: GraphEdge[] = [
   { from: "t11", to: "a15" },
   { from: "t12", to: "a9" },
   { from: "t13", to: "a20" },
+  { from: "t14", to: "a23" }, { from: "t15", to: "a25" }, { from: "t15", to: "a26" }, { from: "t16", to: "a25" },
+  { from: "t10", to: "a14" }, { from: "t10", to: "a15" }, { from: "t10", to: "a31" }, { from: "t10", to: "a32" },
+  { from: "t17", to: "a27" }, { from: "t17", to: "a28" }, { from: "t17", to: "a29" }, { from: "t17", to: "a30" },
+  { from: "t18", to: "a27" },
 
   // Architecture → Paper
   { from: "a1", to: "p1" }, { from: "a3", to: "p2" }, { from: "a4", to: "p3" },
@@ -138,6 +168,9 @@ const edges: GraphEdge[] = [
   { from: "a14", to: "d11" },
   { from: "a20", to: "d8" }, { from: "a19", to: "d9" },
   { from: "a22", to: "d9" },
+  { from: "a25", to: "d12" }, { from: "a26", to: "d12" }, { from: "a24", to: "d12" },
+  { from: "a27", to: "d11" }, { from: "a29", to: "d13" },
+  { from: "a31", to: "d1" }, { from: "a31", to: "d11" },
 
   // Cross-task relationships
   { from: "t2", to: "t3" }, { from: "t3", to: "t5" }, { from: "t3", to: "t4" },
