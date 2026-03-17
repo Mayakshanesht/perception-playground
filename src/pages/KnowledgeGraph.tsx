@@ -115,6 +115,8 @@ const nodes: GraphNode[] = [
   { id: "d9", label: "KITTI", type: "dataset", x: 500, y: 580 },
   { id: "d10", label: "ScanNet", type: "dataset", x: 860, y: 540 },
   { id: "d11", label: "LAION-5B", type: "dataset", x: 1000, y: 540 },
+  { id: "d12", label: "Common Crawl", type: "dataset", x: 780, y: 580 },
+  { id: "d13", label: "FFHQ", type: "dataset", x: 1140, y: 540 },
 ];
 
 const edges: GraphEdge[] = [
