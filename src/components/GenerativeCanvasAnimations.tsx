@@ -351,7 +351,7 @@ export function StableDiffusionPipelineViz() {
               {/* Current position */}
               {(() => {
                 const cx = (cfg / 20) * 200;
-                const q = Math.exp(-(cfg - 7.5) ** 2 / 8) * 0.9 + 0.05 * (1 - Math.exp(-cfg));
+                const q = Math.exp(-((cfg - 7.5) ** 2) / 8) * 0.9 + 0.05 * (1 - Math.exp(-cfg));
                 const cy = 100 - q * 80;
                 return <circle cx={cx} cy={cy} r="4" fill="hsl(187 85% 53%)" />;
               })()}
