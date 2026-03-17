@@ -71,6 +71,19 @@ const nodes: GraphNode[] = [
   { id: "a20", label: "BEVDet", type: "architecture", x: 330, y: 370 },
   { id: "a21", label: "FlowNet", type: "architecture", x: 720, y: 310 },
   { id: "a22", label: "ORB-SLAM", type: "architecture", x: 790, y: 370 },
+  // NLP architectures
+  { id: "a23", label: "Transformer", type: "architecture", x: 780, y: 300 },
+  { id: "a24", label: "BERT", type: "architecture", x: 830, y: 370 },
+  { id: "a25", label: "GPT", type: "architecture", x: 870, y: 300 },
+  { id: "a26", label: "LLaMA", type: "architecture", x: 900, y: 370 },
+  // Generative architectures
+  { id: "a27", label: "Stable Diffusion", type: "architecture", x: 1080, y: 300 },
+  { id: "a28", label: "DALL-E", type: "architecture", x: 1140, y: 310 },
+  { id: "a29", label: "StyleGAN", type: "architecture", x: 1180, y: 370 },
+  { id: "a30", label: "VAE", type: "architecture", x: 1060, y: 370 },
+  // VLM architectures
+  { id: "a31", label: "ViT", type: "architecture", x: 940, y: 300 },
+  { id: "a32", label: "LLaVA", type: "architecture", x: 980, y: 370 },
 
   // Papers (row 4)
   { id: "p1", label: "He 2016", type: "paper", x: 80, y: 440 },
