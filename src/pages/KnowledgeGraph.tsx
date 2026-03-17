@@ -144,6 +144,10 @@ const edges: GraphEdge[] = [
   { from: "t11", to: "a15" },
   { from: "t12", to: "a9" },
   { from: "t13", to: "a20" },
+  { from: "t14", to: "a23" }, { from: "t15", to: "a25" }, { from: "t15", to: "a26" }, { from: "t16", to: "a25" },
+  { from: "t10", to: "a14" }, { from: "t10", to: "a15" }, { from: "t10", to: "a31" }, { from: "t10", to: "a32" },
+  { from: "t17", to: "a27" }, { from: "t17", to: "a28" }, { from: "t17", to: "a29" }, { from: "t17", to: "a30" },
+  { from: "t18", to: "a27" },
 
   // Architecture → Paper
   { from: "a1", to: "p1" }, { from: "a3", to: "p2" }, { from: "a4", to: "p3" },
