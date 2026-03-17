@@ -40,6 +40,13 @@ const nodes: GraphNode[] = [
   { id: "t11", label: "Image Captioning", type: "task", x: 1050, y: 220 },
   { id: "t12", label: "Stereo Matching", type: "task", x: 530, y: 210 },
   { id: "t13", label: "3D Detection", type: "task", x: 320, y: 210 },
+  // NLP tasks
+  { id: "t14", label: "Tokenization", type: "task", x: 750, y: 130 },
+  { id: "t15", label: "Text Generation", type: "task", x: 830, y: 140 },
+  { id: "t16", label: "Agent Planning", type: "task", x: 870, y: 220 },
+  // Generative tasks
+  { id: "t17", label: "Image Generation", type: "task", x: 1100, y: 140 },
+  { id: "t18", label: "Image Editing", type: "task", x: 1150, y: 220 },
 
   // Architectures (row 3)
   { id: "a1", label: "ResNet", type: "architecture", x: 100, y: 300 },
