@@ -16,13 +16,15 @@ interface GraphEdge {
 }
 
 const nodes: GraphNode[] = [
-  // Modules (top row, large)
+  // Modules (top row)
   { id: "mod-cam", label: "Camera", type: "module", x: 80, y: 40 },
-  { id: "mod-sem", label: "Semantic", type: "module", x: 230, y: 40 },
-  { id: "mod-geo", label: "Geometric", type: "module", x: 420, y: 40 },
-  { id: "mod-mot", label: "Motion", type: "module", x: 600, y: 40 },
-  { id: "mod-rec", label: "Reconstruction", type: "module", x: 780, y: 40 },
+  { id: "mod-sem", label: "Semantic", type: "module", x: 200, y: 40 },
+  { id: "mod-geo", label: "Geometric", type: "module", x: 350, y: 40 },
+  { id: "mod-mot", label: "Motion", type: "module", x: 500, y: 40 },
+  { id: "mod-rec", label: "Reconstruction", type: "module", x: 650, y: 40 },
+  { id: "mod-nlp", label: "NLP & LLMs", type: "module", x: 800, y: 40 },
   { id: "mod-rea", label: "Scene Reasoning", type: "module", x: 950, y: 40 },
+  { id: "mod-gen", label: "Generative", type: "module", x: 1100, y: 40 },
 
   // Tasks (row 2)
   { id: "t1", label: "Classification", type: "task", x: 120, y: 140 },
