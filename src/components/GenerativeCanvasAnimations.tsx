@@ -341,7 +341,7 @@ export function StableDiffusionPipelineViz() {
               <path
                 d={Array.from({ length: 100 }, (_, i) => {
                   const w = (i / 100) * 20;
-                  const q = Math.exp(-(w - 7.5) ** 2 / 8) * 0.9 + 0.05 * (1 - Math.exp(-w));
+                  const q = Math.exp(-((w - 7.5) ** 2) / 8) * 0.9 + 0.05 * (1 - Math.exp(-w));
                   return `${i === 0 ? "M" : "L"} ${i * 2} ${100 - q * 80}`;
                 }).join(" ")}
                 fill="none"
