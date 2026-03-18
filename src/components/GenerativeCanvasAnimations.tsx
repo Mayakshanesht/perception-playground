@@ -24,14 +24,12 @@ export function VAEElboViz() {
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = "#0d0916"; ctx.fillRect(0, 0, W, H);
 
-    // Axes
     ctx.strokeStyle = "rgba(168,85,247,0.2)"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(50, H - 40); ctx.lineTo(W - 20, H - 40); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(50, H - 40); ctx.lineTo(50, 20); ctx.stroke();
     ctx.fillStyle = "rgba(168,85,247,0.5)"; ctx.font = "10px monospace";
     ctx.fillText("z", W / 2, H - 8); ctx.fillText("p(z)", 8, H / 2);
 
-    // Prior N(0,1)
     ctx.strokeStyle = "rgba(236,72,153,0.7)"; ctx.lineWidth = 2; ctx.beginPath();
     for (let x = 0; x < W - 70; x++) {
       const z = (x / (W - 70)) * 6 - 3;
@@ -41,7 +39,6 @@ export function VAEElboViz() {
     }
     ctx.stroke();
 
-    // Posterior
     const sigma = Math.sqrt(Math.max(kl, 0.01));
     const mean = mu * 2 - 1;
     ctx.strokeStyle = "rgba(168,85,247,0.9)"; ctx.lineWidth = 2.5; ctx.beginPath();
@@ -53,12 +50,10 @@ export function VAEElboViz() {
     }
     ctx.stroke();
 
-    // Legend
     ctx.font = "10px monospace";
     ctx.fillStyle = "rgba(236,72,153,0.8)"; ctx.fillRect(60, 24, 12, 3); ctx.fillText("Prior N(0,1)", 76, 28);
     ctx.fillStyle = "rgba(168,85,247,0.8)"; ctx.fillRect(60, 36, 12, 3); ctx.fillText("Posterior q_φ(z|x)", 76, 40);
 
-    // Recon quality bar
     ctx.fillStyle = "rgba(34,211,238,0.3)"; ctx.fillRect(50, H - 30, (W - 70) * recon, 8);
     ctx.strokeStyle = "rgba(34,211,238,0.5)"; ctx.lineWidth = 1; ctx.strokeRect(50, H - 30, W - 70, 8);
     ctx.fillStyle = "rgba(34,211,238,0.8)"; ctx.font = "9px monospace"; ctx.fillText("reconstruction quality", 52, H - 14);
@@ -150,7 +145,6 @@ export function GANMinimaxViz() {
     <div className="rounded-xl border border-border bg-card/60 p-5 mb-4">
       <p className="text-[10px] font-mono uppercase tracking-wider text-accent mb-3">// Simulate GAN minimax game: Generator vs Discriminator</p>
       <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
-        {/* Generator */}
         <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-center">
           <p className="text-[10px] font-mono text-primary font-bold mb-2">GENERATOR G</p>
           <div className="h-2 rounded-full bg-muted/40 overflow-hidden mb-2">
@@ -159,8 +153,6 @@ export function GANMinimaxViz() {
           <p className="text-2xl font-bold text-primary">{gScore.toFixed(2)}</p>
           <p className="text-[9px] font-mono text-muted-foreground">D(G(z)) — fools D?</p>
         </div>
-
-        {/* Middle controls */}
         <div className="flex flex-col items-center gap-2">
           <button onClick={step} className="font-mono text-[10px] px-4 py-2 rounded-md border border-accent text-accent hover:bg-accent hover:text-accent-foreground transition-colors">
             ▶ Train Step
@@ -173,8 +165,6 @@ export function GANMinimaxViz() {
             min_G max_D V(G,D):<br />E[log D(x)]<br />+E[log(1-D(G(z)))]
           </div>
         </div>
-
-        {/* Discriminator */}
         <div className="rounded-lg border border-border/50 bg-muted/20 p-4 text-center">
           <p className="text-[10px] font-mono text-accent font-bold mb-2">DISCRIMINATOR D</p>
           <div className="flex gap-1 mb-2 justify-center">
@@ -218,7 +208,6 @@ export function DiffusionTimeline() {
                 }`}
                 style={{ background: `hsl(var(--muted) / ${0.3 + (t / T) * 0.5})` }}
               >
-                {/* Flower pattern with noise overlay */}
                 <div className="relative w-full h-full">
                   <div className="absolute inset-0 flex items-center justify-center" style={{ opacity: Math.max(0.05, 1 - (t / T) * 1.1) }}>
                     {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -335,9 +324,7 @@ export function StableDiffusionPipelineViz() {
         </div>
         <div className="rounded-lg bg-muted/20 border border-border p-4 flex items-center justify-center">
           <div className="w-full h-[160px] relative">
-            {/* Simple quality curve visualization */}
             <svg viewBox="0 0 200 100" className="w-full h-full">
-              {/* Quality curve */}
               <path
                 d={Array.from({ length: 100 }, (_, i) => {
                   const w = (i / 100) * 20;
@@ -348,7 +335,6 @@ export function StableDiffusionPipelineViz() {
                 stroke="hsl(340 75% 55%)"
                 strokeWidth="2"
               />
-              {/* Current position */}
               {(() => {
                 const cx = (cfg / 20) * 200;
                 const q = Math.exp(-((cfg - 7.5) ** 2) / 8) * 0.9 + 0.05 * (1 - Math.exp(-cfg));
@@ -358,6 +344,379 @@ export function StableDiffusionPipelineViz() {
               <text x="5" y="12" fill="hsl(var(--muted-foreground))" fontSize="8" fontFamily="monospace">quality</text>
               <text x="150" y="95" fill="hsl(var(--muted-foreground))" fontSize="8" fontFamily="monospace">ω →</text>
             </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════
+// 5. NOISE SCHEDULE COMPARISON
+// ════════════════════════════════════════════════
+
+export function NoiseScheduleViz() {
+  const [schedule, setSchedule] = useState<"linear" | "cosine" | "scaled-linear">("linear");
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const getAlphaBar = useCallback((t: number, type: string): number => {
+    if (type === "linear") {
+      const beta = 1e-4 + t * (0.02 - 1e-4);
+      return Math.exp(-t * (1e-4 + 0.5 * t * (0.02 - 1e-4)) * 1000);
+    } else if (type === "cosine") {
+      const s = 0.008;
+      const f = Math.cos(((t + s) / (1 + s)) * Math.PI / 2);
+      const f0 = Math.cos((s / (1 + s)) * Math.PI / 2);
+      return Math.max(0.001, (f * f) / (f0 * f0));
+    } else {
+      const beta = Math.sqrt(1e-4 + t * (0.02 - 1e-4));
+      return Math.exp(-t * beta * 500);
+    }
+  }, []);
+
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const ox = 50, oy = 20, gw = W - 70, gh = H - 60;
+
+    // Axes
+    ctx.strokeStyle = "hsl(var(--muted-foreground) / 0.3)";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, oy + gh); ctx.lineTo(ox + gw, oy + gh); ctx.stroke();
+
+    ctx.fillStyle = "hsl(var(--muted-foreground))";
+    ctx.font = "9px monospace"; ctx.textAlign = "center";
+    ctx.fillText("timestep t →", ox + gw / 2, H - 5);
+    ctx.save(); ctx.translate(10, oy + gh / 2); ctx.rotate(-Math.PI / 2);
+    ctx.fillText("ᾱₜ (signal)", 0, 0); ctx.restore();
+
+    // Draw all three for comparison
+    const schedules: { id: string; color: string; label: string }[] = [
+      { id: "linear", color: "hsl(340 75% 55%)", label: "Linear" },
+      { id: "cosine", color: "hsl(187 85% 53%)", label: "Cosine" },
+      { id: "scaled-linear", color: "hsl(32 95% 55%)", label: "Scaled Linear" },
+    ];
+
+    schedules.forEach(({ id, color }) => {
+      const isActive = id === schedule;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = isActive ? 3 : 1;
+      ctx.globalAlpha = isActive ? 1 : 0.3;
+      ctx.beginPath();
+      for (let i = 0; i <= gw; i++) {
+        const t = i / gw;
+        const alpha = getAlphaBar(t, id);
+        const px = ox + i;
+        const py = oy + gh - alpha * gh;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    });
+
+    // SNR annotation at midpoint
+    const midT = 0.5;
+    const alpha = getAlphaBar(midT, schedule);
+    const snr = alpha / (1 - alpha + 1e-8);
+    ctx.fillStyle = "hsl(var(--primary))";
+    ctx.font = "10px monospace"; ctx.textAlign = "left";
+    ctx.fillText(`SNR(t=0.5) = ᾱ/(1-ᾱ) = ${snr.toFixed(2)}`, ox + 5, oy + 15);
+  }, [schedule, getAlphaBar]);
+
+  useEffect(() => { draw(); }, [draw]);
+
+  return (
+    <div className="rounded-xl border border-border bg-card/60 p-5 mb-4">
+      <p className="text-[10px] font-mono uppercase tracking-wider text-primary mb-3">// Compare noise schedules — how signal decays over time</p>
+      <div className="flex gap-2 mb-3">
+        {(["linear", "cosine", "scaled-linear"] as const).map((s) => (
+          <button key={s} onClick={() => setSchedule(s)}
+            className={`font-mono text-[10px] px-3 py-1.5 rounded-md border transition-all ${
+              schedule === s ? "bg-primary/20 border-primary text-primary" : "border-border text-muted-foreground hover:border-primary/40"
+            }`}>{s}</button>
+        ))}
+      </div>
+      <canvas ref={canvasRef} width={480} height={240} className="w-full rounded-lg" />
+      <div className="mt-3 rounded-lg bg-muted/30 border border-border p-3 font-mono text-[10px] text-muted-foreground leading-relaxed">
+        <strong className="text-foreground">Linear:</strong> β_t ∈ [1e-4, 0.02] — fast signal decay, wastes steps near t=T.{" "}
+        <strong className="text-foreground">Cosine:</strong> ᾱ_t = cos²((t/T+s)/(1+s) · π/2) — smoother, more uniform SNR.{" "}
+        <strong className="text-foreground">Scaled Linear:</strong> β_t = (√β_min + t·(√β_max−√β_min))² — SDXL default.
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════
+// 6. CONTROLNET ARCHITECTURE VISUALIZER
+// ════════════════════════════════════════════════
+
+const controlTypes = [
+  { id: "canny", label: "🔲 Canny Edge", desc: "Edge detection → structural control. Preserves composition while allowing style changes.", condition: "Binary edges from Canny detector" },
+  { id: "depth", label: "🏔️ Depth Map", desc: "MiDaS depth estimation → 3D-aware generation. Foreground/background preserved.", condition: "Monocular depth from MiDaS/ZoeDepth" },
+  { id: "pose", label: "🤸 OpenPose", desc: "Skeleton keypoints → pose-guided generation. Body proportions and position controlled.", condition: "18-joint skeleton from OpenPose" },
+  { id: "seg", label: "🎨 Segmentation", desc: "Semantic map → region-aware generation. Each color → material/object class.", condition: "Semantic label map (ADE20K classes)" },
+];
+
+export function ControlNetViz() {
+  const [activeType, setActiveType] = useState(0);
+  const [zeroConvScale, setZeroConvScale] = useState(0);
+  const ct = controlTypes[activeType];
+
+  return (
+    <div className="rounded-xl border border-border bg-card/60 p-5 mb-4">
+      <p className="text-[10px] font-mono uppercase tracking-wider text-primary mb-3">// ControlNet — zero-convolution architecture</p>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {controlTypes.map((c, i) => (
+          <button key={c.id} onClick={() => setActiveType(i)}
+            className={`font-mono text-[10px] px-3 py-1.5 rounded-md border transition-all ${
+              activeType === i ? "bg-primary/20 border-primary text-primary" : "border-border text-muted-foreground hover:border-primary/40"
+            }`}>{c.label}</button>
+        ))}
+      </div>
+
+      {/* Architecture diagram */}
+      <div className="grid md:grid-cols-[2fr_1fr] gap-4 mb-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-0 overflow-x-auto pb-1">
+            {[
+              { label: "Condition\n(edge/depth)", color: "hsl(32 95% 55%)" },
+              { label: "Zero Conv\n(init=0)", color: "hsl(340 75% 55%)" },
+              { label: "Trainable\nEncoder Copy", color: "hsl(265 70% 60%)" },
+              { label: "Zero Conv\n(output)", color: "hsl(340 75% 55%)" },
+              { label: "⊕ Locked\nU-Net", color: "hsl(187 85% 53%)" },
+            ].map((block, i) => (
+              <div key={i} className="flex items-center">
+                <div
+                  className="min-w-[85px] px-2 py-2.5 rounded-lg text-center font-mono text-[9px] font-bold border whitespace-pre-line"
+                  style={{
+                    background: `${block.color.replace(")", " / 0.12)")}`,
+                    borderColor: `${block.color.replace(")", " / 0.4)")}`,
+                    color: block.color,
+                  }}
+                >{block.label}</div>
+                {i < 4 && <span className="text-muted-foreground text-sm px-0.5">→</span>}
+              </div>
+            ))}
+          </div>
+          <div className="rounded-lg bg-muted/30 border-l-[3px] border-primary p-3 font-mono text-[11px] text-primary leading-relaxed">
+            y = F_locked(x) + zero_conv(F_trainable(x, c))<br />
+            At init: zero_conv weights = 0 → output = F_locked(x)<br />
+            Training gradually increases ControlNet contribution
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <label className="flex justify-between text-[10px] font-mono text-muted-foreground mb-1">
+              Zero-Conv Scale (training progress) <span className="text-primary">{zeroConvScale.toFixed(2)}</span>
+            </label>
+            <input type="range" min="0" max="1" step="0.01" value={zeroConvScale} onChange={(e) => setZeroConvScale(+e.target.value)} className="w-full accent-primary" />
+          </div>
+          <div className="rounded-lg border border-border bg-muted/20 p-3 text-center">
+            <div className="flex gap-2 items-center justify-center mb-2">
+              <div className="w-16 h-16 rounded bg-muted/40 border border-border flex items-center justify-center text-xl">🖼️</div>
+              <span className="text-muted-foreground text-xs">+</span>
+              <div className="w-16 h-16 rounded border border-border flex items-center justify-center text-xl"
+                style={{ background: `hsl(32 95% 55% / ${0.1 + zeroConvScale * 0.3})`, borderColor: `hsl(32 95% 55% / ${0.3 + zeroConvScale * 0.5})` }}>
+                {ct.id === "canny" ? "🔲" : ct.id === "depth" ? "🏔️" : ct.id === "pose" ? "🤸" : "🎨"}
+              </div>
+            </div>
+            <p className="text-[9px] font-mono text-muted-foreground">
+              ControlNet weight: {zeroConvScale < 0.1 ? "0 (pure SD)" : zeroConvScale < 0.5 ? "low (subtle)" : zeroConvScale < 0.9 ? "medium (balanced)" : "high (strong control)"}
+            </p>
+          </div>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        <strong className="text-foreground">{ct.label}:</strong> {ct.desc} <span className="text-primary">Input: {ct.condition}</span>
+      </p>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════
+// 7. VIDEO GENERATION PIPELINE VISUALIZER
+// ════════════════════════════════════════════════
+
+const videoModels = [
+  {
+    name: "Stable Video Diffusion",
+    pipeline: [
+      { label: "Image I₀", color: "hsl(var(--primary))" },
+      { label: "CLIP Embed\n+ Noise Aug", color: "hsl(265 70% 60%)" },
+      { label: "3D U-Net\n(Spatial+Temporal)", color: "hsl(340 75% 55%)" },
+      { label: "Temporal\nAttention", color: "hsl(32 95% 55%)" },
+      { label: "VAE Decode\nPer Frame", color: "hsl(187 85% 53%)" },
+    ],
+    math: "z_t^{1:F} = Denoise(z_T^{1:F}, c_img, t)\nTemporal Attn: Q_f = z_f W^Q, K/V = [z_1...z_F] W^{K,V}\nSpatial layers shared, temporal layers inserted",
+    notes: "Image-to-video: conditions on single frame. 3D U-Net factorizes spatial (2D conv) and temporal (1D conv + temporal attention) processing. 14-25 frames at 576×1024.",
+  },
+  {
+    name: "Sora (DiT)",
+    pipeline: [
+      { label: "Text +\nOptional Image", color: "hsl(265 70% 60%)" },
+      { label: "Spacetime\nPatchify", color: "hsl(var(--primary))" },
+      { label: "DiT Blocks\n(Transformer)", color: "hsl(340 75% 55%)" },
+      { label: "Spacetime\nDe-patchify", color: "hsl(32 95% 55%)" },
+      { label: "Variable Res\nVideo Output", color: "hsl(187 85% 53%)" },
+    ],
+    math: "Patches: p_{t,h,w} = video[t:t+τ, h:h+P, w:w+P]\nDiT: z' = z + Attn(LN(z, γ, β)) where γ,β=f(t,c)\nNative resolution: no cropping/resizing needed",
+    notes: "Treats video as spacetime patches, not separate frames. Diffusion Transformer (DiT) replaces U-Net. Trains on variable duration/resolution. Emergent 3D consistency from scale.",
+  },
+  {
+    name: "AnimateDiff",
+    pipeline: [
+      { label: "Frozen\nSD U-Net", color: "hsl(var(--primary))" },
+      { label: "Motion\nModule", color: "hsl(340 75% 55%)" },
+      { label: "Temporal\nSelf-Attn", color: "hsl(32 95% 55%)" },
+      { label: "LoRA\n(Optional)", color: "hsl(265 70% 60%)" },
+      { label: "16-Frame\nVideo", color: "hsl(187 85% 53%)" },
+    ],
+    math: "Motion Module: Attn(z_f, [z_1...z_F], [z_1...z_F])\nInserted after each spatial attention block\nFrozen SD weights + trained temporal layers only",
+    notes: "Plug-and-play: adds temporal attention to any SD checkpoint/LoRA. Train only the motion module on video data. Compatible with personalized models (DreamBooth, LoRA).",
+  },
+];
+
+export function VideoGenPipelineViz() {
+  const [active, setActive] = useState(0);
+  const model = videoModels[active];
+
+  return (
+    <div className="rounded-xl border border-border bg-card/60 p-5 mb-4">
+      <p className="text-[10px] font-mono uppercase tracking-wider text-primary mb-3">// Video Generation Architectures — temporal diffusion models</p>
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {videoModels.map((m, i) => (
+          <button key={m.name} onClick={() => setActive(i)}
+            className={`font-mono text-[10px] px-4 py-1.5 rounded-full border transition-all ${
+              active === i ? "bg-primary border-primary text-primary-foreground" : "border-border text-muted-foreground hover:border-primary/40"
+            }`}>{m.name}</button>
+        ))}
+      </div>
+      <div className="flex items-center gap-0 overflow-x-auto pb-2 mb-3">
+        {model.pipeline.map((block, i) => (
+          <div key={i} className="flex items-center">
+            <div
+              className="min-w-[90px] px-3 py-3 rounded-lg text-center font-mono text-[10px] font-bold border whitespace-pre-line"
+              style={{
+                background: `${block.color.replace(")", " / 0.15)")}`,
+                borderColor: `${block.color.replace(")", " / 0.5)")}`,
+                color: block.color,
+              }}
+            >{block.label}</div>
+            {i < model.pipeline.length - 1 && <span className="text-muted-foreground text-lg px-1.5">→</span>}
+          </div>
+        ))}
+      </div>
+      <div className="rounded-lg bg-muted/30 border-l-[3px] border-primary p-3 font-mono text-[11px] text-primary leading-relaxed mb-2 whitespace-pre-wrap">
+        {model.math}
+      </div>
+      <p className="text-xs text-muted-foreground leading-relaxed">{model.notes}</p>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════
+// 8. SCORE FUNCTION & TWEEDIE VISUALIZER
+// ════════════════════════════════════════════════
+
+export function ScoreFunctionViz() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [noiseLevel, setNoiseLevel] = useState(0.3);
+
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#0d0916"; ctx.fillRect(0, 0, W, H);
+
+    const ox = 50, oy = 20, gw = W - 70, gh = H - 50;
+
+    // Axes
+    ctx.strokeStyle = "rgba(168,85,247,0.2)"; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(ox, oy + gh / 2); ctx.lineTo(ox + gw, oy + gh / 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ox + gw / 2, oy); ctx.lineTo(ox + gw / 2, oy + gh); ctx.stroke();
+
+    // Data distribution (mixture of 2 Gaussians)
+    const sigma = 0.1 + noiseLevel * 0.8;
+    const mu1 = -1.2, mu2 = 1.0;
+
+    // Draw noisy distribution
+    ctx.strokeStyle = "rgba(236,72,153,0.7)"; ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= gw; i++) {
+      const x = (i / gw) * 6 - 3;
+      const p1 = Math.exp(-((x - mu1) ** 2) / (2 * sigma ** 2));
+      const p2 = Math.exp(-((x - mu2) ** 2) / (2 * sigma ** 2));
+      const y = (p1 + p2) / (sigma * Math.sqrt(2 * Math.PI) * 2);
+      const py = oy + gh / 2 - y * gh * 0.4;
+      if (i === 0) ctx.moveTo(ox + i, py); else ctx.lineTo(ox + i, py);
+    }
+    ctx.stroke();
+
+    // Score arrows (∇_x log p(x))
+    ctx.strokeStyle = "rgba(34,211,238,0.7)"; ctx.lineWidth = 1.5;
+    for (let i = 0; i < 20; i++) {
+      const x = (i / 20) * 6 - 3;
+      const px = ox + ((x + 3) / 6) * gw;
+      const py = oy + gh / 2;
+
+      // Compute score
+      const p1 = Math.exp(-((x - mu1) ** 2) / (2 * sigma ** 2));
+      const p2 = Math.exp(-((x - mu2) ** 2) / (2 * sigma ** 2));
+      const dp1 = -(x - mu1) / (sigma ** 2) * p1;
+      const dp2 = -(x - mu2) / (sigma ** 2) * p2;
+      const score = (dp1 + dp2) / (p1 + p2 + 1e-8);
+      const arrowLen = Math.min(Math.abs(score) * 15, 30) * Math.sign(score);
+
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(px + arrowLen, py);
+      ctx.stroke();
+
+      // Arrowhead
+      if (Math.abs(arrowLen) > 3) {
+        ctx.beginPath();
+        ctx.moveTo(px + arrowLen, py);
+        ctx.lineTo(px + arrowLen - Math.sign(arrowLen) * 4, py - 3);
+        ctx.lineTo(px + arrowLen - Math.sign(arrowLen) * 4, py + 3);
+        ctx.fill();
+        ctx.fillStyle = "rgba(34,211,238,0.7)";
+      }
+    }
+
+    // Labels
+    ctx.fillStyle = "rgba(236,72,153,0.8)"; ctx.font = "10px monospace"; ctx.textAlign = "left";
+    ctx.fillText(`p_σ(x) — noised data (σ=${sigma.toFixed(2)})`, ox + 5, oy + 12);
+    ctx.fillStyle = "rgba(34,211,238,0.8)";
+    ctx.fillText("→ score: ∇_x log p(x) — points toward data", ox + 5, oy + 25);
+  }, [noiseLevel]);
+
+  useEffect(() => { draw(); }, [draw]);
+
+  return (
+    <div className="rounded-xl border border-border bg-card/60 p-5 mb-4">
+      <p className="text-[10px] font-mono uppercase tracking-wider text-primary mb-3">// Score function — gradient of log-density points toward data modes</p>
+      <div className="grid md:grid-cols-2 gap-4">
+        <canvas ref={canvasRef} width={420} height={220} className="w-full rounded-lg" />
+        <div className="space-y-3">
+          <div>
+            <label className="flex justify-between text-[10px] font-mono text-muted-foreground mb-1">
+              Noise level σ <span className="text-primary">{(0.1 + noiseLevel * 0.8).toFixed(2)}</span>
+            </label>
+            <input type="range" min="0" max="1" step="0.01" value={noiseLevel} onChange={(e) => setNoiseLevel(+e.target.value)} className="w-full accent-primary" />
+          </div>
+          <div className="rounded-lg bg-muted/30 border border-border p-3 font-mono text-[10px] text-muted-foreground leading-relaxed">
+            <p><strong className="text-foreground">Score matching:</strong></p>
+            <p className="text-primary">s_θ(x,t) ≈ ∇_x log p_t(x)</p>
+            <p className="mt-1"><strong className="text-foreground">Tweedie's formula:</strong></p>
+            <p className="text-primary">E[x₀|xₜ] = (xₜ + σₜ² · ∇ log p(xₜ)) / ᾱₜ</p>
+            <p className="mt-1 text-accent">Connection: ε_θ = -σₜ · s_θ</p>
           </div>
         </div>
       </div>
