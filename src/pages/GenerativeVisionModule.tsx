@@ -210,7 +210,7 @@ export default function GenerativeVisionModule() {
                 </div>
               </ContentCard>
               <ContentCard title="Reverse Process — Posterior" accent="#38bdf8">
-                <p className="mb-2">The true posterior q(x_{t-1}|x_t,x₀) is Gaussian and tractable:</p>
+                <p className="mb-2">{"The true posterior q(x_{t-1}|x_t,x₀) is Gaussian and tractable:"}</p>
                 <div className="font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border space-y-1">
                   <p>q(xₜ₋₁|xₜ,x₀) = N(μ̃ₜ, β̃ₜI)</p>
                   <p>μ̃ₜ = (√ᾱₜ₋₁·βₜ·x₀ + √αₜ·(1-ᾱₜ₋₁)·xₜ)/(1-ᾱₜ)</p>
