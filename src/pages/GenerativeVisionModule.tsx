@@ -204,7 +204,7 @@ export default function GenerativeVisionModule() {
                 <div className="font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border space-y-1">
                   <p>q(xₜ|xₜ₋₁) = N(√(1-βₜ)xₜ₋₁, βₜI)</p>
                   <p>Closed-form: xₜ = √ᾱₜ·x₀ + √(1-ᾱₜ)·ε</p>
-                  <p>ᾱₜ = Π_{s=1}^t (1-βₛ) → monotonically ↓</p>
+                  <p>{"ᾱₜ = Π_{s=1}^t (1-βₛ) → monotonically ↓"}</p>
                   <p>SNR(t) = ᾱₜ/(1-ᾱₜ) → 0 as t → T</p>
                   <p>At t=T: ᾱ_T ≈ 0, x_T ≈ N(0,I)</p>
                 </div>
