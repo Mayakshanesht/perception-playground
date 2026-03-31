@@ -53,18 +53,18 @@ const App = () => (
               <Route path="/knowledge-graph" element={<ProtectedRoute><KnowledgeGraph /></ProtectedRoute>} />
               <Route path="/studios" element={<ProtectedRoute><PerceptionStudios /></ProtectedRoute>} />
 
-              {/* Pro - needs subscription */}
-              <Route path="/module/geometric" element={<ProtectedRoute requireSubscription><GeometricModule /></ProtectedRoute>} />
-              <Route path="/module/motion" element={<ProtectedRoute requireSubscription><MotionModule /></ProtectedRoute>} />
-              <Route path="/module/reconstruction" element={<ProtectedRoute requireSubscription><ReconstructionModule /></ProtectedRoute>} />
-              <Route path="/module/scene-reasoning" element={<ProtectedRoute requireSubscription><SceneReasoningModule /></ProtectedRoute>} />
-              <Route path="/module/nlp-llm" element={<ProtectedRoute requireSubscription><NLPModule /></ProtectedRoute>} />
-              <Route path="/module/generative-vision" element={<ProtectedRoute requireSubscription><GenerativeVisionModule /></ProtectedRoute>} />
-              <Route path="/tutorials" element={<ProtectedRoute requireSubscription><Tutorials /></ProtectedRoute>} />
+              {/* All free */}
+              <Route path="/module/geometric" element={<ProtectedRoute><GeometricModule /></ProtectedRoute>} />
+              <Route path="/module/motion" element={<ProtectedRoute><MotionModule /></ProtectedRoute>} />
+              <Route path="/module/reconstruction" element={<ProtectedRoute><ReconstructionModule /></ProtectedRoute>} />
+              <Route path="/module/scene-reasoning" element={<ProtectedRoute><SceneReasoningModule /></ProtectedRoute>} />
+              <Route path="/module/nlp-llm" element={<ProtectedRoute><NLPModule /></ProtectedRoute>} />
+              <Route path="/module/generative-vision" element={<ProtectedRoute><GenerativeVisionModule /></ProtectedRoute>} />
+              <Route path="/tutorials" element={<ProtectedRoute><Tutorials /></ProtectedRoute>} />
               <Route path="/module/:moduleId" element={<ProtectedRoute><GenericModule /></ProtectedRoute>} />
 
-              {/* Pro - needs subscription */}
-              <Route path="/research-copilot" element={<ProtectedRoute requireSubscription><ResearchCopilot /></ProtectedRoute>} />
+              {/* All free */}
+              <Route path="/research-copilot" element={<ProtectedRoute><ResearchCopilot /></ProtectedRoute>} />
 
               {/* Admin */}
               <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
