@@ -50,7 +50,7 @@ const copilotWorkflow = [
 
 export default function Dashboard() {
   const { isSubscribed } = useSubscription();
-
+  const { getModulePercent } = useModuleProgress();
   return (
     <div className="p-5 md:p-8 max-w-7xl mx-auto">
       {/* Hero Header */}
