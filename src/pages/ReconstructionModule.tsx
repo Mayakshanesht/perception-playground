@@ -14,6 +14,8 @@ import {
 import { ArrowLeft, GraduationCap, Search, Layers, Box, Mountain, Sparkles, Blocks } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useSectionObserver } from "@/hooks/useSectionObserver";
+import { Progress } from "@/components/ui/progress";
 
 // ── Merge SfM + NeRF + add MVS into 3D reconstruction
 const mvsTheory = [
@@ -195,6 +197,8 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
 }
 
 export default function ReconstructionModule() {
+  const progressPct = useSectionObserver("reconstruction", ['features', 'epipolar', 'sfm', 'mvs', 'nerf', 'gs', 'review']);
+
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6">

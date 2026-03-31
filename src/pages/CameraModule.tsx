@@ -6,6 +6,8 @@ import AITutor from "@/components/AITutor";
 import { ArrowLeft, GraduationCap, Lightbulb, BookOpen, Cpu, Aperture, Palette, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useSectionObserver } from "@/hooks/useSectionObserver";
+import { Progress } from "@/components/ui/progress";
 
 // Categorize camera module theory sections for inline rendering
 const theoryByTitle: Record<string, typeof cameraModule.theory[0]> = {};
@@ -58,8 +60,11 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
   );
 }
 
+const cameraSections = ["cam-s1", "cam-s2", "cam-s3", "cam-s4", "cam-s5", "cam-s6"];
+
 export default function CameraModule() {
   const color = cameraModule.color;
+  const progressPct = useSectionObserver("camera", cameraSections);
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -71,7 +76,7 @@ export default function CameraModule() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-start gap-4 mb-10"
+        className="flex items-start gap-4 mb-4"
       >
         <div
           className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
@@ -79,15 +84,21 @@ export default function CameraModule() {
         >
           <GraduationCap className="h-6 w-6" style={{ color: `hsl(${color})` }} />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">{cameraModule.title}</h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">{cameraModule.subtitle}</p>
         </div>
       </motion.div>
 
+      {/* Progress bar */}
+      <div className="flex items-center gap-3 mb-10">
+        <Progress value={progressPct} className="h-2 flex-1" />
+        <span className="text-xs font-mono text-muted-foreground">{progressPct}%</span>
+      </div>
+
       <div className="space-y-12">
         {/* ═══ PART 1: Image Formation & Projection ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <motion.section id="cam-s1" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <SectionHeader icon={Lightbulb} title="Image Formation & Projection" number={1} subtitle="How does a camera turn the 3D world into a flat image?" />
 
           <div className="space-y-6">
@@ -106,7 +117,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 2: Perspective Projection & Similar Triangles ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <motion.section id="cam-s2" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <SectionHeader icon={BookOpen} title="Perspective Projection & Similar Triangles" number={2} subtitle="The geometry that makes projection work — connect f, Z, and image coordinates" />
 
           <div className="space-y-6">
@@ -126,7 +137,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 3: Lens, Distortion & Depth of Field ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <motion.section id="cam-s3" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <SectionHeader icon={Aperture} title="Lenses, Distortion & Depth of Field" number={3} subtitle="Real cameras use lenses — introducing blur, distortion, and optical trade-offs" />
 
           <div className="space-y-6">
@@ -138,7 +149,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 4: Intrinsic Matrix, Sensor & Calibration ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+        <motion.section id="cam-s4" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           <SectionHeader icon={Cpu} title="Intrinsic Matrix, Sensor & Calibration" number={4} subtitle="From camera geometry to pixel coordinates — the K matrix and digital sensors" />
 
           <div className="space-y-6">
@@ -157,7 +168,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 5: Color Spaces & Image Manipulation ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+        <motion.section id="cam-s5" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <SectionHeader icon={Palette} title="Color Spaces & Image Manipulation" number={5} subtitle="RGB, HSV, gamma correction, and the pixel operations that power every CV pipeline" />
 
           <div className="space-y-6">
@@ -173,7 +184,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 6: Applications ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+        <motion.section id="cam-s6" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
           <SectionHeader icon={Eye} title="Real-World Applications" number={6} subtitle="Where camera models and image formation matter in practice" />
 
           <div className="space-y-6">

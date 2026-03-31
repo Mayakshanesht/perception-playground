@@ -7,6 +7,8 @@ import { MonocularDepthCanvas, StereoVisionCanvas, Pose2DCanvas, Pose3DCanvas, S
 import { ArrowLeft, GraduationCap, Eye, Scan, PersonStanding, Rotate3D, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useSectionObserver } from "@/hooks/useSectionObserver";
+import { Progress } from "@/components/ui/progress";
 
 // Merge depth + pose into geometric information
 const geometricModule: ModuleContent = {
@@ -101,6 +103,8 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
 }
 
 export default function GeometricModule() {
+  const progressPct = useSectionObserver("geometric", ['stereo', 'mono-depth', 'pose-2d', 'pose-3d', 'self-sup', 'review']);
+
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       {/* Back link */}

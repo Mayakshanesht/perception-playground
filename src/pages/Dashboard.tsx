@@ -8,16 +8,18 @@ import {
 } from "lucide-react";
 import Playground from "@/components/Playground";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useModuleProgress } from "@/hooks/useModuleProgress";
+import { Progress } from "@/components/ui/progress";
 
 const pipelineModules = [
-  { name: "Camera Image Formation", desc: "Pinhole model, calibration, lens distortion, coordinate systems", icon: Camera, path: "/module/camera", color: "var(--module-camera)", step: 1 },
-  { name: "Semantic Information", desc: "Classification, detection, segmentation — what's in the scene", icon: Layers, path: "/module/semantic", color: "var(--module-semantic)", step: 2 },
-  { name: "Geometric Information", desc: "Depth estimation, stereo vision, pose — recovering 3D structure", icon: Mountain, path: "/module/geometric", color: "var(--module-geometric)", step: 3 },
-  { name: "Motion Estimation", desc: "Optical flow, tracking, action recognition, velocity", icon: Activity, path: "/module/motion", color: "var(--module-motion)", step: 4 },
-  { name: "3D Reconstruction", desc: "SfM, Multi-View Stereo, NeRF, Gaussian Splatting", icon: Box, path: "/module/reconstruction", color: "var(--module-reconstruction)", step: 5 },
-  { name: "NLP & Large Language Models", desc: "Tokenization, transformers, BERT/GPT, RLHF, agents, LoRA", icon: Type, path: "/module/nlp-llm", color: "var(--module-nlp)", step: 6 },
-  { name: "Scene Reasoning & VLMs", desc: "ViT, CLIP, LLaVA, Flamingo, visual grounding, NeRF, 3D scenes", icon: MessageSquare, path: "/module/scene-reasoning", color: "var(--module-reasoning)", step: 7 },
-  { name: "Generative Vision", desc: "VAEs, GANs, diffusion models, Stable Diffusion, ControlNet", icon: Paintbrush, path: "/module/generative-vision", color: "var(--module-generative)", step: 8 },
+  { name: "Camera Image Formation", desc: "Pinhole model, calibration, lens distortion, coordinate systems", icon: Camera, path: "/module/camera", color: "var(--module-camera)", step: 1, progressId: "camera" },
+  { name: "Semantic Information", desc: "Classification, detection, segmentation — what's in the scene", icon: Layers, path: "/module/semantic", color: "var(--module-semantic)", step: 2, progressId: "semantic" },
+  { name: "Geometric Information", desc: "Depth estimation, stereo vision, pose — recovering 3D structure", icon: Mountain, path: "/module/geometric", color: "var(--module-geometric)", step: 3, progressId: "geometric" },
+  { name: "Motion Estimation", desc: "Optical flow, tracking, action recognition, velocity", icon: Activity, path: "/module/motion", color: "var(--module-motion)", step: 4, progressId: "motion" },
+  { name: "3D Reconstruction", desc: "SfM, Multi-View Stereo, NeRF, Gaussian Splatting", icon: Box, path: "/module/reconstruction", color: "var(--module-reconstruction)", step: 5, progressId: "reconstruction" },
+  { name: "NLP & Large Language Models", desc: "Tokenization, transformers, BERT/GPT, RLHF, agents, LoRA", icon: Type, path: "/module/nlp-llm", color: "var(--module-nlp)", step: 6, progressId: "nlp-llm" },
+  { name: "Scene Reasoning & VLMs", desc: "ViT, CLIP, LLaVA, Flamingo, visual grounding, NeRF, 3D scenes", icon: MessageSquare, path: "/module/scene-reasoning", color: "var(--module-reasoning)", step: 7, progressId: "scene-reasoning" },
+  { name: "Generative Vision", desc: "VAEs, GANs, diffusion models, Stable Diffusion, ControlNet", icon: Paintbrush, path: "/module/generative-vision", color: "var(--module-generative)", step: 8, progressId: "generative-vision" },
 ];
 
 const pipelineSteps = [
@@ -48,7 +50,7 @@ const copilotWorkflow = [
 
 export default function Dashboard() {
   const { isSubscribed } = useSubscription();
-
+  const { getModulePercent } = useModuleProgress();
   return (
     <div className="p-5 md:p-8 max-w-7xl mx-auto">
       {/* Hero Header */}
@@ -275,7 +277,16 @@ export default function Dashboard() {
                   </div>
                   <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed pl-12">{mod.desc}</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed pl-12 mb-2">{mod.desc}</p>
+                {(() => {
+                  const pct = getModulePercent(mod.progressId);
+                  return (
+                    <div className="pl-12 flex items-center gap-2">
+                      <Progress value={pct} className="h-1.5 flex-1" />
+                      <span className="text-[9px] font-mono text-muted-foreground w-8 text-right">{pct}%</span>
+                    </div>
+                  );
+                })()}
               </Link>
             </motion.div>
           ))}

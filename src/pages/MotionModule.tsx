@@ -7,6 +7,8 @@ import { OpticalFlowCanvas, TrackingCanvas, Tracking3DCanvas, ActionRecognitionC
 import { ArrowLeft, GraduationCap, Waves, Eye, Box, Clapperboard, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useSectionObserver } from "@/hooks/useSectionObserver";
+import { Progress } from "@/components/ui/progress";
 
 const velocityPlayground: PlaygroundConfig = {
   title: "Speed Estimation Playground",
@@ -154,6 +156,8 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
 }
 
 export default function MotionModule() {
+  const progressPct = useSectionObserver("motion", ['optical-flow', 'tracking', 'tracking-3d', 'action', 'review']);
+
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6">
