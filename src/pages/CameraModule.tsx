@@ -60,8 +60,11 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
   );
 }
 
+const cameraSections = ["cam-s1", "cam-s2", "cam-s3", "cam-s4", "cam-s5", "cam-s6"];
+
 export default function CameraModule() {
   const color = cameraModule.color;
+  const progressPct = useSectionObserver("camera", cameraSections);
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -73,7 +76,7 @@ export default function CameraModule() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-start gap-4 mb-10"
+        className="flex items-start gap-4 mb-4"
       >
         <div
           className="h-12 w-12 rounded-xl flex items-center justify-center shrink-0"
@@ -81,15 +84,21 @@ export default function CameraModule() {
         >
           <GraduationCap className="h-6 w-6" style={{ color: `hsl(${color})` }} />
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-foreground tracking-tight">{cameraModule.title}</h1>
           <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">{cameraModule.subtitle}</p>
         </div>
       </motion.div>
 
+      {/* Progress bar */}
+      <div className="flex items-center gap-3 mb-10">
+        <Progress value={progressPct} className="h-2 flex-1" />
+        <span className="text-xs font-mono text-muted-foreground">{progressPct}%</span>
+      </div>
+
       <div className="space-y-12">
         {/* ═══ PART 1: Image Formation & Projection ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <motion.section id="cam-s1" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <SectionHeader icon={Lightbulb} title="Image Formation & Projection" number={1} subtitle="How does a camera turn the 3D world into a flat image?" />
 
           <div className="space-y-6">
