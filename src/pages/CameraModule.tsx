@@ -168,7 +168,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 5: Color Spaces & Image Manipulation ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+        <motion.section id="cam-s5" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <SectionHeader icon={Palette} title="Color Spaces & Image Manipulation" number={5} subtitle="RGB, HSV, gamma correction, and the pixel operations that power every CV pipeline" />
 
           <div className="space-y-6">
