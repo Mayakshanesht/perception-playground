@@ -12,14 +12,14 @@ import { useModuleProgress } from "@/hooks/useModuleProgress";
 import { Progress } from "@/components/ui/progress";
 
 const pipelineModules = [
-  { name: "Camera Image Formation", desc: "Pinhole model, calibration, lens distortion, coordinate systems", icon: Camera, path: "/module/camera", color: "var(--module-camera)", step: 1 },
-  { name: "Semantic Information", desc: "Classification, detection, segmentation — what's in the scene", icon: Layers, path: "/module/semantic", color: "var(--module-semantic)", step: 2 },
-  { name: "Geometric Information", desc: "Depth estimation, stereo vision, pose — recovering 3D structure", icon: Mountain, path: "/module/geometric", color: "var(--module-geometric)", step: 3 },
-  { name: "Motion Estimation", desc: "Optical flow, tracking, action recognition, velocity", icon: Activity, path: "/module/motion", color: "var(--module-motion)", step: 4 },
-  { name: "3D Reconstruction", desc: "SfM, Multi-View Stereo, NeRF, Gaussian Splatting", icon: Box, path: "/module/reconstruction", color: "var(--module-reconstruction)", step: 5 },
-  { name: "NLP & Large Language Models", desc: "Tokenization, transformers, BERT/GPT, RLHF, agents, LoRA", icon: Type, path: "/module/nlp-llm", color: "var(--module-nlp)", step: 6 },
-  { name: "Scene Reasoning & VLMs", desc: "ViT, CLIP, LLaVA, Flamingo, visual grounding, NeRF, 3D scenes", icon: MessageSquare, path: "/module/scene-reasoning", color: "var(--module-reasoning)", step: 7 },
-  { name: "Generative Vision", desc: "VAEs, GANs, diffusion models, Stable Diffusion, ControlNet", icon: Paintbrush, path: "/module/generative-vision", color: "var(--module-generative)", step: 8 },
+  { name: "Camera Image Formation", desc: "Pinhole model, calibration, lens distortion, coordinate systems", icon: Camera, path: "/module/camera", color: "var(--module-camera)", step: 1, progressId: "camera" },
+  { name: "Semantic Information", desc: "Classification, detection, segmentation — what's in the scene", icon: Layers, path: "/module/semantic", color: "var(--module-semantic)", step: 2, progressId: "semantic" },
+  { name: "Geometric Information", desc: "Depth estimation, stereo vision, pose — recovering 3D structure", icon: Mountain, path: "/module/geometric", color: "var(--module-geometric)", step: 3, progressId: "geometric" },
+  { name: "Motion Estimation", desc: "Optical flow, tracking, action recognition, velocity", icon: Activity, path: "/module/motion", color: "var(--module-motion)", step: 4, progressId: "motion" },
+  { name: "3D Reconstruction", desc: "SfM, Multi-View Stereo, NeRF, Gaussian Splatting", icon: Box, path: "/module/reconstruction", color: "var(--module-reconstruction)", step: 5, progressId: "reconstruction" },
+  { name: "NLP & Large Language Models", desc: "Tokenization, transformers, BERT/GPT, RLHF, agents, LoRA", icon: Type, path: "/module/nlp-llm", color: "var(--module-nlp)", step: 6, progressId: "nlp-llm" },
+  { name: "Scene Reasoning & VLMs", desc: "ViT, CLIP, LLaVA, Flamingo, visual grounding, NeRF, 3D scenes", icon: MessageSquare, path: "/module/scene-reasoning", color: "var(--module-reasoning)", step: 7, progressId: "scene-reasoning" },
+  { name: "Generative Vision", desc: "VAEs, GANs, diffusion models, Stable Diffusion, ControlNet", icon: Paintbrush, path: "/module/generative-vision", color: "var(--module-generative)", step: 8, progressId: "generative-vision" },
 ];
 
 const pipelineSteps = [
