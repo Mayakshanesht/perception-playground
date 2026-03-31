@@ -117,7 +117,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 2: Perspective Projection & Similar Triangles ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <motion.section id="cam-s2" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <SectionHeader icon={BookOpen} title="Perspective Projection & Similar Triangles" number={2} subtitle="The geometry that makes projection work — connect f, Z, and image coordinates" />
 
           <div className="space-y-6">
