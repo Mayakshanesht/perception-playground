@@ -9,6 +9,8 @@ import {
 import { ArrowLeft, GraduationCap, Sparkles, Layers, Zap, Paintbrush, BarChart3, Wand2, Film, SlidersHorizontal, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useSectionObserver } from "@/hooks/useSectionObserver";
+import { Progress } from "@/components/ui/progress";
 
 const color = generativeVisionModule.color;
 
@@ -71,6 +73,8 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
 }
 
 export default function GenerativeVisionModule() {
+  const progressPct = useSectionObserver("generative-vision", ['vae', 'gan', 'score', 'diffusion', 'schedules', 'sampling', 'latent', 'controlnet', 'video', 'review']);
+
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6">

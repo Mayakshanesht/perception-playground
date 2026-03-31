@@ -8,6 +8,8 @@ import { ViTPatchDemo, CLIPSimilarityDemo, VLMArchitectureTabs, NeRFRayCastingDe
 import { ArrowLeft, GraduationCap, Sparkles, Brain, Eye, Box, Layers } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useSectionObserver } from "@/hooks/useSectionObserver";
+import { Progress } from "@/components/ui/progress";
 
 // Extend with 3D scene understanding + VLM content from Part 2
 const sceneReasoningModule: ModuleContent = {
@@ -153,6 +155,8 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
 }
 
 export default function SceneReasoningModule() {
+  const progressPct = useSectionObserver("scene-reasoning", ['vit', 'clip', 'vlm', 'grounding', '3d-scene', 'review']);
+
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6">

@@ -6,6 +6,8 @@ import { BPETokenizerDemo, AttentionHeatmap, TransformerPipelineViz, AgentLoopVi
 import { ArrowLeft, GraduationCap, Type, Brain, Cpu, Layers, Zap, Bot, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useSectionObserver } from "@/hooks/useSectionObserver";
+import { Progress } from "@/components/ui/progress";
 
 const color = nlpLLMModule.color;
 
@@ -73,6 +75,8 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
 }
 
 export default function NLPModule() {
+  const progressPct = useSectionObserver("nlp-llm", ['foundations', 'attention', 'transformer', 'models', 'training', 'efficiency', 'review']);
+
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6">
