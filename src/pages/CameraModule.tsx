@@ -149,7 +149,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 4: Intrinsic Matrix, Sensor & Calibration ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+        <motion.section id="cam-s4" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           <SectionHeader icon={Cpu} title="Intrinsic Matrix, Sensor & Calibration" number={4} subtitle="From camera geometry to pixel coordinates — the K matrix and digital sensors" />
 
           <div className="space-y-6">
