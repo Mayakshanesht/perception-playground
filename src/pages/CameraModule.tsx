@@ -137,7 +137,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 3: Lens, Distortion & Depth of Field ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <motion.section id="cam-s3" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <SectionHeader icon={Aperture} title="Lenses, Distortion & Depth of Field" number={3} subtitle="Real cameras use lenses — introducing blur, distortion, and optical trade-offs" />
 
           <div className="space-y-6">
