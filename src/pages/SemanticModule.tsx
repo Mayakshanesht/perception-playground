@@ -8,6 +8,8 @@ import { CNNArchitectureCanvas, ConvFilterCanvas, DetectionPipelineCanvas, Segme
 import { ArrowLeft, GraduationCap, Lightbulb, Target, Grid3X3, Layers, Puzzle, Brain, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useSectionObserver } from "@/hooks/useSectionObserver";
+import { Progress } from "@/components/ui/progress";
 
 const semanticModule: ModuleContent = {
   id: "semantic",
@@ -95,7 +97,10 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
   );
 }
 
+const semanticSections = ['sem-s1', 'sem-s2', 'sem-s3', 'sem-s4', 'sem-s5', 'sem-s6', 'sem-s7'];
+
 export default function SemanticModule() {
+  const progressPct = useSectionObserver("semantic", semanticSections);
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mb-6">
@@ -112,10 +117,15 @@ export default function SemanticModule() {
         </div>
       </div>
 
+      <div className="flex items-center gap-3 mb-8">
+        <Progress value={progressPct} className="h-2 flex-1" />
+        <span className="text-xs font-mono text-muted-foreground">{progressPct}%</span>
+      </div>
+
       <div className="space-y-10">
 
         {/* ═══ Part 1: The Three Core Tasks ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        <motion.section id="sem-s1" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <SectionHeader icon={Lightbulb} title="The Three Core Tasks" number={1} subtitle="Classification → Detection → Segmentation: increasing spatial precision" />
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
@@ -144,7 +154,7 @@ export default function SemanticModule() {
         </motion.section>
 
         {/* ═══ Part 2: Image Classification ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.4 }}>
+        <motion.section id="sem-s2" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.4 }}>
           <SectionHeader icon={Lightbulb} title="Image Classification" number={2} subtitle="Assign a single label to an entire image — f(x) → class label" />
 
           <div className="space-y-4 mb-6">
@@ -191,7 +201,7 @@ export default function SemanticModule() {
         </motion.section>
 
         {/* ═══ Part 3: Object Detection ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
+        <motion.section id="sem-s3" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
           <SectionHeader icon={Target} title="Object Detection" number={3} subtitle="Localize and classify multiple objects — f(x) → {class, bbox, conf}" />
 
           <div className="space-y-4 mb-6">
@@ -230,7 +240,7 @@ export default function SemanticModule() {
         </motion.section>
 
         {/* ═══ Part 4: Semantic Segmentation ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
+        <motion.section id="sem-s4" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.4 }}>
           <SectionHeader icon={Grid3X3} title="Semantic Segmentation" number={4} subtitle="Pixel-level class labeling — f(x) → pixel-class map (H×W)" />
 
           <div className="space-y-4 mb-6">
@@ -256,7 +266,7 @@ export default function SemanticModule() {
         </motion.section>
 
         {/* ═══ Part 5: Instance Segmentation ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.4 }}>
+        <motion.section id="sem-s5" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.4 }}>
           <SectionHeader icon={Puzzle} title="Instance Segmentation" number={5} subtitle="Separate individual objects at pixel level — f(x) → {class, mask, id} × N" />
 
           <div className="space-y-4 mb-6">
@@ -270,7 +280,7 @@ export default function SemanticModule() {
         </motion.section>
 
         {/* ═══ Part 6: Vision Transformers ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.4 }}>
+        <motion.section id="sem-s6" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.4 }}>
           <SectionHeader icon={Brain} title="Vision Transformers & Self-Attention" number={6} subtitle="Pure attention replaces convolutions — patches as tokens" />
 
           {/* ViT Canvas */}
@@ -303,7 +313,7 @@ export default function SemanticModule() {
         </motion.section>
 
         {/* ═══ Part 7: Algorithms, Papers & Practice ═══ */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}>
+        <motion.section id="sem-s7" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.4 }}>
           <SectionHeader icon={Layers} title="Algorithms, Papers & Practice" number={7} subtitle="Pipelines, key papers, playgrounds, and quizzes" />
           <ModulePage content={semanticModule} hideHeader hideTheory />
         </motion.section>
