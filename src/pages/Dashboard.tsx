@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import Playground from "@/components/Playground";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useModuleProgress } from "@/hooks/useModuleProgress";
+import { Progress } from "@/components/ui/progress";
 
 const pipelineModules = [
   { name: "Camera Image Formation", desc: "Pinhole model, calibration, lens distortion, coordinate systems", icon: Camera, path: "/module/camera", color: "var(--module-camera)", step: 1 },
