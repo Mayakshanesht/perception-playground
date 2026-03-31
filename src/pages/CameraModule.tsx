@@ -8,8 +8,6 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useSectionObserver } from "@/hooks/useSectionObserver";
 import { Progress } from "@/components/ui/progress";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 
 // Categorize camera module theory sections for inline rendering
 const theoryByTitle: Record<string, typeof cameraModule.theory[0]> = {};
