@@ -277,7 +277,16 @@ export default function Dashboard() {
                   </div>
                   <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                 </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed pl-12">{mod.desc}</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed pl-12 mb-2">{mod.desc}</p>
+                {(() => {
+                  const pct = getModulePercent(mod.progressId);
+                  return (
+                    <div className="pl-12 flex items-center gap-2">
+                      <Progress value={pct} className="h-1.5 flex-1" />
+                      <span className="text-[9px] font-mono text-muted-foreground w-8 text-right">{pct}%</span>
+                    </div>
+                  );
+                })()}
               </Link>
             </motion.div>
           ))}
