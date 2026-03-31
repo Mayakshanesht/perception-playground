@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { lovable } from "@/integrations/lovable/index";
 
 export default function SignUp() {
   const [name, setName] = useState("");
