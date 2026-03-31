@@ -184,7 +184,7 @@ export default function CameraModule() {
         </motion.section>
 
         {/* ═══ PART 6: Applications ═══ */}
-        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+        <motion.section id="cam-s6" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
           <SectionHeader icon={Eye} title="Real-World Applications" number={6} subtitle="Where camera models and image formation matter in practice" />
 
           <div className="space-y-6">
