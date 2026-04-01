@@ -8,15 +8,23 @@ export default function AuthCallback() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Exchange the code/hash for a session
-        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-        if (error) {
-          console.error("Auth callback error:", error);
+        // Try to exchange code if present in URL
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get("code");
+        if (code) {
+          await supabase.auth.exchangeCodeForSession(window.location.href);
+        }
+        // Also check hash fragment for implicit flow
+        if (window.location.hash) {
+          const { data } = await supabase.auth.getSession();
+          if (!data.session) {
+            // Wait a moment for auth state to settle
+            await new Promise(r => setTimeout(r, 1000));
+          }
         }
       } catch (e) {
-        console.error("Auth callback exception:", e);
+        console.error("Auth callback error:", e);
       }
-      // Always navigate to dashboard
       navigate("/", { replace: true });
     };
     handleCallback();
