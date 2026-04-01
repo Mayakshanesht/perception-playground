@@ -25,6 +25,7 @@ import ResearchCopilot from "@/pages/ResearchCopilot";
 import Pricing from "@/pages/Pricing";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import AdminPanel from "@/pages/AdminPanel";
+import AuthCallback from "@/pages/AuthCallback";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
