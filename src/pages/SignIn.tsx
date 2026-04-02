@@ -40,10 +40,20 @@ export default function SignIn() {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
-      if (result?.error) {
+
+      if (result.error) {
         toast({ title: "Google sign in failed", description: String(result.error), variant: "destructive" });
         setGoogleLoading(false);
+        return;
       }
+
+      if (result.redirected) {
+        // Browser will redirect to Google - just return and let it happen
+        return;
+      }
+
+      // Tokens received and session set - user is authenticated
+      navigate("/", { replace: true });
     } catch (err: any) {
       toast({ title: "Google sign in failed", description: err?.message || "Unknown error", variant: "destructive" });
       setGoogleLoading(false);
