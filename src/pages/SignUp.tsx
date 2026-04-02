@@ -29,10 +29,18 @@ export default function SignUp() {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
-      if (result?.error) {
+
+      if (result.error) {
         toast({ title: "Google sign up failed", description: String(result.error), variant: "destructive" });
         setGoogleLoading(false);
+        return;
       }
+
+      if (result.redirected) {
+        return;
+      }
+
+      navigate("/", { replace: true });
     } catch (err: any) {
       toast({ title: "Google sign up failed", description: err?.message || "Unknown error", variant: "destructive" });
       setGoogleLoading(false);
