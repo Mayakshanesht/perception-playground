@@ -126,31 +126,22 @@ export default function Dashboard() {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h2 className="text-lg font-bold text-foreground">Research Copilot</h2>
-                    <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-accent/15 text-accent font-bold uppercase tracking-wider leading-none">Pro</span>
+                    <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-primary/15 text-primary font-bold uppercase tracking-wider leading-none">Experimental</span>
                   </div>
                   <p className="text-xs text-muted-foreground max-w-md leading-relaxed">
                     Go from research question to runnable experiments. AI finds papers, generates hypotheses, and exports PyTorch notebooks.
+                    <span className="block mt-1 text-primary/80 font-medium">⚡ This feature is experimental — outputs may vary and should be validated independently.</span>
                   </p>
                 </div>
               </div>
-              {isSubscribed ? (
-                <Link
-                  to="/research-copilot"
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-semibold hover:bg-accent/90 transition-colors shadow-md shadow-accent/15 shrink-0 self-start"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Launch Copilot
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              ) : (
-                <Link
-                  to="/pricing"
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-semibold hover:bg-accent/90 transition-colors shadow-md shadow-accent/15 shrink-0 self-start"
-                >
-                  <Crown className="h-3.5 w-3.5" />
-                  Upgrade to Unlock
-                </Link>
-              )}
+              <Link
+                to="/research-copilot"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-accent text-accent-foreground text-xs font-semibold hover:bg-accent/90 transition-colors shadow-md shadow-accent/15 shrink-0 self-start"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Try Copilot
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
 
             {/* Workflow Steps */}
