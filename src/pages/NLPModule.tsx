@@ -3,7 +3,7 @@ import { nlpLLMModule } from "@/data/nlpModuleData";
 import { MathEquation } from "@/components/MathBlock";
 import AITutor from "@/components/AITutor";
 import { BPETokenizerDemo, AttentionHeatmap, TransformerPipelineViz, AgentLoopViz } from "@/components/NLPCanvasAnimations";
-import { ArrowLeft, GraduationCap, Type, Brain, Cpu, Layers, Zap, Bot, BookOpen } from "lucide-react";
+import { ArrowLeft, GraduationCap, Type, Brain, Cpu, Layers, Zap, Bot, BookOpen, Wrench, Users, Network } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useSectionObserver } from "@/hooks/useSectionObserver";
