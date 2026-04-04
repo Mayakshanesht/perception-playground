@@ -44,6 +44,8 @@ const nodes: GraphNode[] = [
   { id: "t14", label: "Tokenization", type: "task", x: 750, y: 130 },
   { id: "t15", label: "Text Generation", type: "task", x: 830, y: 140 },
   { id: "t16", label: "Agent Planning", type: "task", x: 870, y: 220 },
+  { id: "t19", label: "Tool Use", type: "task", x: 750, y: 220 },
+  { id: "t20", label: "Multi-Agent", type: "task", x: 920, y: 220 },
   // Generative tasks
   { id: "t17", label: "Image Generation", type: "task", x: 1100, y: 140 },
   { id: "t18", label: "Image Editing", type: "task", x: 1150, y: 220 },
