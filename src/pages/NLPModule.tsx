@@ -3,7 +3,7 @@ import { nlpLLMModule } from "@/data/nlpModuleData";
 import { MathEquation } from "@/components/MathBlock";
 import AITutor from "@/components/AITutor";
 import { BPETokenizerDemo, AttentionHeatmap, TransformerPipelineViz, AgentLoopViz } from "@/components/NLPCanvasAnimations";
-import { ArrowLeft, GraduationCap, Type, Brain, Cpu, Layers, Zap, Bot, BookOpen } from "lucide-react";
+import { ArrowLeft, GraduationCap, Type, Brain, Cpu, Layers, Zap, Bot, BookOpen, Wrench, Users, Network } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useSectionObserver } from "@/hooks/useSectionObserver";
@@ -21,7 +21,7 @@ function TheoryInline({ title }: { title: string }) {
     <div className="concept-card">
       <div className="flex items-center flex-wrap gap-y-1 mb-3">
         <h3 className="font-semibold text-foreground text-sm">{section.title}</h3>
-        <AITutor conceptTitle={section.title} conceptContent={section.content} moduleName="NLP & LLMs" />
+        <AITutor conceptTitle={section.title} conceptContent={section.content} moduleName="Agentic AI" />
       </div>
       <p className="text-sm text-muted-foreground leading-relaxed mb-3">{section.content}</p>
       {section.equations?.map((eq) => (
@@ -75,7 +75,7 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
 }
 
 export default function NLPModule() {
-  const progressPct = useSectionObserver("nlp-llm", ['foundations', 'attention', 'transformer', 'models', 'training', 'efficiency', 'review']);
+  const progressPct = useSectionObserver("nlp-llm", ['foundations', 'attention', 'transformer', 'models', 'training', 'efficiency', 'agents', 'multiagent', 'review']);
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -96,7 +96,7 @@ export default function NLPModule() {
       {/* Learning flow nav */}
       <div className="rounded-xl border border-border bg-muted/30 p-4 mb-8">
         <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">Structured Learning Flow</h2>
-        <div className="grid sm:grid-cols-3 lg:grid-cols-7 gap-2">
+        <div className="grid sm:grid-cols-3 lg:grid-cols-9 gap-2">
           {[
             { id: "foundations", icon: "📝", label: "Tokenization & Embeddings" },
             { id: "attention", icon: "🧠", label: "Self-Attention" },
@@ -104,7 +104,9 @@ export default function NLPModule() {
             { id: "models", icon: "🏗️", label: "BERT & GPT" },
             { id: "training", icon: "🎯", label: "Training & Alignment" },
             { id: "efficiency", icon: "🔧", label: "RAG & LoRA" },
-            { id: "review", icon: "📚", label: "Agents & Review" },
+            { id: "agents", icon: "🤖", label: "Tools & Agents" },
+            { id: "multiagent", icon: "🌐", label: "Multi-Agent & MCP" },
+            { id: "review", icon: "📚", label: "Review" },
           ].map((item) => (
             <a key={item.id} href={`#${item.id}`} className="rounded-lg border border-border bg-card p-2.5 hover:border-primary/40 transition-colors text-center">
               <p className="text-sm mb-0.5">{item.icon}</p>
@@ -118,9 +120,10 @@ export default function NLPModule() {
 
         {/* ═══ Part 1: Tokenization & Embeddings ═══ */}
         <section id="foundations">
-          <SectionHeader icon={Type} title="Tokenization & Embeddings" number={1} subtitle="Convert raw text into numerical representations — BPE tokenization and learned word embeddings that capture semantic relationships." />
+          <SectionHeader icon={Type} title="Tokenization & Embeddings" number={1} subtitle="Convert raw text into numerical representations — from LLM foundations through BPE tokenization and learned embeddings." />
           <div className="space-y-4">
             <TheoryInline title="Intuition" />
+            <TheoryInline title="Foundation: What is an LLM?" />
             <BPETokenizerDemo />
             <TheoryInline title="Tokenization & BPE" />
 
@@ -296,22 +299,77 @@ export default function NLPModule() {
           </div>
         </section>
 
-        {/* ═══ Part 7: Agents & Review ═══ */}
-        <section id="review">
-          <SectionHeader icon={Bot} title="Agentic AI, Papers & Practice" number={7} subtitle="LLM agents with tool use, consolidated algorithms, key research papers, and quizzes." />
+        {/* ═══ Part 7: Tools & Agents ═══ */}
+        <section id="agents">
+          <SectionHeader icon={Wrench} title="Tools & Agents" number={7} subtitle="From passive LLMs to autonomous decision-makers — tools extend capabilities, agents add reasoning loops." />
           <div className="space-y-4">
+            <TheoryInline title="Tools: Giving LLMs Capabilities" />
             <AgentLoopViz />
-            <TheoryInline title="Agentic AI & Tool Use" />
+            <TheoryInline title="Agents: Decision-Making Systems" />
+            <TheoryInline title="Agent Architecture — Planner, Executor, Controller" />
 
-            <ContentCard title="ReAct Trajectory" accent="#f59e0b">
+            <div className="grid md:grid-cols-2 gap-4">
+              <ContentCard title="ReAct Trajectory" accent="#f59e0b">
+                <div className="font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border space-y-1">
+                  <p>τ = (query, Thought₁, Action₁, Obs₁, Thought₂, ...)</p>
+                  <p>Tool selection: P(aₜ|hₜ) ∝ exp(LLM_score(aₜ, hₜ))</p>
+                </div>
+              </ContentCard>
+              <ContentCard title="Agent vs Chatbot" accent="#06b6d4">
+                <div className="space-y-1.5 text-xs">
+                  <p><span className="text-foreground font-medium">Chatbot:</span> input → output (single pass)</p>
+                  <p><span className="text-foreground font-medium">Agent:</span> observe → think → act → repeat</p>
+                  <p><span className="text-foreground font-medium">Key:</span> agents decide their own actions autonomously</p>
+                </div>
+              </ContentCard>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ Part 8: Multi-Agent & MCP ═══ */}
+        <section id="multiagent">
+          <SectionHeader icon={Network} title="Multi-Agent Systems & MCP" number={8} subtitle="Scale intelligence with specialized agent teams, memory systems, and the Model Context Protocol for standardized tool access." />
+          <div className="space-y-4">
+            <TheoryInline title="Memory: Adding State to Agents" />
+            <TheoryInline title="Multi-Agent Systems" />
+            <TheoryInline title="MCP — Model Context Protocol" />
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <ContentCard title="MCP Architecture" accent="#a855f7">
+                <div className="font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border space-y-1">
+                  <p>LLM Agent → MCP Client → MCP Server(s)</p>
+                  <p>MCP Server hosts tools via JSON-RPC 2.0</p>
+                  <p>FastMCP: @tool → network-accessible tool</p>
+                  <p>LangChain Adapters: MCP → LangGraph Agent</p>
+                </div>
+              </ContentCard>
+              <ContentCard title="Memory Types" accent="#06b6d4">
+                <div className="space-y-1.5 text-xs">
+                  <p><span className="text-foreground font-medium">Short-term:</span> conversation history (context window)</p>
+                  <p><span className="text-foreground font-medium">Long-term:</span> vector DB for cross-session retrieval</p>
+                  <p><span className="text-foreground font-medium">Working:</span> current task state & scratchpad</p>
+                </div>
+              </ContentCard>
+            </div>
+
+            <TheoryInline title="OpenClaw & Paperclip — Agent OS and Organizations" />
+            <TheoryInline title="Evolution of Intelligence" />
+
+            <ContentCard title="Intelligence Evolution Stack" accent="#f59e0b">
               <div className="font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border space-y-1">
-                <p>τ = (query, Thought₁, Action₁, Obs₁, Thought₂, Action₂, Obs₂, ..., Answer)</p>
-                <p>Tool selection: P(aₜ|hₜ) ∝ exp(LLM_score(aₜ, hₜ))</p>
-                <p>MCP: JSON-RPC 2.0 with OAuth 2.1 + rate limiting + sandboxed exec</p>
+                <p>LLM (Think) → Tools (Act) → Agent (Decide)</p>
+                <p>→ Memory (Remember) → Multi-Agent (Collaborate)</p>
+                <p>→ MCP (Integrate) → OpenClaw (Systemize)</p>
+                <p>→ Paperclip (Organize)</p>
               </div>
             </ContentCard>
+          </div>
+        </section>
 
-            <TheoryInline title="Real-World Applications" />
+        {/* ═══ Part 9: Review ═══ */}
+        <section id="review">
+          <SectionHeader icon={BookOpen} title="Papers, Algorithms & Practice" number={9} subtitle="Key research papers, consolidated algorithms, and quizzes to test your understanding." />
+          <div className="space-y-4">
             <ModulePage content={nlpLLMModule} hideHeader hideTheory />
           </div>
         </section>
