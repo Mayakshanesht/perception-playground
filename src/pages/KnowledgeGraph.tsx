@@ -73,11 +73,14 @@ const nodes: GraphNode[] = [
   { id: "a20", label: "BEVDet", type: "architecture", x: 330, y: 370 },
   { id: "a21", label: "FlowNet", type: "architecture", x: 720, y: 310 },
   { id: "a22", label: "ORB-SLAM", type: "architecture", x: 790, y: 370 },
-  // NLP architectures
+  // Agentic AI architectures
   { id: "a23", label: "Transformer", type: "architecture", x: 780, y: 300 },
   { id: "a24", label: "BERT", type: "architecture", x: 830, y: 370 },
   { id: "a25", label: "GPT", type: "architecture", x: 870, y: 300 },
   { id: "a26", label: "LLaMA", type: "architecture", x: 900, y: 370 },
+  { id: "a33", label: "ReAct", type: "architecture", x: 760, y: 370 },
+  { id: "a34", label: "LangGraph", type: "architecture", x: 940, y: 370 },
+  { id: "a35", label: "MCP", type: "architecture", x: 820, y: 300 },
   // Generative architectures
   { id: "a27", label: "Stable Diffusion", type: "architecture", x: 1080, y: 300 },
   { id: "a28", label: "DALL-E", type: "architecture", x: 1140, y: 310 },
