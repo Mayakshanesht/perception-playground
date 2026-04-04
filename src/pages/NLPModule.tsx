@@ -75,7 +75,7 @@ function SectionHeader({ icon: Icon, title, number, subtitle }: { icon: any; tit
 }
 
 export default function NLPModule() {
-  const progressPct = useSectionObserver("nlp-llm", ['foundations', 'attention', 'transformer', 'models', 'training', 'efficiency', 'review']);
+  const progressPct = useSectionObserver("nlp-llm", ['foundations', 'attention', 'transformer', 'models', 'training', 'efficiency', 'agents', 'multiagent', 'review']);
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto">
