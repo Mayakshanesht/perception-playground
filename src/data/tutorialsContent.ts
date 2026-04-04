@@ -186,7 +186,7 @@ export const tutorialsContent: TutorialCard[] = [
       "Learn training loop design for large language models",
       "Evaluate perplexity and generation quality",
     ],
-    category: "NLP & LLMs",
+    category: "Agentic AI",
   },
   {
     id: "llm-finetuning-unsloth",
