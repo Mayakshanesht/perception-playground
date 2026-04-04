@@ -96,7 +96,7 @@ export default function NLPModule() {
       {/* Learning flow nav */}
       <div className="rounded-xl border border-border bg-muted/30 p-4 mb-8">
         <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">Structured Learning Flow</h2>
-        <div className="grid sm:grid-cols-3 lg:grid-cols-7 gap-2">
+        <div className="grid sm:grid-cols-3 lg:grid-cols-9 gap-2">
           {[
             { id: "foundations", icon: "📝", label: "Tokenization & Embeddings" },
             { id: "attention", icon: "🧠", label: "Self-Attention" },
@@ -104,7 +104,9 @@ export default function NLPModule() {
             { id: "models", icon: "🏗️", label: "BERT & GPT" },
             { id: "training", icon: "🎯", label: "Training & Alignment" },
             { id: "efficiency", icon: "🔧", label: "RAG & LoRA" },
-            { id: "review", icon: "📚", label: "Agents & Review" },
+            { id: "agents", icon: "🤖", label: "Tools & Agents" },
+            { id: "multiagent", icon: "🌐", label: "Multi-Agent & MCP" },
+            { id: "review", icon: "📚", label: "Review" },
           ].map((item) => (
             <a key={item.id} href={`#${item.id}`} className="rounded-lg border border-border bg-card p-2.5 hover:border-primary/40 transition-colors text-center">
               <p className="text-sm mb-0.5">{item.icon}</p>
