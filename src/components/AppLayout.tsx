@@ -18,7 +18,7 @@ const modules = [
   { name: "Geometric Information", path: "/module/geometric", icon: Mountain, premium: false },
   { name: "Motion Estimation", path: "/module/motion", icon: Activity, premium: false },
   { name: "3D Reconstruction", path: "/module/reconstruction", icon: Box, premium: false },
-  { name: "NLP & Large Language Models", path: "/module/nlp-llm", icon: MessageSquare, premium: false },
+  { name: "Agentic AI", path: "/module/nlp-llm", icon: MessageSquare, premium: false },
   { name: "Scene Reasoning & VLMs", path: "/module/scene-reasoning", icon: Eye, premium: false },
   { name: "Generative Vision", path: "/module/generative-vision", icon: Sparkles, premium: false },
   { name: "Tutorials", path: "/tutorials", icon: BookOpen, premium: false },

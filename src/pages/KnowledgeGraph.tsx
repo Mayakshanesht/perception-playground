@@ -22,7 +22,7 @@ const nodes: GraphNode[] = [
   { id: "mod-geo", label: "Geometric", type: "module", x: 350, y: 40 },
   { id: "mod-mot", label: "Motion", type: "module", x: 500, y: 40 },
   { id: "mod-rec", label: "Reconstruction", type: "module", x: 650, y: 40 },
-  { id: "mod-nlp", label: "NLP & LLMs", type: "module", x: 800, y: 40 },
+  { id: "mod-nlp", label: "Agentic AI", type: "module", x: 800, y: 40 },
   { id: "mod-rea", label: "Scene Reasoning", type: "module", x: 950, y: 40 },
   { id: "mod-gen", label: "Generative", type: "module", x: 1100, y: 40 },
 
@@ -44,6 +44,8 @@ const nodes: GraphNode[] = [
   { id: "t14", label: "Tokenization", type: "task", x: 750, y: 130 },
   { id: "t15", label: "Text Generation", type: "task", x: 830, y: 140 },
   { id: "t16", label: "Agent Planning", type: "task", x: 870, y: 220 },
+  { id: "t19", label: "Tool Use", type: "task", x: 750, y: 220 },
+  { id: "t20", label: "Multi-Agent", type: "task", x: 920, y: 220 },
   // Generative tasks
   { id: "t17", label: "Image Generation", type: "task", x: 1100, y: 140 },
   { id: "t18", label: "Image Editing", type: "task", x: 1150, y: 220 },
@@ -71,11 +73,14 @@ const nodes: GraphNode[] = [
   { id: "a20", label: "BEVDet", type: "architecture", x: 330, y: 370 },
   { id: "a21", label: "FlowNet", type: "architecture", x: 720, y: 310 },
   { id: "a22", label: "ORB-SLAM", type: "architecture", x: 790, y: 370 },
-  // NLP architectures
+  // Agentic AI architectures
   { id: "a23", label: "Transformer", type: "architecture", x: 780, y: 300 },
   { id: "a24", label: "BERT", type: "architecture", x: 830, y: 370 },
   { id: "a25", label: "GPT", type: "architecture", x: 870, y: 300 },
   { id: "a26", label: "LLaMA", type: "architecture", x: 900, y: 370 },
+  { id: "a33", label: "ReAct", type: "architecture", x: 760, y: 370 },
+  { id: "a34", label: "LangGraph", type: "architecture", x: 940, y: 370 },
+  { id: "a35", label: "MCP", type: "architecture", x: 820, y: 300 },
   // Generative architectures
   { id: "a27", label: "Stable Diffusion", type: "architecture", x: 1080, y: 300 },
   { id: "a28", label: "DALL-E", type: "architecture", x: 1140, y: 310 },
@@ -126,7 +131,7 @@ const edges: GraphEdge[] = [
   { from: "mod-geo", to: "t4" }, { from: "mod-geo", to: "t5" }, { from: "mod-geo", to: "t12" },
   { from: "mod-mot", to: "t6" }, { from: "mod-mot", to: "t7" },
   { from: "mod-rec", to: "t8" }, { from: "mod-rec", to: "t9" },
-  { from: "mod-nlp", to: "t14" }, { from: "mod-nlp", to: "t15" }, { from: "mod-nlp", to: "t16" },
+  { from: "mod-nlp", to: "t14" }, { from: "mod-nlp", to: "t15" }, { from: "mod-nlp", to: "t16" }, { from: "mod-nlp", to: "t19" }, { from: "mod-nlp", to: "t20" },
   { from: "mod-rea", to: "t10" }, { from: "mod-rea", to: "t11" },
   { from: "mod-gen", to: "t17" }, { from: "mod-gen", to: "t18" },
 
@@ -144,7 +149,7 @@ const edges: GraphEdge[] = [
   { from: "t11", to: "a15" },
   { from: "t12", to: "a9" },
   { from: "t13", to: "a20" },
-  { from: "t14", to: "a23" }, { from: "t15", to: "a25" }, { from: "t15", to: "a26" }, { from: "t16", to: "a25" },
+  { from: "t14", to: "a23" }, { from: "t15", to: "a25" }, { from: "t15", to: "a26" }, { from: "t16", to: "a25" }, { from: "t16", to: "a33" }, { from: "t19", to: "a33" }, { from: "t19", to: "a35" }, { from: "t20", to: "a34" },
   { from: "t10", to: "a14" }, { from: "t10", to: "a15" }, { from: "t10", to: "a31" }, { from: "t10", to: "a32" },
   { from: "t17", to: "a27" }, { from: "t17", to: "a28" }, { from: "t17", to: "a29" }, { from: "t17", to: "a30" },
   { from: "t18", to: "a27" },
