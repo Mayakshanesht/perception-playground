@@ -131,7 +131,7 @@ const edges: GraphEdge[] = [
   { from: "mod-geo", to: "t4" }, { from: "mod-geo", to: "t5" }, { from: "mod-geo", to: "t12" },
   { from: "mod-mot", to: "t6" }, { from: "mod-mot", to: "t7" },
   { from: "mod-rec", to: "t8" }, { from: "mod-rec", to: "t9" },
-  { from: "mod-nlp", to: "t14" }, { from: "mod-nlp", to: "t15" }, { from: "mod-nlp", to: "t16" },
+  { from: "mod-nlp", to: "t14" }, { from: "mod-nlp", to: "t15" }, { from: "mod-nlp", to: "t16" }, { from: "mod-nlp", to: "t19" }, { from: "mod-nlp", to: "t20" },
   { from: "mod-rea", to: "t10" }, { from: "mod-rea", to: "t11" },
   { from: "mod-gen", to: "t17" }, { from: "mod-gen", to: "t18" },
 
