@@ -204,7 +204,7 @@ export const tutorialsContent: TutorialCard[] = [
       "Configure training hyperparameters for efficient convergence",
       "Benchmark speedup and memory savings vs standard fine-tuning",
     ],
-    category: "NLP & LLMs",
+    category: "Agentic AI",
   },
   {
     id: "llm-datalab",
