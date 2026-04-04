@@ -22,7 +22,7 @@ const nodes: GraphNode[] = [
   { id: "mod-geo", label: "Geometric", type: "module", x: 350, y: 40 },
   { id: "mod-mot", label: "Motion", type: "module", x: 500, y: 40 },
   { id: "mod-rec", label: "Reconstruction", type: "module", x: 650, y: 40 },
-  { id: "mod-nlp", label: "NLP & LLMs", type: "module", x: 800, y: 40 },
+  { id: "mod-nlp", label: "Agentic AI", type: "module", x: 800, y: 40 },
   { id: "mod-rea", label: "Scene Reasoning", type: "module", x: 950, y: 40 },
   { id: "mod-gen", label: "Generative", type: "module", x: 1100, y: 40 },
 
