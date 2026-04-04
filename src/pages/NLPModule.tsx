@@ -299,22 +299,77 @@ export default function NLPModule() {
           </div>
         </section>
 
-        {/* ═══ Part 7: Agents & Review ═══ */}
-        <section id="review">
-          <SectionHeader icon={Bot} title="Agentic AI, Papers & Practice" number={7} subtitle="LLM agents with tool use, consolidated algorithms, key research papers, and quizzes." />
+        {/* ═══ Part 7: Tools & Agents ═══ */}
+        <section id="agents">
+          <SectionHeader icon={Wrench} title="Tools & Agents" number={7} subtitle="From passive LLMs to autonomous decision-makers — tools extend capabilities, agents add reasoning loops." />
           <div className="space-y-4">
+            <TheoryInline title="Tools: Giving LLMs Capabilities" />
             <AgentLoopViz />
-            <TheoryInline title="Agentic AI & Tool Use" />
+            <TheoryInline title="Agents: Decision-Making Systems" />
+            <TheoryInline title="Agent Architecture — Planner, Executor, Controller" />
 
-            <ContentCard title="ReAct Trajectory" accent="#f59e0b">
+            <div className="grid md:grid-cols-2 gap-4">
+              <ContentCard title="ReAct Trajectory" accent="#f59e0b">
+                <div className="font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border space-y-1">
+                  <p>τ = (query, Thought₁, Action₁, Obs₁, Thought₂, ...)</p>
+                  <p>Tool selection: P(aₜ|hₜ) ∝ exp(LLM_score(aₜ, hₜ))</p>
+                </div>
+              </ContentCard>
+              <ContentCard title="Agent vs Chatbot" accent="#06b6d4">
+                <div className="space-y-1.5 text-xs">
+                  <p><span className="text-foreground font-medium">Chatbot:</span> input → output (single pass)</p>
+                  <p><span className="text-foreground font-medium">Agent:</span> observe → think → act → repeat</p>
+                  <p><span className="text-foreground font-medium">Key:</span> agents decide their own actions autonomously</p>
+                </div>
+              </ContentCard>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ Part 8: Multi-Agent & MCP ═══ */}
+        <section id="multiagent">
+          <SectionHeader icon={Network} title="Multi-Agent Systems & MCP" number={8} subtitle="Scale intelligence with specialized agent teams, memory systems, and the Model Context Protocol for standardized tool access." />
+          <div className="space-y-4">
+            <TheoryInline title="Memory: Adding State to Agents" />
+            <TheoryInline title="Multi-Agent Systems" />
+            <TheoryInline title="MCP — Model Context Protocol" />
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <ContentCard title="MCP Architecture" accent="#a855f7">
+                <div className="font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border space-y-1">
+                  <p>LLM Agent → MCP Client → MCP Server(s)</p>
+                  <p>MCP Server hosts tools via JSON-RPC 2.0</p>
+                  <p>FastMCP: @tool → network-accessible tool</p>
+                  <p>LangChain Adapters: MCP → LangGraph Agent</p>
+                </div>
+              </ContentCard>
+              <ContentCard title="Memory Types" accent="#06b6d4">
+                <div className="space-y-1.5 text-xs">
+                  <p><span className="text-foreground font-medium">Short-term:</span> conversation history (context window)</p>
+                  <p><span className="text-foreground font-medium">Long-term:</span> vector DB for cross-session retrieval</p>
+                  <p><span className="text-foreground font-medium">Working:</span> current task state & scratchpad</p>
+                </div>
+              </ContentCard>
+            </div>
+
+            <TheoryInline title="OpenClaw & Paperclip — Agent OS and Organizations" />
+            <TheoryInline title="Evolution of Intelligence" />
+
+            <ContentCard title="Intelligence Evolution Stack" accent="#f59e0b">
               <div className="font-mono text-xs text-foreground/70 bg-muted/40 rounded p-2 border border-border space-y-1">
-                <p>τ = (query, Thought₁, Action₁, Obs₁, Thought₂, Action₂, Obs₂, ..., Answer)</p>
-                <p>Tool selection: P(aₜ|hₜ) ∝ exp(LLM_score(aₜ, hₜ))</p>
-                <p>MCP: JSON-RPC 2.0 with OAuth 2.1 + rate limiting + sandboxed exec</p>
+                <p>LLM (Think) → Tools (Act) → Agent (Decide)</p>
+                <p>→ Memory (Remember) → Multi-Agent (Collaborate)</p>
+                <p>→ MCP (Integrate) → OpenClaw (Systemize)</p>
+                <p>→ Paperclip (Organize)</p>
               </div>
             </ContentCard>
+          </div>
+        </section>
 
-            <TheoryInline title="Real-World Applications" />
+        {/* ═══ Part 9: Review ═══ */}
+        <section id="review">
+          <SectionHeader icon={BookOpen} title="Papers, Algorithms & Practice" number={9} subtitle="Key research papers, consolidated algorithms, and quizzes to test your understanding." />
+          <div className="space-y-4">
             <ModulePage content={nlpLLMModule} hideHeader hideTheory />
           </div>
         </section>
