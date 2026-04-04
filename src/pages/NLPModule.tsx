@@ -120,9 +120,10 @@ export default function NLPModule() {
 
         {/* ═══ Part 1: Tokenization & Embeddings ═══ */}
         <section id="foundations">
-          <SectionHeader icon={Type} title="Tokenization & Embeddings" number={1} subtitle="Convert raw text into numerical representations — BPE tokenization and learned word embeddings that capture semantic relationships." />
+          <SectionHeader icon={Type} title="Tokenization & Embeddings" number={1} subtitle="Convert raw text into numerical representations — from LLM foundations through BPE tokenization and learned embeddings." />
           <div className="space-y-4">
             <TheoryInline title="Intuition" />
+            <TheoryInline title="Foundation: What is an LLM?" />
             <BPETokenizerDemo />
             <TheoryInline title="Tokenization & BPE" />
 
