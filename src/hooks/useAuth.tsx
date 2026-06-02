@@ -13,6 +13,29 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const AUTH_STORAGE_KEY = "sb-cxckobhbsvjbdkdlmpee-auth-token";
+
+function isNetworkAuthError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+
+  const message = error.message.toLowerCase();
+  return (
+    error.name === "AuthRetryableFetchError" ||
+    message.includes("failed to fetch") ||
+    message.includes("err_name_not_resolved")
+  );
+}
+
+async function clearBrokenLocalSession() {
+  try {
+    await supabase.auth.signOut({ scope: "local" });
+  } catch {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem(`${AUTH_STORAGE_KEY}-user`);
+    localStorage.removeItem(`${AUTH_STORAGE_KEY}-code-verifier`);
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -25,11 +48,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+      } catch (error) {
+        if (isNetworkAuthError(error)) {
+          await clearBrokenLocalSession();
+          setSession(null);
+          setUser(null);
+        } else {
+          console.error("Auth bootstrap failed:", error);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void initializeAuth();
 
     return () => subscription.unsubscribe();
   }, []);
@@ -47,12 +84,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      return { error };
+    } catch (error) {
+      return {
+        error: isNetworkAuthError(error)
+          ? new Error("Authentication is temporarily unavailable. Please try again in a moment.")
+          : error,
+      };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      if (isNetworkAuthError(error)) {
+        await clearBrokenLocalSession();
+        setSession(null);
+        setUser(null);
+        return;
+      }
+
+      throw error;
+    }
   };
 
   return (
