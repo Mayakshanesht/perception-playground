@@ -20,15 +20,23 @@ export function useSubscription() {
 
     const fetchStatus = async () => {
       setLoading(true);
-      const [subResult, roleResult] = await Promise.all([
-        supabase.from("subscriptions").select("status").eq("user_id", user.id).maybeSingle(),
-        supabase.from("user_roles").select("role").eq("user_id", user.id),
-      ]);
+      try {
+        const [subResult, roleResult] = await Promise.all([
+          supabase.from("subscriptions").select("status").eq("user_id", user.id).maybeSingle(),
+          supabase.from("user_roles").select("role").eq("user_id", user.id),
+        ]);
 
-      setIsSubscribed(subResult.data?.status === "active");
-      setIsPending(subResult.data?.status === "pending");
-      setIsAdmin(roleResult.data?.some((r: any) => r.role === "admin") ?? false);
-      setLoading(false);
+        setIsSubscribed(subResult.data?.status === "active");
+        setIsPending(subResult.data?.status === "pending");
+        setIsAdmin(roleResult.data?.some((r: any) => r.role === "admin") ?? false);
+      } catch (error) {
+        console.error("Failed to load subscription state:", error);
+        setIsSubscribed(false);
+        setIsPending(false);
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchStatus();
